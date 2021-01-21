@@ -1,4 +1,6 @@
 apply plugin: "com.android.application"
+//fonts and icon
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 import com.android.build.OutputFile
 
