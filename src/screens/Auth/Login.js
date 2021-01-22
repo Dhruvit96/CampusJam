@@ -1,8 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Avatar, Button, Input, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
-import {Avatar, Button, Input, Text} from 'react-native-elements';
+import {useDispatch} from 'react-redux';
+import {navigation} from '../../navigations/RootNavigation';
+import {LoginRequest} from '../../actions/userActions';
+import Loading from '../../components/Loading';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -10,8 +14,12 @@ const validationSchema = Yup.object().shape({
 });
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const {_onLogin, _onPressRegister} = getEventHandlers(setLoading, dispatch);
   return (
-    <ScrollView>
+    <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+      <Loading isVisible={loading} />
       <View style={styles.container}>
         <Avatar
           rounded
@@ -41,7 +49,7 @@ const Login = () => {
               initialValues={{email: '', password: ''}}
               validationSchema={validationSchema}
               onSubmit={(values) => {
-                console.log(values);
+                _onLogin(values);
               }}>
               {({
                 errors,
@@ -98,7 +106,11 @@ const Login = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <TouchableOpacity style={{marginTop: 12}}>
+              <TouchableOpacity
+                style={{marginTop: 12}}
+                onPress={() => {
+                  _onPressRegister();
+                }}>
                 <Text style={styles.buttonText}>
                   Don't have account? Sign Up
                 </Text>
@@ -110,6 +122,21 @@ const Login = () => {
     </ScrollView>
   );
 };
+
+function getEventHandlers(setLoading, dispatch) {
+  const _onPressRegister = () => {
+    navigation.push('SignUp');
+  };
+  const _onLogin = async (data) => {
+    setLoading(true);
+    await dispatch(LoginRequest(data));
+    setLoading(false);
+  };
+  return {
+    _onLogin,
+    _onPressRegister,
+  };
+}
 
 const styles = StyleSheet.create({
   buttonText: {color: 'black', fontSize: 18},

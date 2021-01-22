@@ -6,7 +6,7 @@ import AppScreen from '../../components/AppScreen';
 const Splash = () => {
   return (
     <AppScreen>
-      <View contentContainerStyle={styles.container}>
+      <View style={styles.container}>
         <Image
           source={require('../../assets/splash.png')}
           style={styles.image}
@@ -23,8 +23,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    height: 90,
-    width: 90,
+    height: 350,
+    width: 350,
     resizeMode: 'contain',
   },
 });

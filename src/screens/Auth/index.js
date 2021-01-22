@@ -1,3 +1,3 @@
 export {default as Login} from './Login';
 export {default as SignUp} from './SignUp';
-export {default as Forgot} from './ForgotPassword';
+export {default as ForgotPassword} from './ForgotPassword';

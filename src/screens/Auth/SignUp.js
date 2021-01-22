@@ -1,8 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import {Button, Icon, Input, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
-import {Button, Icon, Input, Text} from 'react-native-elements';
+import {useDispatch} from 'react-redux';
+import {navigation} from '../../navigations/RootNavigation';
+import {RegisterRequest} from '../../actions/userActions';
+import Loading from '../../components/Loading';
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required().label('First Name'),
@@ -16,8 +20,13 @@ const validationSchema = Yup.object().shape({
 });
 
 const SignUpScreen = () => {
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const {_onRegister, _onPressBack} = getEventHandlers(setLoading, dispatch);
+
   return (
-    <ScrollView>
+    <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+      <Loading isVisible={loading} />
       <View style={styles.container}>
         <View
           style={{
@@ -32,16 +41,14 @@ const SignUpScreen = () => {
               alignItems: 'flex-start',
               marginStart: 20,
             }}>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => _onPressBack()}>
               <Icon name="arrow-back" size={34} color="#fff" />
             </TouchableOpacity>
           </View>
           <View style={{flex: 1, justifyContent: 'center'}}>
-            <TouchableOpacity>
-              <Text style={{alignSelf: 'center', fontSize: 40, color: '#fff'}}>
-                Sign Up
-              </Text>
-            </TouchableOpacity>
+            <Text style={{alignSelf: 'center', fontSize: 40, color: '#fff'}}>
+              Sign Up
+            </Text>
           </View>
           <View style={{flex: 1}} />
         </View>
@@ -69,7 +76,7 @@ const SignUpScreen = () => {
               }}
               validationSchema={validationSchema}
               onSubmit={(values) => {
-                console.log(values);
+                _onRegister(values);
               }}>
               {({
                 errors,
@@ -176,6 +183,21 @@ const SignUpScreen = () => {
     </ScrollView>
   );
 };
+
+function getEventHandlers(setLoading, dispatch) {
+  const _onPressBack = () => {
+    navigation.goBack();
+  };
+  const _onRegister = async (data) => {
+    setLoading(true);
+    await dispatch(RegisterRequest(data));
+    setLoading(false);
+  };
+  return {
+    _onRegister,
+    _onPressBack,
+  };
+}
 
 const styles = StyleSheet.create({
   buttonText: {color: 'black', fontSize: 18},

@@ -56,7 +56,7 @@ export const LoginSuccess = (payload) => {
 export const RegisterRequest = ({firstName, lastName, email, password}) => {
   return (dispatch) => {
     return auth()
-      .createUserWithEmailAndPassword(userData.email, userData.password)
+      .createUserWithEmailAndPassword(email, password)
       .then((ref) => {
         ref.user?.sendEmailVerification();
         let domain = email.substring(email.lastIndexOf('@') + 1);

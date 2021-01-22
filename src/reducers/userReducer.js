@@ -11,6 +11,7 @@ const defaultState = {
 };
 
 const reducer = (state = defaultState, action) => {
+  let message = '';
   switch (action.type) {
     case userActionTypes.LOGIN_REQUEST:
       state = {
@@ -28,7 +29,7 @@ const reducer = (state = defaultState, action) => {
       console.log(state);
       return state;
     case userActionTypes.LOGIN_FAILURE:
-      let message = action.payload.message;
+      message = action.payload.message;
       Alert.alert('Error', message);
       return state;
     case userActionTypes.REGISTER_REQUEST:
@@ -43,11 +44,11 @@ const reducer = (state = defaultState, action) => {
       };
       return state;
     case userActionTypes.REGISTER_SUCCESS:
-      let message = action.payload.message;
+      message = action.payload.message;
       Alert.alert('Verify Email', message);
       return state;
     case userActionTypes.REGISTER_FAILURE:
-      let message = action.payload.message;
+      message = action.payload.message;
       Alert.alert('Error', message);
       return state;
     default:
