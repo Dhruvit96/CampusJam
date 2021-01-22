@@ -16,7 +16,10 @@ const validationSchema = Yup.object().shape({
 const Login = () => {
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const {_onLogin, _onPressRegister} = getEventHandlers(setLoading, dispatch);
+  const {_onLogin, _onPressRegister, _onPressForgotPassword} = getEventHandlers(
+    setLoading,
+    dispatch,
+  );
   return (
     <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
       <Loading isVisible={loading} />
@@ -88,7 +91,11 @@ const Login = () => {
                     //  this.password = input;
                     //}}
                   />
-                  <TouchableOpacity style={{marginEnd: 10}}>
+                  <TouchableOpacity
+                    style={{marginEnd: 10}}
+                    onPress={() => {
+                      _onPressForgotPassword();
+                    }}>
                     <Text style={styles.buttonText}>Forgot Password?</Text>
                   </TouchableOpacity>
                   <Button
@@ -127,6 +134,9 @@ function getEventHandlers(setLoading, dispatch) {
   const _onPressRegister = () => {
     navigation.push('SignUp');
   };
+  const _onPressForgotPassword = () => {
+    navigation.push('ForgotPassword');
+  };
   const _onLogin = async (data) => {
     setLoading(true);
     await dispatch(LoginRequest(data));
@@ -135,6 +145,7 @@ function getEventHandlers(setLoading, dispatch) {
   return {
     _onLogin,
     _onPressRegister,
+    _onPressForgotPassword,
   };
 }
 

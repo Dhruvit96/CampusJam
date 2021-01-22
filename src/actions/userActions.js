@@ -1,42 +1,46 @@
 import {userActionTypes} from '../constants';
-import {auth, firestore} from 'firebase';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 export const LoginRequest = (user) => {
-  return (dispatch) => {
-    return auth()
-      .signInWithEmailAndPassword(user.email, user.password)
-      .then(async (ref) => {
-        if (!ref.user.emailVerified) {
-          let user = await firestore()
-            .collection('users')
-            .doc(ref.user.uid)
-            .get();
-          user = user.data();
-          const result = {
-            logined: true,
-            ...user,
-          };
-          dispatch(LoginSuccess(result));
-        } else dispatch(LoginFailure('Please verify your email.'));
-      })
-      .catch((error) => {
-        let errorMessage = '';
-        switch (error.code) {
-          case 'auth/invalid-email':
-            errorMessage = 'Invalid email address format.';
-            break;
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-            errorMessage = 'Invalid email address or password.';
-            break;
-          case 'auth/too-many-requests':
-            errorMessage = 'Too many request. Try again in a minute.';
-            break;
-          default:
-            errorMessage = 'Check your internet connection.';
-        }
-        dispatch(LoginFailure(errorMessage));
-      });
+  return async (dispatch) => {
+    try {
+      const ref = await auth().signInWithEmailAndPassword(
+        user.email,
+        user.password,
+      );
+      if (ref.user.emailVerified) {
+        let user = await firestore()
+          .collection('users')
+          .doc(ref.user.uid)
+          .get();
+        user = user.data();
+        const result = {
+          logined: true,
+          isStudent: typeof user.id === 'string',
+          uid: ref.user.uid,
+          ...user,
+        };
+        dispatch(LoginSuccess(result));
+      } else dispatch(LoginFailure('Please verify your email.'));
+    } catch (error) {
+      let errorMessage_1 = '';
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage_1 = 'Invalid email address format.';
+          break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+          errorMessage_1 = 'Invalid email address or password.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage_1 = 'Too many request. Try again in a minute.';
+          break;
+        default:
+          errorMessage_1 = 'Check your internet connection.';
+      }
+      dispatch(LoginFailure(errorMessage_1));
+    }
   };
 };
 export const LoginFailure = (errorMessage) => {
@@ -57,7 +61,7 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
   return (dispatch) => {
     return auth()
       .createUserWithEmailAndPassword(email, password)
-      .then((ref) => {
+      .then(async (ref) => {
         ref.user?.sendEmailVerification();
         let domain = email.substring(email.lastIndexOf('@') + 1);
         let id =
@@ -66,7 +70,7 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
             : null;
         let name = firstName + ' ' + lastName;
         let initials = firstName[0].toUpperCase() + lastName[0].toUpperCase();
-        firestore().collection('users').doc(ref.user.uid).set({
+        await firestore().collection('users').doc(ref.user.uid).set({
           avatar: null,
           bio: null,
           email: email,
