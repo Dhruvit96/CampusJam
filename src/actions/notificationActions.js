@@ -1,0 +1,67 @@
+import firestore from '@react-native-firebase/firestore';
+import {notificationActionTypes} from '../constants';
+import {store} from '../store';
+
+export const CreateNotificationRequest = (notification) => {
+  return async (dispatch) => {
+    try {
+      await firestore().collection('notifications').add(notification);
+    } catch (e) {
+      console.warn(e);
+      dispatch(FetchNotificationListFailure());
+    }
+  };
+};
+
+export const FetchNotificationListRequest = () => {
+  return async (dispatch) => {
+    try {
+      let uid = store.getState().user.userInfo.uid;
+      let time = new Date().getTime() - 24 * 3600 * 7;
+      let data = await firestore()
+        .collection('notifications')
+        .where('userId', '==', uid)
+        .where('created_at', '>=', time)
+        .orderBy('create_at', 'desc')
+        .get();
+      let notifications = [];
+      data = data.data();
+      data.forEach(async (ref) => {
+        let notification = ref.data();
+        let userInfo = await firestore()
+          .collection('users')
+          .doc(notification.from)
+          .get();
+        userInfo = userInfo.data();
+        notifications.push({
+          ...notification,
+          userInfo: {
+            avatar: userInfo.avatar,
+            initials: userInfo.initials,
+            name: userInfo.name,
+          },
+        });
+      });
+      dispatch(FetchNotificationListSuccess(notifications));
+    } catch (e) {
+      console.warn(e);
+      dispatch(FetchNotificationListFailure());
+    }
+  };
+};
+
+export const FetchNotificationListFailure = () => {
+  return {
+    type: notificationActionTypes.FETCH_NOTIFICATIONS_FAILURE,
+    payload: {
+      message: 'Get Notifications Failed!',
+    },
+  };
+};
+
+export const FetchNotificationListSuccess = (payload) => {
+  return {
+    type: notificationActionTypes.FETCH_NOTIFICATIONS_SUCCESS,
+    payload: payload,
+  };
+};

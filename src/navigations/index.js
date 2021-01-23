@@ -13,12 +13,9 @@ const index = () => {
     gestureEnabled: false,
   };
   const [isLoading, setIsLoading] = React.useState(true);
-  React.useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-      return;
-    }, 2000);
-  }, []);
+  setTimeout(() => {
+    setIsLoading(false);
+  }, 2000);
   return (
     <NavigationContainer ref={navigationRef}>
       {isLoading ? <Splash /> : !user.logined ? <AuthStack /> : <Splash />}
