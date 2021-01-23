@@ -5,7 +5,7 @@ const defaultState = {
   userInfo: {
     avatar: null,
     bio: '',
-    email: email,
+    email: '',
     followers: [],
     following: [],
     id: null,
