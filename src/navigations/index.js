@@ -8,10 +8,6 @@ import Splash from '../screens/Splash';
 
 const index = () => {
   const user = useSelector((state) => state.user);
-  const navigationOptions = {
-    headerShown: false,
-    gestureEnabled: false,
-  };
   const [isLoading, setIsLoading] = React.useState(true);
   setTimeout(() => {
     setIsLoading(false);

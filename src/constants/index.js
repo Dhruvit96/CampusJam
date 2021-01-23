@@ -46,8 +46,8 @@ export const notificationActionTypes = {
   FETCH_NOTIFICATIONS_FAILURE: 'FETCH_NOTIFICATIONS_FAILURE',
 };
 
-export const FieldValue = firebase.firestore.FieldValue;
-export const TimeStamp = firebase.firestore.Timestamp;
+//export const FieldValue = firebase.firestore.FieldValue;
+//export const TimeStamp = firebase.firestore.Timestamp;
 
 export const uploadPhotoAsync = (uri, filename) => {
   return new Promise(async (res, rej) => {
