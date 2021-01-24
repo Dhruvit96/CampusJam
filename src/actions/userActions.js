@@ -185,9 +185,13 @@ export const FetchExtraInfoRequest = () => {
       followersData.forEach((ref) => followers.push(ref.id));
 
       const payload = {
-        posts: postData.docs.map((x) => x.data()),
-        followers: followers,
-        followings: followings,
+        userInfo: {
+          followings: followings,
+        },
+        extraInfo: {
+          posts: postData.docs.map((x) => x.data()),
+          followers: followers,
+        },
       };
       dispatch(FetchExtraInfoSuccess(payload));
     } catch (e) {
@@ -210,17 +214,6 @@ export const FetchExtraInfoSuccess = (extraInfo) => {
   return {
     type: userActionTypes.FETCH_EXTRA_INFO_SUCCESS,
     payload: extraInfo,
-  };
-};
-
-export const UpdateExtraInfoRequest = (data) => {
-  return async (dispatch) => {
-    try {
-      dispatch(FetchExtraInfoSuccess(data));
-    } catch (e) {
-      console.warn(e);
-      dispatch(FetchExtraInfoFailure());
-    }
   };
 };
 

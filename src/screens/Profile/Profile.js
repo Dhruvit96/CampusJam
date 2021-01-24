@@ -4,10 +4,11 @@ import {Avatar, Header, Text} from 'react-native-elements';
 import AppScreen from '../../components/AppScreen';
 import TabComponent from '../../components/ProfileTab';
 import PostButton from '../../components/PostButton';
-import useSelector from '../../store';
+import {useSelector} from '../../store';
 
 const Profile = () => {
   const userState = useSelector((state) => state.user.userInfo);
+  const extraInfoState = useSelector((state) => state.user.extraInfo);
   return (
     <AppScreen>
       <Header
@@ -36,7 +37,7 @@ const Profile = () => {
         <Avatar
           rounded
           size="xlarge"
-          source={{uri: userState.avatar}}
+          source={userState.avatar ? {uri: userState.avatar} : null}
           title={userState.initials}
           titleStyle={{fontSize: 55}}
           containerStyle={{backgroundColor: '#523', margin: 20}}
@@ -55,15 +56,12 @@ const Profile = () => {
           }}>
           <View
             style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
-            <TabComponent name="Posts" count={userState.posts.length()} />
+            <TabComponent name="Posts" count={extraInfoState.posts.length} />
             <TabComponent
               name="Followers"
-              count={userState.followers.length()}
+              count={extraInfoState.followers.length}
             />
-            <TabComponent
-              name="Following"
-              count={userState.following.length()}
-            />
+            <TabComponent name="Following" count={userState.following.length} />
           </View>
         </View>
       </View>

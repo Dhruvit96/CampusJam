@@ -6,13 +6,11 @@ const defaultState = {
     avatar: null,
     bio: '',
     email: '',
-    followers: [],
     following: [],
     id: null,
     initials: '',
     isStudent: false,
     name: '',
-    posts: [],
     uid: '',
     notificationSettings: {
       posts: true,
@@ -21,6 +19,10 @@ const defaultState = {
       followed: true,
       pauseAll: false,
     },
+  },
+  extraInfo: {
+    followers: [],
+    posts: [],
   },
 };
 
@@ -32,7 +34,11 @@ const reducer = (state = defaultState, action) => {
       state = [...defaultState];
       return state;
     case userActionTypes.LOGIN_SUCCESS:
-      state = {...state, ...action.payload};
+      state = {
+        ...state,
+        ...action.payload,
+        userInfo: {...state.userInfo, ...action.payload.userInfo},
+      };
       return state;
     case userActionTypes.LOGIN_FAILURE:
     case userActionTypes.FOLLOW_FAILURE:
@@ -45,8 +51,7 @@ const reducer = (state = defaultState, action) => {
       Alert.alert('Error', action.payload.message);
       return state;
     case userActionTypes.REGISTER_SUCCESS:
-      message = action.payload.message;
-      Alert.alert('Verify Email', message);
+      Alert.alert('Verify Email', action.payload.message);
       return state;
     case userActionTypes.FETCH_EXTRA_INFO_REQUEST:
     case userActionTypes.UPDATE_USER_INFO_REQUEST:
@@ -55,11 +60,11 @@ const reducer = (state = defaultState, action) => {
     case userActionTypes.FOLLOW_REQUEST:
       state = {...state};
       return state;
-    case userActionTypes.UPDATE_EXTRA_INFO_SUCCESS:
     case userActionTypes.FETCH_EXTRA_INFO_SUCCESS:
       state = {
         ...state,
-        userInfo: {...state.userInfo, ...action.payload.extraInfo},
+        userInfo: {...state.userInfo, ...action.payload.userInfo},
+        extraInfo: {...state.extraInfo, ...action.payload.extraInfo},
       };
       return state;
     case userActionTypes.UPDATE_USER_INFO_SUCCESS:
