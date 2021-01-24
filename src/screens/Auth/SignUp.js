@@ -7,6 +7,11 @@ import {useDispatch} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
 import {RegisterRequest} from '../../actions/userActions';
 import Loading from '../../components/Loading';
+import {
+  fontscale,
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from '../../constants';
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string().required().label('First Name'),
@@ -31,7 +36,7 @@ const SignUpScreen = () => {
         <View
           style={{
             width: '100%',
-            height: 80,
+            height: heightPercentageToDP(10),
             flexDirection: 'row',
           }}>
           <View
@@ -39,14 +44,19 @@ const SignUpScreen = () => {
               flex: 1,
               justifyContent: 'center',
               alignItems: 'flex-start',
-              marginStart: 20,
+              marginStart: widthPercentageToDP(4),
             }}>
             <TouchableOpacity onPress={() => _onPressBack()}>
-              <Icon name="arrow-back" size={34} color="#fff" />
+              <Icon name="arrow-back" size={fontscale(30)} color="#fff" />
             </TouchableOpacity>
           </View>
           <View style={{flex: 1, justifyContent: 'center'}}>
-            <Text style={{alignSelf: 'center', fontSize: 40, color: '#fff'}}>
+            <Text
+              style={{
+                alignSelf: 'center',
+                fontSize: fontscale(34),
+                color: '#fff',
+              }}>
               Sign Up
             </Text>
           </View>
@@ -57,13 +67,13 @@ const SignUpScreen = () => {
             flex: 1,
             width: '100%',
             backgroundColor: 'white',
-            borderTopLeftRadius: 75,
+            borderTopLeftRadius: widthPercentageToDP(12),
             alignItems: 'center',
           }}>
           <View
             style={{
-              width: 350,
-              marginTop: 50,
+              width: widthPercentageToDP(80),
+              marginTop: heightPercentageToDP(5),
               alignItems: 'flex-end',
             }}>
             <Formik
@@ -90,7 +100,7 @@ const SignUpScreen = () => {
                     autoCapitalize="words"
                     errorMessage={touched.firstName ? errors.firstName : ''}
                     errorStyle={styles.errorText}
-                    inputStyle={[styles.text, {fontSize: 20}]}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
                     label="First Name"
                     labelStyle={styles.text}
                     onBlur={() => setFieldTouched('firstName')}
@@ -104,7 +114,7 @@ const SignUpScreen = () => {
                     autoCapitalize="words"
                     errorMessage={touched.lastName ? errors.lastName : ''}
                     errorStyle={styles.errorText}
-                    inputStyle={[styles.text, {fontSize: 20}]}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
                     label="Last Name"
                     labelStyle={styles.text}
                     onBlur={() => setFieldTouched('lastName')}
@@ -121,7 +131,7 @@ const SignUpScreen = () => {
                     autoCapitalize="none"
                     errorMessage={touched.email ? errors.email : ''}
                     errorStyle={styles.errorText}
-                    inputStyle={[styles.text, {fontSize: 20}]}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
                     label="Email"
                     labelStyle={styles.text}
                     onBlur={() => setFieldTouched('email')}
@@ -200,7 +210,6 @@ function getEventHandlers(setLoading, dispatch) {
 }
 
 const styles = StyleSheet.create({
-  buttonText: {color: 'black', fontSize: 18},
   container: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -208,22 +217,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#61c0ff',
   },
   errorText: {
-    fontSize: 20,
+    fontSize: fontscale(17),
     color: 'red',
   },
   submitButton: {
     backgroundColor: '#61c0ff',
-    width: 330,
-    height: 50,
-    marginEnd: 10,
-    marginTop: 18,
+    width: widthPercentageToDP(77),
+    height: heightPercentageToDP(6.5),
+    marginEnd: widthPercentageToDP(2),
+    marginTop: heightPercentageToDP(1),
   },
   text: {
     fontWeight: '300',
-    fontSize: 20,
+    fontSize: fontscale(17),
     color: 'black',
   },
-  titleText: {fontSize: 20},
+  titleText: {fontSize: fontscale(17)},
 });
 
 export default SignUpScreen;

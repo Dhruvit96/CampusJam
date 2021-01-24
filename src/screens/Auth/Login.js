@@ -7,6 +7,11 @@ import {useDispatch} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
 import {LoginRequest} from '../../actions/userActions';
 import Loading from '../../components/Loading';
+import {
+  fontscale,
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from '../../constants';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -26,26 +31,31 @@ const Login = () => {
       <View style={styles.container}>
         <Avatar
           rounded
-          size={130}
+          size={widthPercentageToDP(32)}
           source={require('../../assets/logo.png')}
           imageProps={{resizeMode: 'stretch'}}
-          containerStyle={{backgroundColor: '#523', margin: 20}}
+          containerStyle={{
+            backgroundColor: '#523',
+            margin: widthPercentageToDP(6),
+          }}
         />
         <View
           style={{
             flex: 1,
             width: '100%',
             backgroundColor: 'white',
-            borderTopLeftRadius: 75,
+            borderTopLeftRadius: widthPercentageToDP(12),
             alignItems: 'center',
           }}>
-          <Text h1 h1Style={{marginTop: 50, fontWeight: '200'}}>
+          <Text
+            h1
+            h1Style={{marginTop: heightPercentageToDP(5), fontWeight: '200'}}>
             Login
           </Text>
           <View
             style={{
-              width: 350,
-              marginTop: 30,
+              width: widthPercentageToDP(80),
+              marginTop: heightPercentageToDP(4),
               alignItems: 'flex-end',
             }}>
             <Formik
@@ -66,7 +76,7 @@ const Login = () => {
                     autoCapitalize="none"
                     errorMessage={touched.email ? errors.email : ''}
                     errorStyle={styles.errorText}
-                    inputStyle={[styles.text, {fontSize: 20}]}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
                     label="Email"
                     labelStyle={styles.text}
                     onBlur={() => setFieldTouched('email')}
@@ -92,7 +102,7 @@ const Login = () => {
                     //}}
                   />
                   <TouchableOpacity
-                    style={{marginEnd: 10}}
+                    style={{marginEnd: widthPercentageToDP(3)}}
                     onPress={() => {
                       _onPressForgotPassword();
                     }}>
@@ -109,12 +119,12 @@ const Login = () => {
             </Formik>
             <View
               style={{
-                width: 330,
+                width: widthPercentageToDP(80),
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
               <TouchableOpacity
-                style={{marginTop: 12}}
+                style={{marginTop: heightPercentageToDP(2)}}
                 onPress={() => {
                   _onPressRegister();
                 }}>
@@ -150,7 +160,7 @@ function getEventHandlers(setLoading, dispatch) {
 }
 
 const styles = StyleSheet.create({
-  buttonText: {color: 'black', fontSize: 18},
+  buttonText: {color: 'black', fontSize: fontscale(15)},
   container: {
     flex: 1,
     justifyContent: 'flex-start',
@@ -158,22 +168,22 @@ const styles = StyleSheet.create({
     backgroundColor: '#61c0ff',
   },
   errorText: {
-    fontSize: 20,
+    fontSize: fontscale(17),
     color: 'red',
   },
   submit: {
     backgroundColor: '#61c0ff',
-    width: 330,
-    height: 50,
-    marginEnd: 10,
-    marginTop: 35,
+    width: widthPercentageToDP(76),
+    height: heightPercentageToDP(6.5),
+    marginEnd: widthPercentageToDP(2),
+    marginTop: heightPercentageToDP(4),
   },
   text: {
     fontWeight: '300',
-    fontSize: 20,
+    fontSize: fontscale(17),
     color: 'black',
   },
-  titleText: {fontSize: 20},
+  titleText: {fontSize: fontscale(17)},
 });
 
 export default Login;

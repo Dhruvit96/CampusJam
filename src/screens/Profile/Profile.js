@@ -5,6 +5,7 @@ import AppScreen from '../../components/AppScreen';
 import TabComponent from '../../components/ProfileTab';
 import PostButton from '../../components/PostButton';
 import {useSelector} from '../../store';
+import {fontscale, heightPercentageToDP} from '../../constants';
 
 const Profile = () => {
   const userState = useSelector((state) => state.user.userInfo);
@@ -14,12 +15,12 @@ const Profile = () => {
       <Header
         backgroundColor="transparent"
         placement="center"
-        leftComponent={{icon: 'arrow-back', color: '#000'}}
+        leftComponent={{icon: 'arrow-back', color: '#000', size: fontscale(24)}}
         centerComponent={{
           text: 'My Profile',
-          style: {color: '#000', fontSize: 24},
+          style: {color: '#000', fontSize: fontscale(24)},
         }}
-        rightComponent={{icon: 'settings', color: '#000'}}
+        rightComponent={{icon: 'settings', color: '#000', size: fontscale(24)}}
         /*() => {
           return (
             <View style={{flexDirection: 'row'}}>
@@ -39,7 +40,7 @@ const Profile = () => {
           size="xlarge"
           source={userState.avatar ? {uri: userState.avatar} : null}
           title={userState.initials}
-          titleStyle={{fontSize: 55}}
+          titleStyle={{fontSize: fontscale(50)}}
           containerStyle={{backgroundColor: '#523', margin: 20}}
         />
         <Text h4 h4Style={{fontWeight: '300'}}>
@@ -52,7 +53,7 @@ const Profile = () => {
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            marginTop: 30,
+            marginTop: heightPercentageToDP(3),
           }}>
           <View
             style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
@@ -75,21 +76,18 @@ const Profile = () => {
           title="Edit Profile"
           iconName="edit"
           type="feather"
-          size={24}
-          padding={50}
+          size={fontscale(20)}
         />
-        <PostButton title="Add Post" iconName="add" size={24} padding={50} />
+        <PostButton title="Add Post" iconName="add" size={fontscale(22)} />
         <PostButton
           title="Shared Posts"
           iconName="bookmark-outline"
-          size={24}
-          padding={50}
+          size={fontscale(22)}
         />
         <PostButton
           title="Liked Posts"
           iconName="favorite-outline"
-          size={24}
-          padding={30}
+          size={fontscale(22)}
         />
       </View>
     </AppScreen>
@@ -106,7 +104,7 @@ const styles = StyleSheet.create({
     flex: 8,
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: heightPercentageToDP(4),
   },
   profileContainer: {
     flex: 9,
@@ -114,7 +112,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   text: {
-    fontSize: 20,
+    fontSize: fontscale(19),
     color: 'grey',
     padding: 2,
     fontWeight: 'normal',

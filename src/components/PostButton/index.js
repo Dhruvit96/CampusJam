@@ -1,29 +1,34 @@
 import React from 'react';
 import {Icon, Text} from 'react-native-elements';
 import {TouchableOpacity} from 'react-native';
+import {
+  fontscale,
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from '../../constants';
 const PostButton = ({size, onPress, title, type, iconName}) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       style={{
-        width: 250,
+        width: widthPercentageToDP(60),
         borderColor: '#6a6a6a',
         borderWidth: 0.8,
         flexDirection: 'row',
-        paddingTop: 6,
-        paddingBottom: 6,
-        paddingStart: 45,
+        paddingTop: heightPercentageToDP(0.6),
+        paddingBottom: heightPercentageToDP(0.8),
+        paddingStart: widthPercentageToDP(11),
       }}>
       <Icon
         name={iconName}
         size={size}
         color="black"
         type={type}
-        style={{marginEnd: 20}}
+        style={{marginEnd: widthPercentageToDP(5)}}
       />
       <Text
         style={{
-          fontSize: 20,
+          fontSize: fontscale(18),
           fontWeight: '400',
           color: 'black',
         }}>

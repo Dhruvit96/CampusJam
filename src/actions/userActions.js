@@ -9,6 +9,7 @@ import {
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
+import {CreateNotificationRequest} from '../actions/notificationActions';
 
 export const LoginRequest = (user) => {
   return async (dispatch) => {

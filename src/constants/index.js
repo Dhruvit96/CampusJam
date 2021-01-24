@@ -1,5 +1,7 @@
 import firebase from '@react-native-firebase/app';
+import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
+import {Dimensions, PixelRatio} from 'react-native';
 
 export const userActionTypes = {
   LOGIN_REQUEST: 'LOGIN_REQUEST',
@@ -27,6 +29,11 @@ export const userActionTypes = {
   UPDATE_NOTIFICATION_SETTING_FAILURE: 'UPDATE_NOTIFICATION_SETTING_FAILURE',
 };
 
+export const userXActionTypes = {
+  FETCH_PROFILEX_SUCCESS: 'FETCH_PROFILEX_SUCCESS',
+  FETCH_PROFILEX_FAILURE: 'FETCH_PROFILEX_FAILURE',
+};
+
 export const notificationTypes = {
   LIKE_MY_POST: 1,
   COMMENT_MY_POST: 2,
@@ -45,8 +52,8 @@ export const notificationActionTypes = {
   FETCH_NOTIFICATIONS_FAILURE: 'FETCH_NOTIFICATIONS_FAILURE',
 };
 
-//export const FieldValue = firebase.firestore.FieldValue;
-//export const TimeStamp = firebase.firestore.Timestamp;
+export const FieldValue = firebase.firestore.FieldValue;
+export const TimeStamp = firebase.firestore.Timestamp;
 
 export const uploadPhotoAsync = (uri, filename) => {
   return new Promise(async (res, rej) => {
@@ -67,4 +74,48 @@ export const uploadPhotoAsync = (uri, filename) => {
         },
       );
   });
+};
+
+// Retrieve initial screen's width
+let screenWidth = Dimensions.get('window').width;
+
+// Retrieve initial screen's height
+let screenHeight = Dimensions.get('window').height;
+
+/**
+ * Converts provided width percentage to independent pixel (dp).
+ * @param  {string} widthPercent The percentage of screen's width that UI element should cover
+ *                               along with the percentage symbol (%).
+ * @return {number}              The calculated dp depending on current device's screen width.
+ */
+export const widthPercentageToDP = (widthPercent) => {
+  // Parse string percentage input and convert it to number.
+  const elemWidth =
+    typeof widthPercent === 'number' ? widthPercent : parseFloat(widthPercent);
+
+  // Use PixelRatio.roundToNearestPixel method in order to round the layout
+  // size (dp) to the nearest one that correspons to an integer number of pixels.
+  return PixelRatio.roundToNearestPixel((screenWidth * elemWidth) / 100);
+};
+
+/**
+ * Converts provided height percentage to independent pixel (dp).
+ * @param  {string} heightPercent The percentage of screen's height that UI element should cover
+ *                                along with the percentage symbol (%).
+ * @return {number}               The calculated dp depending on current device's screen height.
+ */
+export const heightPercentageToDP = (heightPercent) => {
+  // Parse string percentage input and convert it to number.
+  const elemHeight =
+    typeof heightPercent === 'number'
+      ? heightPercent
+      : parseFloat(heightPercent);
+
+  // Use PixelRatio.roundToNearestPixel method in order to round the layout
+  // size (dp) to the nearest one that correspons to an integer number of pixels.
+  return PixelRatio.roundToNearestPixel((screenHeight * elemHeight) / 100);
+};
+
+export const fontscale = (size) => {
+  return (screenWidth / 375) * size;
 };
