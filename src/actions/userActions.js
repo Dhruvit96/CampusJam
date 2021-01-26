@@ -145,6 +145,50 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
     }
   };
 };
+
+export const passwordResetRequest = (email) => {
+  return async (dispatch) => {
+    try {
+      await auth().sendPasswordResetEmail(email);
+      dispatch(passwordResetRequest());
+    } catch (error) {
+      let errorMessage = '';
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address format.';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'User with this email does not exist.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many request. Try again in a minute.';
+          break;
+        default:
+          errorMessage = 'Check your internet connection.';
+      }
+      dispatch(passwordResetFailure(errorMessage));
+    }
+  };
+};
+
+export const passwordResetFailure = (errorMessage) => {
+  return {
+    payload: {
+      message: errorMessage,
+    },
+    type: userActionTypes.PASSWORD_RESET_FAILURE,
+  };
+};
+
+export const passwordResetSuccess = () => {
+  return {
+    payload: {
+      message: 'Please check your inbox for password reset mail.',
+    },
+    type: userActionTypes.PASSWORD_RESET_SUCCESS,
+  };
+};
+
 export const RegisterFailure = (errorMessage) => {
   return {
     payload: {
@@ -215,6 +259,15 @@ export const FetchExtraInfoSuccess = (extraInfo) => {
   return {
     type: userActionTypes.FETCH_EXTRA_INFO_SUCCESS,
     payload: extraInfo,
+  };
+};
+
+export const UpdateExtraInfoRequest = (postId) => {
+  return {
+    type: userActionTypes.UPDATE_EXTRA_INFO_SUCCESS,
+    payload: {
+      postId: postId,
+    },
   };
 };
 
@@ -299,7 +352,7 @@ export const followRequest = (uid) => {
           postId: 0,
           userId: uid,
           from: currentUser.uid,
-          created_at: TimeStamp(),
+          created_at: TimeStamp.now(),
           seen: seenTypes.NOTSEEN,
           type: notificationTypes.FOLLOWED_ME,
         }),

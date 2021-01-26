@@ -112,7 +112,10 @@ const Login = () => {
                     buttonStyle={styles.submit}
                     onPress={handleSubmit}
                     title={'Login'}
-                    titleStyle={[styles.text, {color: 'white', fontSize: 24}]}
+                    titleStyle={[
+                      styles.text,
+                      {color: 'white', fontSize: fontscale(20)},
+                    ]}
                   />
                 </>
               )}

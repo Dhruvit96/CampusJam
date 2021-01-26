@@ -5,11 +5,15 @@ import AppScreen from '../../components/AppScreen';
 import TabComponent from '../../components/ProfileTab';
 import PostButton from '../../components/PostButton';
 import {useSelector} from '../../store';
+import {useDispatch} from 'react-redux';
 import {fontscale, heightPercentageToDP} from '../../constants';
+import {navigation} from '../../navigations/RootNavigation';
 
 const Profile = () => {
   const userState = useSelector((state) => state.user.userInfo);
   const extraInfoState = useSelector((state) => state.user.extraInfo);
+  const dispatch = useDispatch();
+  const {_onPressEditProfile} = getEventHandlers(dispatch);
   return (
     <AppScreen>
       <Header
@@ -66,17 +70,13 @@ const Profile = () => {
           </View>
         </View>
       </View>
-      {/*<Divider
-        style={{
-          backgroundColor: '#000',
-        }}
-      />*/}
       <View style={styles.postContainer}>
         <PostButton
           title="Edit Profile"
           iconName="edit"
           type="feather"
           size={fontscale(20)}
+          onPress={() => _onPressEditProfile()}
         />
         <PostButton title="Add Post" iconName="add" size={fontscale(22)} />
         <PostButton
@@ -94,6 +94,15 @@ const Profile = () => {
   );
 };
 
+function getEventHandlers(dispatch) {
+  const _onPressEditProfile = () => {
+    navigation.push('EditProfile');
+  };
+  return {
+    _onPressEditProfile,
+  };
+}
+
 const styles = StyleSheet.create({
   child: {
     flex: 1,
@@ -104,7 +113,6 @@ const styles = StyleSheet.create({
     flex: 8,
     justifyContent: 'space-evenly',
     alignItems: 'center',
-    marginBottom: heightPercentageToDP(4),
   },
   profileContainer: {
     flex: 9,

@@ -1,20 +1,26 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
 import {useSelector} from '../store';
 import AuthStack from './AuthStack';
 import {navigationRef} from './RootNavigation';
 import Splash from '../screens/Splash';
+import {HomeModule} from './TabBar';
 
 const index = () => {
   const user = useSelector((state) => state.user);
   const [isLoading, setIsLoading] = React.useState(true);
-  setTimeout(() => {
-    setIsLoading(false);
-  }, 2000);
+  useEffect(() => {
+    let timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+    return () => {
+      clearTimeout(timer);
+    };
+  }, []);
+
   return (
     <NavigationContainer ref={navigationRef}>
-      {isLoading ? <Splash /> : !user.logined ? <AuthStack /> : <Splash />}
+      {isLoading ? <Splash /> : !user.logined ? <AuthStack /> : <HomeModule />}
     </NavigationContainer>
   );
 };

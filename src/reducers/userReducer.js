@@ -28,8 +28,6 @@ const defaultState = {
 
 const reducer = (state = defaultState, action) => {
   switch (action.type) {
-    case userActionTypes.LOGIN_REQUEST:
-    case userActionTypes.REGISTER_REQUEST:
     case userActionTypes.LOGOUT_SUCCESS:
       state = [...defaultState];
       return state;
@@ -48,17 +46,14 @@ const reducer = (state = defaultState, action) => {
     case userActionTypes.UPDATE_NOTIFICATION_SETTING_FAILURE:
     case userActionTypes.UNFOLLOW_FAILURE:
     case userActionTypes.LOGOUT_FAILURE:
+    case userActionTypes.PASSWORD_RESET_FAILURE:
       Alert.alert('Error', action.payload.message);
       return state;
     case userActionTypes.REGISTER_SUCCESS:
       Alert.alert('Verify Email', action.payload.message);
       return state;
-    case userActionTypes.FETCH_EXTRA_INFO_REQUEST:
-    case userActionTypes.UPDATE_USER_INFO_REQUEST:
-    case userActionTypes.UPDATE_NOTIFICATION_SETTING_REQUEST:
-    case userActionTypes.UNFOLLOW_REQUEST:
-    case userActionTypes.FOLLOW_REQUEST:
-      state = {...state};
+    case userActionTypes.PASSWORD_RESET_SUCCESS:
+      Alert.alert('Password reset', action.payload.message);
       return state;
     case userActionTypes.FETCH_EXTRA_INFO_SUCCESS:
       state = {
@@ -73,6 +68,15 @@ const reducer = (state = defaultState, action) => {
         userInfo: {
           ...state.userInfo,
           ...action.payload,
+        },
+      };
+      return state;
+    case userActionTypes.UPDATE_EXTRA_INFO_SUCCESS:
+      state = {
+        ...state,
+        exraInfo: {
+          ...state.exraInfo,
+          posts: [action.payload.postId, ...state.extraInfo.posts],
         },
       };
       return state;
@@ -104,7 +108,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         userInfo: {
           ...state.userInfo,
-          followings: state.userInfo.following.push(action.payload),
+          followings: [action.payload, ...state.userInfo.following],
         },
       };
       return state;
