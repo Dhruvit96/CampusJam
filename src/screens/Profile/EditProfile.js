@@ -3,6 +3,7 @@ import {StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Avatar, Button, Header, Input, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
+import * as ImagePicker from 'expo-image-picker';
 import AppScreen from '../../components/AppScreen';
 import {
   fontscale,
@@ -10,10 +11,9 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {useSelector} from '../../store';
+import {useDispatch} from 'react-redux';
 import Loading from '../../components/Loading';
-import ImagePicker from 'react-native-image-crop-picker';
 import {navigation} from '../../navigations/RootNavigation';
-import {date} from 'yup/lib/locale';
 import {UpdateUserInfoRequest} from '../../actions/userActions';
 
 const validationSchema = Yup.object().shape({
@@ -21,6 +21,7 @@ const validationSchema = Yup.object().shape({
 });
 
 const EditProfile = () => {
+  const dispatch = useDispatch();
   const userState = useSelector((state) => state.user.userInfo);
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState(userState.avatar);
@@ -40,7 +41,7 @@ const EditProfile = () => {
           icon: 'arrow-back',
           color: '#000',
           size: fontscale(25),
-          onPress: () => _onPressBack,
+          onPress: () => _onPressBack(),
         }}
         centerComponent={{
           text: 'Edit Profile',
@@ -51,8 +52,8 @@ const EditProfile = () => {
         <Avatar
           rounded
           size={fontscale(124)}
-          title={userState.initials}
-          source={avatar ? {uri: userState.avatar} : null}
+          source={avatar ? {uri: avatar} : null}
+          title={!avatar ? userState.initials : null}
           titleStyle={{fontSize: fontscale(50)}}
           containerStyle={{
             backgroundColor: '#523',
@@ -70,7 +71,7 @@ const EditProfile = () => {
             marginTop: heightPercentageToDP(4),
           }}>
           <Formik
-            initialValues={{name: '', bio: ''}}
+            initialValues={{name: userState.name, bio: userState.bio}}
             validationSchema={validationSchema}
             onSubmit={(values) => {
               _onPressUpdate({...values, avatar});
@@ -90,8 +91,8 @@ const EditProfile = () => {
                   inputStyle={[styles.text, {fontSize: fontscale(18)}]}
                   label="Name"
                   labelStyle={styles.text}
-                  onBlur={() => setFieldTouched('email')}
-                  onChangeText={handleChange('email')}
+                  onBlur={() => setFieldTouched('name')}
+                  onChangeText={handleChange('name')}
                   textContentType={'name'}
                   defaultValue={userState.name}
                 />
@@ -125,21 +126,27 @@ function getEventHandlers(dispatch, setLoading, setAvatar) {
   const _onPressBack = () => {
     navigation.goBack();
   };
-  const _onPressChangeAvatar = () => {
-    ImagePicker.openPicker({
-      width: 300,
-      height: 300,
-      cropping: true,
-    })
-      .then((image) => {
-        setAvatar(image.path);
-      })
-      .catch((error) => console.log(error));
+  const _onPressChangeAvatar = async () => {
+    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      alert('Sorry, we need camera roll permissions to make this work!');
+    } else {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+      if (!result.cancelled) {
+        setAvatar(result.uri);
+      }
+    }
   };
   const _onPressUpdate = async (data) => {
     setLoading(true);
     await dispatch(UpdateUserInfoRequest(data));
     setLoading(false);
+    _onPressBack();
   };
   return {
     _onPressBack,

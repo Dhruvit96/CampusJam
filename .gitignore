@@ -58,3 +58,5 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 android/app/google-services.json
+android/java_pid3772.hprof
+android/app/src/main/java/com/campusjam/generated/BasePackageList.java

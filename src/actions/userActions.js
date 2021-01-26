@@ -278,7 +278,10 @@ export const UpdateUserInfoRequest = ({avatar, bio, name}) => {
       let photo = avatar
         ? avatar == currentUser.avatar
           ? avatar
-          : await uploadPhotoAsync(avatar, 'profile/' + user)
+          : await uploadPhotoAsync(
+              avatar,
+              'profile/' + currentUser.uid + '/' + TimeStamp.now(),
+            )
         : null;
       let userInfo = {
         avatar: photo,
