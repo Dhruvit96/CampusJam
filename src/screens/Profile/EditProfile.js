@@ -10,6 +10,11 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {useSelector} from '../../store';
+import Loading from '../../components/Loading';
+import ImagePicker from 'react-native-image-crop-picker';
+import {navigation} from '../../navigations/RootNavigation';
+import {date} from 'yup/lib/locale';
+import {UpdateUserInfoRequest} from '../../actions/userActions';
 
 const validationSchema = Yup.object().shape({
   name: Yup.string().required().label('Name'),
@@ -19,14 +24,24 @@ const EditProfile = () => {
   const userState = useSelector((state) => state.user.userInfo);
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState(userState.avatar);
-
+  const {_onPressUpdate, _onPressBack, _onPressChangeAvatar} = getEventHandlers(
+    dispatch,
+    setLoading,
+    setAvatar,
+  );
   return (
     <AppScreen>
+      <Loading isVisible={loading} />
       <Header
         backgroundColor="transparent"
         style={styles.header}
         placement="center"
-        leftComponent={{icon: 'arrow-back', color: '#000', size: fontscale(25)}}
+        leftComponent={{
+          icon: 'arrow-back',
+          color: '#000',
+          size: fontscale(25),
+          onPress: () => _onPressBack,
+        }}
         centerComponent={{
           text: 'Edit Profile',
           style: {color: '#000', fontSize: fontscale(22)},
@@ -44,7 +59,7 @@ const EditProfile = () => {
             margin: widthPercentageToDP(6),
           }}
         />
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => _onPressChangeAvatar()}>
           <Text h4 h4Style={[styles.text, {color: 'grey'}]}>
             Change Photo
           </Text>
@@ -58,7 +73,7 @@ const EditProfile = () => {
             initialValues={{name: '', bio: ''}}
             validationSchema={validationSchema}
             onSubmit={(values) => {
-              console.log(values);
+              _onPressUpdate({...values, avatar});
             }}>
             {({
               errors,
@@ -105,6 +120,33 @@ const EditProfile = () => {
     </AppScreen>
   );
 };
+
+function getEventHandlers(dispatch, setLoading, setAvatar) {
+  const _onPressBack = () => {
+    navigation.goBack();
+  };
+  const _onPressChangeAvatar = () => {
+    ImagePicker.openPicker({
+      width: 300,
+      height: 300,
+      cropping: true,
+    })
+      .then((image) => {
+        setAvatar(image.path);
+      })
+      .catch((error) => console.log(error));
+  };
+  const _onPressUpdate = async (data) => {
+    setLoading(true);
+    await dispatch(UpdateUserInfoRequest(data));
+    setLoading(false);
+  };
+  return {
+    _onPressBack,
+    _onPressUpdate,
+    _onPressChangeAvatar,
+  };
+}
 
 const styles = StyleSheet.create({
   container: {
