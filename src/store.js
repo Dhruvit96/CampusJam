@@ -4,12 +4,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import thunk from 'redux-thunk';
 import logger from 'redux-logger';
 import {persistStore, persistReducer} from 'redux-persist';
-import {userReducer, profileXReducer, notificationReducer} from './reducers';
+import {
+  userReducer,
+  profileXReducer,
+  notificationReducer,
+  postReducer,
+} from './reducers';
 
 const rootReducer = combineReducers({
   user: userReducer,
   profile: profileXReducer,
   notification: notificationReducer,
+  post: postReducer,
 });
 
 const persistConfig = {

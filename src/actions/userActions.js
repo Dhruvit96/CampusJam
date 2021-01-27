@@ -4,7 +4,6 @@ import {
   seenTypes,
   uploadPhotoAsync,
   FieldValue,
-  TimeStamp,
 } from '../constants';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
@@ -223,7 +222,7 @@ export const FetchExtraInfoRequest = () => {
         .get();
 
       let followings = (
-        await ref.collection('users').doc(currentUser.uid).get()
+        await firestore().collection('users').doc(currentUser.uid).get()
       ).data();
       let followers = [];
 
@@ -280,7 +279,7 @@ export const UpdateUserInfoRequest = ({avatar, bio, name}) => {
           ? avatar
           : await uploadPhotoAsync(
               avatar,
-              'profile/' + currentUser.uid + '/' + TimeStamp.now(),
+              'profile/' + currentUser.uid + '/' + Date.now(),
             )
         : null;
       let userInfo = {
@@ -355,7 +354,7 @@ export const followRequest = (uid) => {
           postId: 0,
           userId: uid,
           from: currentUser.uid,
-          created_at: TimeStamp.now(),
+          created_at: Date.now(),
           seen: seenTypes.NOTSEEN,
           type: notificationTypes.FOLLOWED_ME,
         }),

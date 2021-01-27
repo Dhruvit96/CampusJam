@@ -106,9 +106,9 @@ const SignUpScreen = () => {
                     onBlur={() => setFieldTouched('firstName')}
                     onChangeText={handleChange('firstName')}
                     textContentType="givenName"
-                    //onSubmitEditing={() => {
-                    //  this.lastName.focus();
-                    //}}
+                    onSubmitEditing={() => {
+                      this.lastName.focus();
+                    }}
                   />
                   <Input
                     autoCapitalize="words"
@@ -120,12 +120,12 @@ const SignUpScreen = () => {
                     onBlur={() => setFieldTouched('lastName')}
                     onChangeText={handleChange('lastName')}
                     textContentType="familyName"
-                    //onSubmitEditing={() => {
-                    //  this.email.focus();
-                    //}}
-                    //ref={(input) => {
-                    //  this.firstName = input;
-                    //}}
+                    onSubmitEditing={() => {
+                      this.email.focus();
+                    }}
+                    ref={(input) => {
+                      this.lastName = input;
+                    }}
                   />
                   <Input
                     autoCapitalize="none"
@@ -137,12 +137,12 @@ const SignUpScreen = () => {
                     onBlur={() => setFieldTouched('email')}
                     onChangeText={handleChange('email')}
                     textContentType="emailAddress"
-                    //onSubmitEditing={() => {
-                    //  this.password.focus();
-                    //}}
-                    //ref={(input) => {
-                    //  this.email = input;
-                    //}}
+                    onSubmitEditing={() => {
+                      this.password.focus();
+                    }}
+                    ref={(input) => {
+                      this.email = input;
+                    }}
                   />
                   <Input
                     autoCapitalize="none"
@@ -155,12 +155,12 @@ const SignUpScreen = () => {
                     onChangeText={handleChange('password')}
                     secureTextEntry
                     textContentType="password"
-                    //onSubmitEditing={() => {
-                    //  this.confirmPassword.focus();
-                    //}}
-                    //ref={(input) => {
-                    //  this.password = input;
-                    //}}
+                    onSubmitEditing={() => {
+                      this.confirmPassword.focus();
+                    }}
+                    ref={(input) => {
+                      this.password = input;
+                    }}
                   />
                   <Input
                     autoCapitalize="none"
@@ -174,9 +174,9 @@ const SignUpScreen = () => {
                     onBlur={() => setFieldTouched('confirmPassword')}
                     onChangeText={handleChange('confirmPassword')}
                     secureTextEntry
-                    //ref={(input) => {
-                    //  this.confirmPassword = input;
-                    //}}
+                    ref={(input) => {
+                      this.confirmPassword = input;
+                    }}
                   />
                   <Button
                     title={'Sign Up'}

@@ -82,9 +82,9 @@ const Login = () => {
                     onBlur={() => setFieldTouched('email')}
                     onChangeText={handleChange('email')}
                     textContentType="emailAddress"
-                    //onSubmitEditing={() => {
-                    //  this.password.focus();
-                    //}}
+                    onSubmitEditing={() => {
+                      this.password.focus();
+                    }}
                   />
                   <Input
                     autoCapitalize="none"
@@ -97,9 +97,9 @@ const Login = () => {
                     onChangeText={handleChange('password')}
                     secureTextEntry
                     textContentType="password"
-                    //ref={(input) => {
-                    //  this.password = input;
-                    //}}
+                    ref={(input) => {
+                      this.password = input;
+                    }}
                   />
                   <TouchableOpacity
                     style={{marginEnd: widthPercentageToDP(3)}}

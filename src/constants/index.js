@@ -31,6 +31,8 @@ export const userXActionTypes = {
 };
 
 export const postActionTypes = {
+  ALL_LOADED_SUCCESS: 'ALL_LOADED_SUCCESS',
+  CREATE_POST_FAILURE: 'CREATE_POST_FAILURE',
   FETCH_POST_LIST_SUCCESS: 'FETCH_POST_LIST_SUCCESS',
   FETCH_POST_LIST_FAILURE: 'FETCH_POST_LIST_FAILURE',
   LOAD_MORE_POST_LIST_SUCCESS: 'LOAD_MORE_POST_LIST_SUCCESS',
@@ -40,6 +42,9 @@ export const postActionTypes = {
   TOGGLE_LIKE_POST_SUCCESS: 'TOGGLE_LIKE_POST_SUCCESS',
   TOGGLE_LIKE_POST_FAILURE: 'TOGGLE_LIKE_POST_FAILURE',
 };
+
+export const LIMIT_POSTS_PER_LOADING = 10;
+
 export const notificationTypes = {
   LIKE_MY_POST: 1,
   COMMENT_MY_POST: 2,
@@ -58,7 +63,6 @@ export const notificationActionTypes = {
 };
 
 export const FieldValue = firebase.firestore.FieldValue;
-export const TimeStamp = firebase.firestore.Timestamp;
 
 export const uploadPhotoAsync = (uri, filename) => {
   return new Promise(async (res, rej) => {
