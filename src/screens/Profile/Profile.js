@@ -6,7 +6,11 @@ import TabComponent from '../../components/ProfileTab';
 import PostButton from '../../components/PostButton';
 import {useSelector} from '../../store';
 import {useDispatch} from 'react-redux';
-import {fontscale, heightPercentageToDP} from '../../constants';
+import {
+  fontscale,
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
 import {ScrollView} from 'react-native-gesture-handler';
 import {FetchExtraInfoRequest} from '../../actions/userActions';
@@ -25,7 +29,7 @@ const Profile = () => {
   const extraInfoState = useSelector((state) => state.user.extraInfo);
   return (
     <ScrollView
-      contentContainerStyle={{flex: 1}}
+      contentContainerStyle={{flex: 1, backgroundColor: 'white'}}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
@@ -70,7 +74,10 @@ const Profile = () => {
           source={userState.avatar ? {uri: userState.avatar} : null}
           title={!userState.avatar ? userState.initials : null}
           titleStyle={{fontSize: fontscale(50)}}
-          containerStyle={{backgroundColor: '#523', margin: 20}}
+          containerStyle={{
+            backgroundColor: '#523',
+            margin: widthPercentageToDP(6),
+          }}
         />
         <Text h4 h4Style={{fontWeight: '300'}}>
           {userState.name + '-' + userState.id}
@@ -91,7 +98,10 @@ const Profile = () => {
               name="Followers"
               count={extraInfoState.followers.length}
             />
-            <TabComponent name="Following" count={userState.following.length} />
+            <TabComponent
+              name="Following"
+              count={userState.followings.length}
+            />
           </View>
         </View>
       </View>
@@ -108,6 +118,7 @@ const Profile = () => {
           title="Shared Posts"
           iconName="bookmark-outline"
           size={fontscale(22)}
+          onPress={() => console.log(userState)}
         />
         <PostButton
           title="Liked Posts"

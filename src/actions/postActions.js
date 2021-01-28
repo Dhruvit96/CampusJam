@@ -8,13 +8,18 @@ import {
 } from '../constants';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
-import {UpdateExtraInfoRequest} from '../actions/userActions';
+import {
+  followRequest,
+  UnfollowRequest,
+  UpdateExtraInfoRequest,
+} from '../actions/userActions';
 import {CreateNotificationRequest} from '../actions/notificationActions';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 export const FetchPostListRequest = () => {
   return async (dispatch) => {
     try {
+      dispatch(ToggleAllLoadedSuccess(false));
       let currentUser = {...store.getState().user.userInfo};
       const posts = await firestore()
         .collection('posts')
@@ -42,15 +47,33 @@ export const FetchPostListRequest = () => {
             comments: comments,
             initials: userData.initials,
             name: userData.name,
-            isfollowed: currentUser.following.indexOf(postData.uid) >= 0,
+            isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
             isSelf: currentUser.uid == postData.uid,
+            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
           });
         }),
       );
       dispatch(FetchPostListSuccess(payload));
     } catch (e) {
+      console.log(e);
       dispatch(FetchPostListFailure());
     }
+  };
+};
+
+export const FetchPostListFailure = () => {
+  return {
+    type: postActionTypes.FETCH_POST_LIST_FAILURE,
+    payload: {
+      message: 'Get Post List Failed!',
+    },
+  };
+};
+
+export const FetchPostListSuccess = (payload) => {
+  return {
+    type: postActionTypes.FETCH_POST_LIST_SUCCESS,
+    payload: payload,
   };
 };
 
@@ -70,11 +93,6 @@ export const LoadMorePostListRequest = () => {
       const payload = [];
       await Promise.all(
         posts.docs.map(async (doc) => {
-          let comments = await doc.ref
-            .collection('comments')
-            .orderBy('create_at', 'desc')
-            .get();
-          comments = comments.docs.map((comment) => comment.data());
           let postData = doc.data();
           let userData = await firestore()
             .collection('users')
@@ -85,14 +103,15 @@ export const LoadMorePostListRequest = () => {
             ...postData,
             avatar: userData.avatar,
             postId: doc.id,
-            comments: comments,
             initials: userData.initials,
             name: userData.name,
-            isfollowed: currentUser.following.indexOf(postData.uid) >= 0,
+            isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
+            isSelf: currentUser.uid == postData.uid,
+            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
           });
         }),
       );
-      if (payload.length == 0) dispatch(AllLoadedSuccess());
+      if (payload.length == 0) dispatch(ToggleAllLoadedSuccess(true));
       else dispatch(LoadMorePostListSuccess(payload));
     } catch (e) {
       console.log(e);
@@ -101,9 +120,19 @@ export const LoadMorePostListRequest = () => {
   };
 };
 
-export const AllLoadedSuccess = () => {
+export const LoadMorePostListFailure = () => {
   return {
-    type: postActionTypes.ALL_LOADED_SUCCESS,
+    type: postActionTypes.LOAD_MORE_POST_LIST_FAILURE,
+    payload: {
+      message: 'Can not load more posts!',
+    },
+  };
+};
+
+export const LoadMorePostListSuccess = (payload) => {
+  return {
+    type: postActionTypes.LOAD_MORE_POST_LIST_SUCCESS,
+    payload: payload,
   };
 };
 
@@ -111,6 +140,7 @@ export const CreatePostRequest = ({image, text}) => {
   return async (dispatch) => {
     try {
       let currentUser = {...store.getState().user.userInfo};
+      let followers = {...store.getState().user.extraInfo};
       let imageUri = await ImageManipulator.manipulateAsync(
         image,
         [{resize: {width: 580}}],
@@ -140,9 +170,20 @@ export const CreatePostRequest = ({image, text}) => {
             .update({
               posts: FieldValue.arrayUnion(ref.id),
             });
+          dispatch(
+            CreateNotificationRequest({
+              postId: ref.id,
+              userId: [...followers],
+              from: currentUser.uid,
+              created_at: Date.now(),
+              seen: seenTypes.NOTSEEN,
+              type: notificationTypes.SOMEONE_POSTS,
+            }),
+          );
           dispatch(UpdateExtraInfoRequest(ref.id));
         });
-      dispatch(FetchPostDataRequest());
+
+      dispatch(FetchPostListRequest());
     } catch (e) {
       dispatch(CreatePostFailure());
     }
@@ -158,34 +199,78 @@ export const CreatePostFailure = () => {
   };
 };
 
-export const FetchPostListFailure = () => {
-  return {
-    type: postActionTypes.FETCH_POST_LIST_FAILURE,
-    payload: {
-      message: 'Get Post List Failed!',
-    },
+export const ToggleLikePostRequest = (postId, isLiked) => {
+  return async (dispatch) => {
+    try {
+      let uid = store.getState().user.userInfo.uid;
+      if (isLiked)
+        await firestore()
+          .collection('posts')
+          .doc(postId)
+          .update({likedBy: FieldValue.arrayRemove(uid)});
+      else
+        await firestore()
+          .collection('posts')
+          .doc(postId)
+          .update({
+            likedBy: FieldValue.arrayUnion(uid),
+          });
+      dispatch(ToggleLikePostSuccess({postId, uid}));
+    } catch (e) {
+      console.log(e);
+      dispatch(ToggleLikePostFailure());
+    }
   };
 };
 
-export const FetchPostListSuccess = (payload) => {
+export const ToggleLikePostSuccess = (payload) => {
   return {
-    type: postActionTypes.FETCH_POST_LIST_SUCCESS,
+    type: postActionTypes.TOGGLE_LIKE_POST_SUCCESS,
     payload: payload,
   };
 };
 
-export const LoadMorePostListFailure = () => {
+export const ToggleLikePostFailure = () => {
   return {
-    type: postActionTypes.LOAD_MORE_POST_LIST_FAILURE,
+    type: postActionTypes.TOGGLE_LIKE_POST_FAILURE,
     payload: {
-      message: 'Can not load more posts!',
+      message: 'Can not like this posts!',
     },
   };
 };
 
-export const LoadMorePostListSuccess = (payload) => {
+export const ToggleFollowUserRequest = (uid, isFollowed) => {
+  return async (dispatch) => {
+    try {
+      if (isFollowed) dispatch(UnfollowRequest(uid));
+      else dispatch(followRequest(uid));
+      dispatch(ToggleFollowUserSuccess(uid));
+    } catch (e) {
+      console.log(e);
+      dispatch(ToggleFollowUserFailure());
+    }
+  };
+};
+
+export const ToggleFollowUserSuccess = (postId) => {
   return {
-    type: postActionTypes.LOAD_MORE_POST_LIST_SUCCESS,
-    payload: payload,
+    type: postActionTypes.TOGGLE_FOLLOW_USER_SUCCESS,
+    payload: postId,
+  };
+};
+
+export const ToggleFollowUserFailure = () => {
+  return {
+    type: postActionTypes.TOGGLE_FOLLOW_USER_FAILURE,
+    payload: {
+      message: 'Can not follow this user!',
+    },
+  };
+};
+
+export const ToggleAllLoadedSuccess = (value) => {
+  return {
+    type: postActionTypes.TOGGLE_ALL_LOADED_SUCCESS,
+    payload: value,
   };
 };

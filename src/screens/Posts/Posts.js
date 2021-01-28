@@ -8,7 +8,7 @@ import {
 } from '../../actions/postActions';
 import AppScreen from '../../components/AppScreen';
 import PostItem from '../../components/PostItem';
-import FooterLoading from '../../components/FooterLoading';
+import LottieView from 'lottie-react-native';
 import {
   fontscale,
   heightPercentageToDP,
@@ -18,13 +18,13 @@ import {useSelector} from '../../store';
 const Posts = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const {_onRefresh, _loadMore} = getEventHandlers(
+  const postData = useSelector((state) => state.post);
+  const {_onRefresh, _loadMore, _renderItem, _renderFooter} = getEventHandlers(
     dispatch,
     setRefreshing,
-    setLoading,
+    refreshing,
+    postData.loaded,
   );
-  const postData = useSelector((state) => state.post);
   useEffect(() => {
     _onRefresh();
   }, []);
@@ -65,7 +65,7 @@ const Posts = () => {
               dispatch(LoadMorePostListRequest());
             }}
             onPress={() => {
-              console.log(postData.posts.length);
+              console.log(postData.posts[0].isFollowed);
               console.log(postData.loaded);
               //let lastTime = postData.posts[postData.posts.length - 1].text;
               //console.log(lastTime);
@@ -78,34 +78,45 @@ const Posts = () => {
         data={postData.posts}
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
-        renderItem={({item, index}) => <PostItem index={index} item={item} />}
+        renderItem={_renderItem}
+        initialNumToRender={2}
+        maxToRenderPerBatch={3}
         onEndReachedThreshold={0.9}
-        onEndReached={({distanceFromEnd}) => {
-          if (distanceFromEnd >= 0 && !postData.loaded) {
-            _loadMore();
-          }
-        }}
-        onRefresh={() => _onRefresh()}
+        onEndReached={_loadMore}
+        ListFooterComponent={_renderFooter}
+        onRefresh={_onRefresh}
       />
-      {loading && <FooterLoading />}
     </AppScreen>
   );
 };
 
-function getEventHandlers(dispatch, setRefreshing, setLoading) {
+function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
   const _onRefresh = async () => {
     setRefreshing(true);
     await dispatch(FetchPostListRequest());
     setRefreshing(false);
   };
-  const _loadMore = async () => {
-    setLoading(true);
-    await dispatch(LoadMorePostListRequest());
-    setLoading(false);
+  const _loadMore = async ({distanceFromEnd}) => {
+    if (distanceFromEnd >= 0 && !loaded) {
+      await dispatch(LoadMorePostListRequest());
+    }
+  };
+  const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
+  const _renderFooter = () => {
+    return !loaded && !refreshing ? (
+      <LottieView
+        source={require('../../assets/animations/loading.json')}
+        style={{height: widthPercentageToDP(10), alignSelf: 'center'}}
+        autoPlay
+        loop
+      />
+    ) : null;
   };
   return {
     _onRefresh,
     _loadMore,
+    _renderItem,
+    _renderFooter,
   };
 }
 

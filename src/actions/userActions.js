@@ -34,22 +34,22 @@ export const LoginRequest = (user) => {
         dispatch(LoginSuccess(result));
       } else dispatch(LoginFailure('Please verify your email.'));
     } catch (error) {
-      let errorMessage_1 = '';
+      let errorMessage = '';
       switch (error.code) {
         case 'auth/invalid-email':
-          errorMessage_1 = 'Invalid email address format.';
+          errorMessage = 'Invalid email address format.';
           break;
         case 'auth/user-not-found':
         case 'auth/wrong-password':
-          errorMessage_1 = 'Invalid email address or password.';
+          errorMessage = 'Invalid email address or password.';
           break;
         case 'auth/too-many-requests':
-          errorMessage_1 = 'Too many request. Try again in a minute.';
+          errorMessage = 'Too many request. Try again in a minute.';
           break;
         default:
-          errorMessage_1 = 'Check your internet connection.';
+          errorMessage = 'Check your internet connection.';
       }
-      dispatch(LoginFailure(errorMessage_1));
+      dispatch(LoginFailure(errorMessage));
     }
   };
 };
@@ -106,7 +106,7 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
           avatar: null,
           bio: null,
           email: email,
-          following: [],
+          followings: [],
           id: id,
           initials: initials,
           name: name,
@@ -212,16 +212,17 @@ export const FetchExtraInfoRequest = () => {
 
       let postData = await firestore()
         .collection('posts')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('create_at', 'desc')
+        .where('uid', '==', currentUser.uid)
+        .orderBy('created_at', 'desc')
         .get();
-
+      let posts = [];
+      postData.forEach((ref) => posts.push(ref.id));
       let followersData = await firestore()
         .collection('users')
         .where('followings', 'array-contains', currentUser.uid)
         .get();
 
-      let followings = (
+      let userData = (
         await firestore().collection('users').doc(currentUser.uid).get()
       ).data();
       let followers = [];
@@ -230,10 +231,10 @@ export const FetchExtraInfoRequest = () => {
 
       const payload = {
         userInfo: {
-          followings: followings,
+          followings: userData.followings,
         },
         extraInfo: {
-          posts: postData.docs.map((x) => x.data()),
+          posts: posts,
           followers: followers,
         },
       };
@@ -344,15 +345,18 @@ export const followRequest = (uid) => {
   return async (dispatch) => {
     try {
       let currentUser = {...store.getState().user.userInfo};
-      if (!currentUser.following.includes(uid)) {
-        await userRef.doc(currentUser.uid).update({
-          following: FieldValue.arrayUnion(uid),
-        });
+      if (!currentUser.followings.includes(uid)) {
+        await firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            followings: FieldValue.arrayUnion(uid),
+          });
       }
       dispatch(
         CreateNotificationRequest({
           postId: 0,
-          userId: uid,
+          userId: [uid],
           from: currentUser.uid,
           created_at: Date.now(),
           seen: seenTypes.NOTSEEN,
@@ -385,10 +389,13 @@ export const UnfollowRequest = (uid) => {
   return async (dispatch) => {
     try {
       let currentUser = {...store.getState().user.userInfo};
-      if (currentUser.following.includes(uid)) {
-        await userRef.doc(currentUser.uid).update({
-          following: FieldValue.arrayRemove(getUid()),
-        });
+      if (currentUser.followings.includes(uid)) {
+        await firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .update({
+            followings: FieldValue.arrayRemove(uid),
+          });
       }
       dispatch(UnfollowSuccess(uid));
     } catch (e) {

@@ -6,7 +6,7 @@ const defaultState = {
     avatar: null,
     bio: '',
     email: '',
-    following: [],
+    followings: [],
     id: null,
     initials: '',
     isStudent: false,
@@ -35,8 +35,9 @@ const reducer = (state = defaultState, action) => {
       state = {
         ...state,
         ...action.payload,
-        userInfo: {...state.userInfo, ...action.payload.userInfo},
+        userInfo: {...action.payload.userInfo},
       };
+      console.log(state);
       return state;
     case userActionTypes.LOGIN_FAILURE:
     case userActionTypes.FOLLOW_FAILURE:
@@ -97,7 +98,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         userInfo: {
           ...state.userInfo,
-          followings: state.userInfo.following.filter(
+          followings: state.userInfo.followings.filter(
             (x) => x !== action.payload,
           ),
         },
@@ -108,7 +109,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         userInfo: {
           ...state.userInfo,
-          followings: [action.payload, ...state.userInfo.following],
+          followings: [action.payload, ...state.userInfo.followings],
         },
       };
       return state;
