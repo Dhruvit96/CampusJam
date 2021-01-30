@@ -60,7 +60,7 @@ const PostItem = ({item}) => {
               : moment(item.created_at).fromNow()}
           </Text>
         </View>
-        {item.isSelf ? (
+        {!item.isSelf ? (
           <View style={styles.rightComponent}>
             <Button
               type="clear"
@@ -122,7 +122,7 @@ const PostItem = ({item}) => {
 
 function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed) {
   const _onPressLike = async () => {
-    await dispatch(ToggleLikePostRequest(postId, isLiked));
+    await dispatch(ToggleLikePostRequest(uid, postId, isLiked));
   };
   const _onPressFollow = async () => {
     await dispatch(ToggleFollowUserRequest(uid, isFollowed));
