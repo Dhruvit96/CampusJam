@@ -24,6 +24,7 @@ const defaultState = {
     followers: [],
     posts: [],
   },
+  loading: false,
 };
 
 const reducer = (state = defaultState, action) => {
@@ -37,7 +38,6 @@ const reducer = (state = defaultState, action) => {
         ...action.payload,
         userInfo: {...action.payload.userInfo},
       };
-      console.log(state);
       return state;
     case userActionTypes.LOGIN_FAILURE:
     case userActionTypes.FOLLOW_FAILURE:
@@ -93,6 +93,11 @@ const reducer = (state = defaultState, action) => {
         },
       };
       return state;
+    case userActionTypes.TOGGLE_LOADING:
+      state = {
+        ...state,
+        loading: !state.loading,
+      };
     case userActionTypes.UNFOLLOW_SUCCESS:
       state = {
         ...state,

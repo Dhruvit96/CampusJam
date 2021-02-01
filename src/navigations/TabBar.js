@@ -96,7 +96,7 @@ const TabBar = ({navigation, state}) => {
             color: '#000',
             size: fontscale(24),
             onPress: () => {
-              console.log(buttons);
+              navigation.goBack();
             },
           }}
           centerComponent={{
@@ -118,9 +118,10 @@ const FollowListModule = () => {
   return (
     <FollowListTab.Navigator
       tabBar={(props) => <TabBar {...props} />}
-      swipeEnabled={false}>
-      <FollowListTab.Screen name="Following" component={FollowingList} />
+      swipeEnabled={false}
+      backBehavior="none">
       <FollowListTab.Screen name="Followers" component={FollowersList} />
+      <FollowListTab.Screen name="Following" component={FollowingList} />
     </FollowListTab.Navigator>
   );
 };

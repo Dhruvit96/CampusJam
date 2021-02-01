@@ -5,13 +5,14 @@ import {Formik} from 'formik';
 import * as Yup from 'yup';
 import {useDispatch} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
-import {LoginRequest} from '../../actions/userActions';
+import {LoginRequest, ToggleLoading} from '../../actions/userActions';
 import Loading from '../../components/Loading';
 import {
   fontscale,
   heightPercentageToDP,
   widthPercentageToDP,
 } from '../../constants';
+import {useSelector} from '../../store';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().required().email().label('Email'),
@@ -20,9 +21,8 @@ const validationSchema = Yup.object().shape({
 
 const Login = () => {
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(false);
+  const loading = useSelector((state) => state.user.loading);
   const {_onLogin, _onPressRegister, _onPressForgotPassword} = getEventHandlers(
-    setLoading,
     dispatch,
   );
   return (
@@ -143,7 +143,7 @@ const Login = () => {
   );
 };
 
-function getEventHandlers(setLoading, dispatch) {
+function getEventHandlers(dispatch) {
   const _onPressRegister = () => {
     navigation.push('SignUp');
   };
@@ -151,9 +151,9 @@ function getEventHandlers(setLoading, dispatch) {
     navigation.push('ForgotPassword');
   };
   const _onLogin = async (data) => {
-    setLoading(true);
+    dispatch(ToggleLoading());
     await dispatch(LoginRequest(data));
-    setLoading(false);
+    dispatch(ToggleLoading());
   };
   return {
     _onLogin,

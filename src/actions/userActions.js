@@ -246,6 +246,12 @@ export const FetchExtraInfoRequest = () => {
   };
 };
 
+export const ToggleLoading = () => {
+  return {
+    type: userActionTypes.TOGGLE_LOADING,
+  };
+};
+
 export const FetchExtraInfoFailure = () => {
   return {
     type: userActionTypes.FETCH_EXTRA_INFO_FAILURE,
