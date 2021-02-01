@@ -1,6 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch} from 'react-redux';
@@ -68,9 +67,9 @@ const PostItem = ({item}) => {
               title={item.isFollowed ? 'Following' : 'Follow'}
               containerStyle={{
                 width: widthPercentageToDP(25),
-                backgroundColor: '#f3f3f3',
+                backgroundColor: item.isFollowed ? '#f3f3f3' : '#61c0ff',
               }}
-              titleStyle={{color: '#61c0ff'}}
+              titleStyle={{color: item.isFollowed ? '#61c0ff' : '#f3f3f3'}}
             />
           </View>
         ) : null}

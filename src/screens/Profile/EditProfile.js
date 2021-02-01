@@ -1,5 +1,11 @@
 import React, {useState} from 'react';
-import {StyleSheet, TouchableOpacity, View} from 'react-native';
+import {
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {Avatar, Button, Header, Input, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -32,90 +38,94 @@ const EditProfile = () => {
   );
   return (
     <AppScreen>
-      <Loading isVisible={loading} />
-      <Header
-        backgroundColor="transparent"
-        style={styles.header}
-        placement="center"
-        leftComponent={{
-          icon: 'arrow-back',
-          color: '#000',
-          size: fontscale(25),
-          onPress: () => _onPressBack(),
-        }}
-        centerComponent={{
-          text: 'Edit Profile',
-          style: {color: '#000', fontSize: fontscale(22)},
-        }}
-      />
-      <View style={styles.container}>
-        <Avatar
-          rounded
-          size={fontscale(124)}
-          source={avatar ? {uri: avatar} : null}
-          title={!avatar ? userState.initials : null}
-          titleStyle={{fontSize: fontscale(50)}}
+      <View style={{flex: 1, backgroundColor: 'white'}}>
+        <Loading isVisible={loading} />
+        <Header
+          backgroundColor="transparent"
+          placement="center"
           containerStyle={{
-            backgroundColor: '#523',
-            margin: widthPercentageToDP(6),
+            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
+          }}
+          leftComponent={{
+            icon: 'arrow-back',
+            color: '#000',
+            size: fontscale(25),
+            onPress: () => _onPressBack(),
+          }}
+          centerComponent={{
+            text: 'Edit Profile',
+            style: {color: '#000', fontSize: fontscale(22)},
           }}
         />
-        <TouchableOpacity onPress={() => _onPressChangeAvatar()}>
-          <Text h4 h4Style={[styles.text, {color: 'grey'}]}>
-            Change Photo
-          </Text>
-        </TouchableOpacity>
-        <View
-          style={{
-            width: widthPercentageToDP(82),
-            marginTop: heightPercentageToDP(4),
-          }}>
-          <Formik
-            initialValues={{name: userState.name, bio: userState.bio}}
-            validationSchema={validationSchema}
-            onSubmit={(values) => {
-              _onPressUpdate({...values, avatar});
+        <View style={styles.container}>
+          <Avatar
+            rounded
+            size={fontscale(124)}
+            source={avatar ? {uri: avatar} : null}
+            title={!avatar ? userState.initials : null}
+            titleStyle={{fontSize: fontscale(50)}}
+            containerStyle={{
+              backgroundColor: '#523',
+              margin: widthPercentageToDP(6),
+            }}
+          />
+          <TouchableOpacity onPress={() => _onPressChangeAvatar()}>
+            <Text h4 h4Style={[styles.text, {color: 'grey'}]}>
+              Change Photo
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              width: widthPercentageToDP(82),
+              marginTop: heightPercentageToDP(4),
             }}>
-            {({
-              errors,
-              handleChange,
-              handleSubmit,
-              setFieldTouched,
-              touched,
-            }) => (
-              <>
-                <Input
-                  autoCapitalize="words"
-                  errorMessage={touched.name ? errors.name : ''}
-                  errorStyle={styles.errorText}
-                  inputStyle={[styles.text, {fontSize: fontscale(18)}]}
-                  label="Name"
-                  labelStyle={styles.text}
-                  onBlur={() => setFieldTouched('name')}
-                  onChangeText={handleChange('name')}
-                  textContentType={'name'}
-                  defaultValue={userState.name}
-                />
-                <Input
-                  label="Bio"
-                  labelStyle={styles.text}
-                  inputStyle={[styles.text, {fontSize: fontscale(18)}]}
-                  onChangeText={handleChange('bio')}
-                  placeholder={'Enter your bio.'}
-                  defaultValue={userState.bio}
-                />
-                <Button
-                  title={'Update'}
-                  buttonStyle={{
-                    width: widthPercentageToDP(48),
-                    marginStart: widthPercentageToDP(18),
-                    backgroundColor: '#61c0ff',
-                  }}
-                  onPress={handleSubmit}
-                />
-              </>
-            )}
-          </Formik>
+            <Formik
+              initialValues={{name: userState.name, bio: userState.bio}}
+              validationSchema={validationSchema}
+              onSubmit={(values) => {
+                _onPressUpdate({...values, avatar});
+              }}>
+              {({
+                errors,
+                handleChange,
+                handleSubmit,
+                setFieldTouched,
+                touched,
+              }) => (
+                <>
+                  <Input
+                    autoCapitalize="words"
+                    errorMessage={touched.name ? errors.name : ''}
+                    errorStyle={styles.errorText}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
+                    label="Name"
+                    labelStyle={styles.text}
+                    onBlur={() => setFieldTouched('name')}
+                    onChangeText={handleChange('name')}
+                    textContentType={'name'}
+                    defaultValue={userState.name}
+                  />
+                  <Input
+                    label="Bio"
+                    labelStyle={styles.text}
+                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
+                    onChangeText={handleChange('bio')}
+                    placeholder={'Enter your bio.'}
+                    defaultValue={userState.bio}
+                  />
+                  <Button
+                    title={'Update'}
+                    buttonStyle={{
+                      width: widthPercentageToDP(48),
+                      marginStart: widthPercentageToDP(18),
+                      backgroundColor: '#61c0ff',
+                    }}
+                    onPress={handleSubmit}
+                  />
+                </>
+              )}
+            </Formik>
+          </View>
         </View>
       </View>
     </AppScreen>

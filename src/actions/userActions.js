@@ -356,7 +356,7 @@ export const followRequest = (uid) => {
       dispatch(
         CreateNotificationRequest({
           postId: 0,
-          userId: [uid],
+          userIds: [uid],
           from: currentUser.uid,
           created_at: Date.now(),
           seen: seenTypes.NOTSEEN,

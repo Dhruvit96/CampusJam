@@ -1,6 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, TouchableOpacity, View} from 'react-native';
-import {Icon, Text} from 'react-native-elements';
+import {
+  FlatList,
+  Platform,
+  StatusBar,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Icon, Text, Header} from 'react-native-elements';
 import {useDispatch} from 'react-redux';
 import {
   FetchPostListRequest,
@@ -30,62 +36,36 @@ const Posts = () => {
   }, []);
   return (
     <AppScreen>
-      <View
-        style={{
-          width: '100%',
-          height: heightPercentageToDP(9),
-          flexDirection: 'row',
-          backgroundColor: '#61c0ff',
-          borderBottomEndRadius: heightPercentageToDP(3),
-        }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-          }}>
-          <Text
-            style={{
-              alignSelf: 'center',
-              fontSize: fontscale(34),
-              color: '#fff',
-            }}>
-            Home
-          </Text>
-        </View>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'flex-end',
-            marginTop: widthPercentageToDP(2),
-            marginEnd: widthPercentageToDP(4),
-          }}>
-          <TouchableOpacity
-            onLongPress={() => {
-              dispatch(LoadMorePostListRequest());
-            }}
-            onPress={() => {
-              console.log(postData.posts[0].isFollowed);
-              console.log(postData.loaded);
-              //let lastTime = postData.posts[postData.posts.length - 1].text;
-              //console.log(lastTime);
-            }}>
-            <Icon name="search" size={fontscale(30)} color="#fff" />
-          </TouchableOpacity>
-        </View>
+      <View style={{flex: 1, backgroundColor: 'white'}}>
+        <Header
+          backgroundColor="transparent"
+          placement="center"
+          containerStyle={{
+            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
+          }}
+          centerComponent={{
+            text: 'Posts',
+            style: {color: '#000', fontSize: fontscale(24)},
+          }}
+          rightComponent={{
+            icon: 'search',
+            color: '#000',
+            size: fontscale(30),
+          }}
+        />
+        <FlatList
+          data={postData.posts}
+          keyExtractor={(item) => item.postId}
+          refreshing={refreshing}
+          renderItem={_renderItem}
+          initialNumToRender={2}
+          maxToRenderPerBatch={3}
+          onEndReachedThreshold={0.9}
+          onEndReached={_loadMore}
+          ListFooterComponent={_renderFooter}
+          onRefresh={_onRefresh}
+        />
       </View>
-      <FlatList
-        data={postData.posts}
-        keyExtractor={(item) => item.postId}
-        refreshing={refreshing}
-        renderItem={_renderItem}
-        initialNumToRender={2}
-        maxToRenderPerBatch={3}
-        onEndReachedThreshold={0.9}
-        onEndReached={_loadMore}
-        ListFooterComponent={_renderFooter}
-        onRefresh={_onRefresh}
-      />
     </AppScreen>
   );
 };

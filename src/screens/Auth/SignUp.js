@@ -50,7 +50,7 @@ const SignUpScreen = () => {
               <Icon name="arrow-back" size={fontscale(30)} color="#fff" />
             </TouchableOpacity>
           </View>
-          <View style={{flex: 1, justifyContent: 'center'}}>
+          <View style={{flex: 2, justifyContent: 'center'}}>
             <Text
               style={{
                 alignSelf: 'center',

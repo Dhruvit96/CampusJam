@@ -29,11 +29,6 @@ export const FetchPostListRequest = () => {
       const payload = [];
       await Promise.all(
         posts.docs.map(async (doc) => {
-          let comments = await doc.ref
-            .collection('comments')
-            .orderBy('create_at', 'desc')
-            .get();
-          comments = comments.docs.map((comment) => comment.data());
           let postData = doc.data();
           let userData = await firestore()
             .collection('users')
@@ -44,7 +39,6 @@ export const FetchPostListRequest = () => {
             ...postData,
             avatar: userData.avatar,
             postId: doc.id,
-            comments: comments,
             initials: userData.initials,
             name: userData.name,
             isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
@@ -111,7 +105,8 @@ export const LoadMorePostListRequest = () => {
           });
         }),
       );
-      if (payload.length == 0) dispatch(ToggleAllLoadedSuccess(true));
+      if (payload.length < LIMIT_POSTS_PER_LOADING)
+        dispatch(ToggleAllLoadedSuccess(true));
       else dispatch(LoadMorePostListSuccess(payload));
     } catch (e) {
       console.log(e);
@@ -173,7 +168,7 @@ export const CreatePostRequest = ({image, text}) => {
           dispatch(
             CreateNotificationRequest({
               postId: ref.id,
-              userId: [...followers],
+              userIds: [...followers],
               from: currentUser.uid,
               created_at: Date.now(),
               seen: seenTypes.NOTSEEN,
@@ -199,7 +194,7 @@ export const CreatePostFailure = () => {
   };
 };
 
-export const ToggleLikePostRequest = (postId, isLiked) => {
+export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
   return async (dispatch) => {
     try {
       let uid = store.getState().user.userInfo.uid;
@@ -208,13 +203,26 @@ export const ToggleLikePostRequest = (postId, isLiked) => {
           .collection('posts')
           .doc(postId)
           .update({likedBy: FieldValue.arrayRemove(uid)});
-      else
+      else {
         await firestore()
           .collection('posts')
           .doc(postId)
           .update({
             likedBy: FieldValue.arrayUnion(uid),
           });
+        if (postUserId != uid) {
+          dispatch(
+            CreateNotificationRequest({
+              postId: postId,
+              userIds: [postUserId],
+              from: uid,
+              created_at: Date.now(),
+              seen: seenTypes.NOTSEEN,
+              type: notificationTypes.LIKE_MY_POST,
+            }),
+          );
+        }
+      }
       dispatch(ToggleLikePostSuccess({postId, uid}));
     } catch (e) {
       console.log(e);
@@ -252,10 +260,10 @@ export const ToggleFollowUserRequest = (uid, isFollowed) => {
   };
 };
 
-export const ToggleFollowUserSuccess = (postId) => {
+export const ToggleFollowUserSuccess = (uid) => {
   return {
     type: postActionTypes.TOGGLE_FOLLOW_USER_SUCCESS,
-    payload: postId,
+    payload: uid,
   };
 };
 
