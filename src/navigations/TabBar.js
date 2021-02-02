@@ -10,6 +10,7 @@ import {
   FollowersList,
   FollowingList,
   Profile,
+  ProfileX,
 } from '../screens/Profile';
 import StudentData from '../screens/StudentData/StudentData';
 import {ButtonGroup, Header} from 'react-native-elements';
@@ -21,8 +22,24 @@ const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 const FollowListTab = createMaterialTopTabNavigator();
+const PostStack = createStackNavigator();
 
-export const HomeTab = () => {
+const tabBarListeners = ({navigation, route}) => ({
+  tabPress: () => {
+    let first = false;
+    if (route.focused) {
+      navigation.navigate(route.name);
+    }
+    if (route.index === 0) {
+      !first && route.routes[0].params.scrollToTop();
+      first = true;
+    } else {
+      first = false;
+    }
+  },
+});
+
+const HomeTab = () => {
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -40,30 +57,58 @@ export const HomeTab = () => {
         inactiveTintColor: 'grey',
         showLabel: false,
       }}>
-      <Tab.Screen name="Home" component={Posts} />
-      <Tab.Screen name="StudentData" component={StudentData} />
-      <Tab.Screen name="Notification" component={Notification} />
-      <Tab.Screen name="Profile" component={ProfileModule} />
+      <Tab.Screen
+        name="Home"
+        component={PostModule}
+        listeners={tabBarListeners}
+      />
+      <Tab.Screen
+        name="StudentData"
+        component={StudentData}
+        listeners={tabBarListeners}
+      />
+      <Tab.Screen
+        name="Notification"
+        component={Notification}
+        listeners={tabBarListeners}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileModule}
+        listeners={tabBarListeners}
+      />
     </Tab.Navigator>
   );
 };
 
+const screenOptions = {headerShown: false, gestureEnabled: false};
+
 export const HomeModule = () => {
   return (
-    <HomeStack.Navigator
-      screenOptions={{headerShown: false, gestureEnabled: false}}>
+    <HomeStack.Navigator screenOptions={screenOptions}>
       <HomeStack.Screen name="Home" component={HomeTab} />
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
     </HomeStack.Navigator>
   );
 };
 
+const PostModule = () => {
+  return (
+    <PostStack.Navigator screenOptions={screenOptions}>
+      <PostStack.Screen name="Posts" component={Posts} />
+      <PostStack.Screen name="Profile" component={Profile} />
+      <PostStack.Screen name="ProfileX" component={ProfileX} />
+      <PostStack.Screen name="FollowList" component={FollowListModule} />
+    </PostStack.Navigator>
+  );
+};
+
 const ProfileModule = () => {
   return (
-    <ProfileStack.Navigator
-      screenOptions={{headerShown: false, gestureEnabled: false}}>
+    <ProfileStack.Navigator screenOptions={screenOptions}>
       <ProfileStack.Screen name="Profile" component={Profile} />
       <ProfileStack.Screen name="FollowList" component={FollowListModule} />
+      <ProfileStack.Screen name="ProfileX" component={ProfileX} />
     </ProfileStack.Navigator>
   );
 };

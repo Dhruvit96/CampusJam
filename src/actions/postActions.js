@@ -107,7 +107,7 @@ export const LoadMorePostListRequest = () => {
       );
       if (payload.length < LIMIT_POSTS_PER_LOADING)
         dispatch(ToggleAllLoadedSuccess(true));
-      else dispatch(LoadMorePostListSuccess(payload));
+      dispatch(LoadMorePostListSuccess(payload));
     } catch (e) {
       console.log(e);
       dispatch(LoadMorePostListFailure());

@@ -17,7 +17,7 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from '../../constants';
-import {navigate, navigation} from '../../navigations/RootNavigation';
+import {navigation} from '../../navigations/RootNavigation';
 import {ScrollView} from 'react-native-gesture-handler';
 import {FetchExtraInfoRequest} from '../../actions/userActions';
 
@@ -56,7 +56,7 @@ const Profile = () => {
           leftComponent={{
             icon: 'arrow-back',
             color: '#000',
-            size: fontscale(24),
+            size: fontscale(27),
             onPress: _onPressBack,
           }}
           centerComponent={{
@@ -82,7 +82,7 @@ const Profile = () => {
             }}
           />
           <Text h4 h4Style={{fontWeight: '300'}}>
-            {userState.name + '-' + userState.id}
+            {useState.id ? userState.name + '-' + userState.id : userState.name}
           </Text>
           <Text h4 h4Style={styles.text}>
             {userState.bio}

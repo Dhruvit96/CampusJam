@@ -1,12 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {
-  FlatList,
-  Platform,
-  StatusBar,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import {Icon, Text, Header} from 'react-native-elements';
+import {FlatList, Platform, StatusBar, View} from 'react-native';
+import {Header} from 'react-native-elements';
 import {useDispatch} from 'react-redux';
 import {
   FetchPostListRequest,
@@ -15,16 +9,15 @@ import {
 import AppScreen from '../../components/AppScreen';
 import PostItem from '../../components/PostItem';
 import LottieView from 'lottie-react-native';
-import {
-  fontscale,
-  heightPercentageToDP,
-  widthPercentageToDP,
-} from '../../constants';
+import {fontscale, widthPercentageToDP} from '../../constants';
 import {useSelector} from '../../store';
+import {useScrollToTop} from '@react-navigation/native';
 const Posts = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const postData = useSelector((state) => state.post);
+  const ref = React.useRef(null);
+  useScrollToTop(ref);
   const {_onRefresh, _loadMore, _renderItem, _renderFooter} = getEventHandlers(
     dispatch,
     setRefreshing,
@@ -54,6 +47,7 @@ const Posts = () => {
           }}
         />
         <FlatList
+          ref={ref}
           data={postData.posts}
           keyExtractor={(item) => item.postId}
           refreshing={refreshing}

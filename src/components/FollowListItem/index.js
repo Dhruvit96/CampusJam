@@ -9,6 +9,7 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {useSelector} from '../../store';
+import {navigation} from '../../navigations/RootNavigation';
 
 const FollowListItem = ({item}) => {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const FollowListItem = ({item}) => {
     followings.indexOf(item.uid) !== -1,
   );
   const isSelf = uid === item.uid;
-  const {_onPressFollow} = getEventHandlers(
+  const {_onPressAvatar, _onPressFollow} = getEventHandlers(
     dispatch,
     item.uid,
     isFollowed,
@@ -32,6 +33,7 @@ const FollowListItem = ({item}) => {
             <Avatar
               rounded
               size={fontscale(50)}
+              onPress={_onPressAvatar}
               source={item.avatar ? {uri: item.avatar} : null}
               title={!item.avatar ? item.initials : null}
               titleStyle={{fontSize: fontscale(17)}}
@@ -46,7 +48,7 @@ const FollowListItem = ({item}) => {
             <View style={styles.rightComponent}>
               <Button
                 type="clear"
-                onPress={() => _onPressFollow()}
+                onPress={_onPressFollow}
                 title={isFollowed ? 'Following' : 'Follow'}
                 containerStyle={{
                   width: widthPercentageToDP(25),
@@ -63,11 +65,15 @@ const FollowListItem = ({item}) => {
 };
 
 function getEventHandlers(dispatch, uid, isFollowed, setIsFollowed) {
+  const _onPressAvatar = () => {
+    navigation.push('ProfileX', {uid: uid});
+  };
   const _onPressFollow = async () => {
     await dispatch(ToggleFollowUserRequest(uid, isFollowed));
     setIsFollowed(!isFollowed);
   };
   return {
+    _onPressAvatar,
     _onPressFollow,
   };
 }

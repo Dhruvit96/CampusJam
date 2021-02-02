@@ -46,7 +46,7 @@ const SignUpScreen = () => {
               alignItems: 'flex-start',
               marginStart: widthPercentageToDP(4),
             }}>
-            <TouchableOpacity onPress={() => _onPressBack()}>
+            <TouchableOpacity onPress={_onPressBack}>
               <Icon name="arrow-back" size={fontscale(30)} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -85,9 +85,7 @@ const SignUpScreen = () => {
                 confirmPassword: '',
               }}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
-                _onRegister(values);
-              }}>
+              onSubmit={_onRegister}>
               {({
                 errors,
                 handleChange,

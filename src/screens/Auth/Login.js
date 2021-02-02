@@ -61,9 +61,7 @@ const Login = () => {
             <Formik
               initialValues={{email: '', password: ''}}
               validationSchema={validationSchema}
-              onSubmit={(values) => {
-                _onLogin(values);
-              }}>
+              onSubmit={_onLogin}>
               {({
                 errors,
                 handleChange,
@@ -103,9 +101,7 @@ const Login = () => {
                   />
                   <TouchableOpacity
                     style={{marginEnd: widthPercentageToDP(3)}}
-                    onPress={() => {
-                      _onPressForgotPassword();
-                    }}>
+                    onPress={_onPressForgotPassword}>
                     <Text style={styles.buttonText}>Forgot Password?</Text>
                   </TouchableOpacity>
                   <Button
@@ -128,9 +124,7 @@ const Login = () => {
               }}>
               <TouchableOpacity
                 style={{marginTop: heightPercentageToDP(2)}}
-                onPress={() => {
-                  _onPressRegister();
-                }}>
+                onPress={_onPressRegister}>
                 <Text style={styles.buttonText}>
                   Don't have account? Sign Up
                 </Text>

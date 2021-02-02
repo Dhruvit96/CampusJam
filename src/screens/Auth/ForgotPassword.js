@@ -36,7 +36,7 @@ const ForgotPassword = () => {
             justifyContent: 'center',
             alignItems: 'flex-start',
           }}>
-          <TouchableOpacity onPress={() => _onPressBack()}>
+          <TouchableOpacity onPress={_onPressBack}>
             <Icon name="arrow-back" size={fontscale(30)} color="#000" />
           </TouchableOpacity>
         </View>
@@ -72,9 +72,7 @@ const ForgotPassword = () => {
         <Formik
           initialValues={{email: ''}}
           validationSchema={validationSchema}
-          onSubmit={(values) => {
-            _onPressSend(values);
-          }}>
+          onSubmit={_onPressSend}>
           {({errors, handleChange, handleSubmit, setFieldTouched, touched}) => (
             <>
               <Input

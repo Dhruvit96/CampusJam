@@ -1,8 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {Component} from 'react';
 import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useDispatch} from 'react-redux';
 import {
   ToggleFollowUserRequest,
   ToggleLikePostRequest,
@@ -14,112 +13,159 @@ import {
   heightPercentageToDP,
   widthPercentageToDP,
 } from '../../constants';
+import {connect} from 'react-redux';
+import {navigation} from '../../navigations/RootNavigation';
 
-const PostItem = ({item}) => {
-  const dispatch = useDispatch();
-  const animation = useRef(null);
-  const [isFirstRun, setIsFirstRun] = useState(true);
-  useEffect(() => {
-    if (isFirstRun) {
-      if (item.isLiked) animation.current.play(43, 43);
-      else animation.current.play(11, 11);
-      setIsFirstRun(false);
-    } else {
-      if (item.isLiked) animation.current.play(25, 60);
-      else animation.current.play(0, 17);
-    }
-  }, [item.isLiked]);
+class PostItem extends Component {
+  constructor() {
+    super();
+    this.state = {
+      count: 0,
+      isFollowed: false,
+    };
+  }
 
-  const {_onPressLike, _onPressFollow} = getEventHandlers(
-    dispatch,
-    item.uid,
-    item.postId,
-    item.isLiked,
-    item.isFollowed,
-  );
+  componentDidMount() {
+    this.setState({
+      count: this.props.item.likedBy.length,
+      isFollowed: this.props.item.isFollowed,
+    });
+    if (this.props.item.isLiked) this.animation.play(43, 43);
+    else this.animation.play(11, 11);
+  }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.row}>
-        <View>
-          <Avatar
-            rounded
-            size={fontscale(50)}
-            source={item.avatar ? {uri: item.avatar} : null}
-            title={!item.avatar ? item.initials : null}
-            titleStyle={{fontSize: fontscale(17)}}
-            containerStyle={{backgroundColor: '#523'}}
-          />
-        </View>
-        <View style={{marginStart: widthPercentageToDP(3)}}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.text}>
-            {moment(item.created_at).fromNow() == 'a few seconds ago'
-              ? 'Just now'
-              : moment(item.created_at).fromNow()}
-          </Text>
-        </View>
-        {!item.isSelf ? (
-          <View style={styles.rightComponent}>
-            <Button
-              type="clear"
-              onPress={() => _onPressFollow()}
-              title={item.isFollowed ? 'Following' : 'Follow'}
-              containerStyle={{
-                width: widthPercentageToDP(25),
-                backgroundColor: item.isFollowed ? '#f3f3f3' : '#61c0ff',
-              }}
-              titleStyle={{color: item.isFollowed ? '#61c0ff' : '#f3f3f3'}}
+  shouldComponentUpdate(nextProps, nextState) {
+    let likeChange = this.state.count !== nextState.count;
+    let followChange = this.state.isFollowed !== nextState.isFollowed;
+    return likeChange || followChange;
+  }
+
+  render() {
+    const {_onPressAvatar, _onPressLike, _onPressFollow} = getEventHandlers(
+      this.props.dispatch,
+      this.props.item.uid,
+      this.props.item.postId,
+      this.props.item.isLiked,
+      this.props.item.isFollowed,
+      this.props.item.isSelf,
+    );
+    return (
+      <View style={styles.container}>
+        <View style={styles.row}>
+          <View>
+            <Avatar
+              rounded
+              size={fontscale(50)}
+              source={
+                this.props.item.avatar ? {uri: this.props.item.avatar} : null
+              }
+              title={!this.props.item.avatar ? this.props.item.initials : null}
+              onPress={
+                typeof this.props.profileX === 'undefined'
+                  ? _onPressAvatar
+                  : null
+              }
+              titleStyle={{fontSize: fontscale(17)}}
+              containerStyle={{backgroundColor: '#523'}}
             />
           </View>
+          <View style={{marginStart: widthPercentageToDP(3)}}>
+            <Text style={styles.name}>{this.props.item.name}</Text>
+            <Text style={styles.text}>
+              {moment(this.props.item.created_at).fromNow() ==
+              'a few seconds ago'
+                ? 'Just now'
+                : moment(this.props.item.created_at).fromNow()}
+            </Text>
+          </View>
+          {!this.props.item.isSelf ? (
+            <View style={styles.rightComponent}>
+              <Button
+                type="clear"
+                onPress={() => {
+                  _onPressFollow();
+                  this.setState({isFollowed: !this.state.isFollowed});
+                }}
+                title={this.state.isFollowed ? 'Following' : 'Follow'}
+                containerStyle={{
+                  width: widthPercentageToDP(25),
+                  backgroundColor: this.state.isFollowed
+                    ? '#f3f3f3'
+                    : '#61c0ff',
+                }}
+                titleStyle={{
+                  color: this.state.isFollowed ? '#61c0ff' : '#f3f3f3',
+                }}
+              />
+            </View>
+          ) : null}
+        </View>
+        {this.props.item.text ? (
+          <Text style={{...styles.text, marginTop: heightPercentageToDP(2)}}>
+            {this.props.item.text}
+          </Text>
         ) : null}
-      </View>
-      {item.text ? (
-        <Text style={{...styles.text, marginTop: heightPercentageToDP(2)}}>
-          {item.text}
-        </Text>
-      ) : null}
-      <Image
-        source={{uri: item.image}}
-        style={{
-          width: widthPercentageToDP(84),
-          height: item.scale * widthPercentageToDP(84),
-          resizeMode: 'cover',
-          marginTop: heightPercentageToDP(1),
-          marginBottom: heightPercentageToDP(1),
-          borderRadius: widthPercentageToDP(3),
-        }}
-      />
-      <View style={styles.row}>
-        <TouchableOpacity onPress={() => _onPressLike()}>
-          <LottieView
-            source={require('../../assets/animations/like-animation.json')}
-            style={styles.heart}
-            autoPlay={false}
-            loop={false}
-            ref={animation}
-          />
-        </TouchableOpacity>
-        <Text style={{...styles.text, marginStart: widthPercentageToDP(2)}}>
-          {item.likedBy.length}
-        </Text>
-        <View
+        <Image
+          source={{uri: this.props.item.image}}
           style={{
-            flexDirection: 'row',
-            ...styles.rightComponent,
-          }}>
-          <Icon
-            name="chat-bubble-outline"
-            size={fontscale(22)}
-            style={{transform: [{rotateY: '180deg'}]}}
-          />
+            width: widthPercentageToDP(84),
+            height: this.props.item.scale * widthPercentageToDP(84),
+            resizeMode: 'cover',
+            marginTop: heightPercentageToDP(1),
+            marginBottom: heightPercentageToDP(1),
+            borderRadius: widthPercentageToDP(3),
+          }}
+        />
+        <View style={styles.row}>
+          <TouchableOpacity
+            onPress={() => {
+              _onPressLike();
+              if (this.props.item.isLiked) {
+                this.animation.play(0, 17);
+                this.setState({count: this.state.count - 1});
+              } else {
+                this.animation.play(25, 60);
+                this.setState({count: this.state.count + 1});
+              }
+            }}>
+            <LottieView
+              source={require('../../assets/animations/like-animation.json')}
+              style={styles.heart}
+              autoPlay={false}
+              loop={false}
+              ref={(animation) => {
+                this.animation = animation;
+              }}
+            />
+          </TouchableOpacity>
+          <Text style={{...styles.text, marginStart: widthPercentageToDP(2)}}>
+            {this.state.count}
+          </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              ...styles.rightComponent,
+            }}>
+            <Icon
+              name="chat-bubble-outline"
+              size={fontscale(22)}
+              style={{transform: [{rotateY: '180deg'}]}}
+            />
+          </View>
         </View>
       </View>
-    </View>
-  );
-};
+    );
+  }
+}
 
-function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed) {
+function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed, isSelf) {
+  const _onPressAvatar = async () => {
+    if (isSelf) navigation.push('Profile');
+    else
+      navigation.push('ProfileX', {
+        uid: uid,
+      });
+  };
   const _onPressLike = async () => {
     await dispatch(ToggleLikePostRequest(uid, postId, isLiked));
   };
@@ -127,6 +173,7 @@ function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed) {
     await dispatch(ToggleFollowUserRequest(uid, isFollowed));
   };
   return {
+    _onPressAvatar,
     _onPressLike,
     _onPressFollow,
   };
@@ -170,4 +217,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostItem;
+export default connect()(PostItem);

@@ -50,7 +50,7 @@ const EditProfile = () => {
             icon: 'arrow-back',
             color: '#000',
             size: fontscale(25),
-            onPress: () => _onPressBack(),
+            onPress: _onPressBack,
           }}
           centerComponent={{
             text: 'Edit Profile',
@@ -69,7 +69,7 @@ const EditProfile = () => {
               margin: widthPercentageToDP(6),
             }}
           />
-          <TouchableOpacity onPress={() => _onPressChangeAvatar()}>
+          <TouchableOpacity onPress={_onPressChangeAvatar}>
             <Text h4 h4Style={[styles.text, {color: 'grey'}]}>
               Change Photo
             </Text>
