@@ -23,6 +23,7 @@ const HomeStack = createStackNavigator();
 const ProfileStack = createStackNavigator();
 const FollowListTab = createMaterialTopTabNavigator();
 const PostStack = createStackNavigator();
+const NotificationStack = createStackNavigator();
 
 const tabBarListeners = ({navigation, route}) => ({
   tabPress: () => {
@@ -69,7 +70,7 @@ const HomeTab = () => {
       />
       <Tab.Screen
         name="Notification"
-        component={Notification}
+        component={NotificationModule}
         listeners={tabBarListeners}
       />
       <Tab.Screen
@@ -100,6 +101,20 @@ const PostModule = () => {
       <PostStack.Screen name="ProfileX" component={ProfileX} />
       <PostStack.Screen name="FollowList" component={FollowListModule} />
     </PostStack.Navigator>
+  );
+};
+
+const NotificationModule = () => {
+  return (
+    <NotificationStack.Navigator screenOptions={screenOptions}>
+      <NotificationStack.Screen name="Notification" component={Notification} />
+      <NotificationStack.Screen name="Profile" component={Profile} />
+      <NotificationStack.Screen name="ProfileX" component={ProfileX} />
+      <NotificationStack.Screen
+        name="FollowList"
+        component={FollowListModule}
+      />
+    </NotificationStack.Navigator>
   );
 };
 

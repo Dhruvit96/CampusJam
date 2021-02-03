@@ -52,9 +52,7 @@ const Posts = () => {
           keyExtractor={(item) => item.postId}
           refreshing={refreshing}
           renderItem={_renderItem}
-          initialNumToRender={2}
-          maxToRenderPerBatch={3}
-          onEndReachedThreshold={0.9}
+          onEndReachedThreshold={0.5}
           onEndReached={_loadMore}
           ListFooterComponent={_renderFooter}
           onRefresh={_onRefresh}

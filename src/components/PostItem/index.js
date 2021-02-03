@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -16,7 +16,7 @@ import {
 import {connect} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
 
-class PostItem extends Component {
+class PostItem extends PureComponent {
   constructor() {
     super();
     this.state = {
@@ -32,12 +32,6 @@ class PostItem extends Component {
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    let likeChange = this.state.count !== nextState.count;
-    let followChange = this.state.isFollowed !== nextState.isFollowed;
-    return likeChange || followChange;
   }
 
   render() {

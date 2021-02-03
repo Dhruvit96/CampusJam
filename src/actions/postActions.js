@@ -223,18 +223,10 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           );
         }
       }
-      dispatch(ToggleLikePostSuccess({postId, uid}));
     } catch (e) {
       console.log(e);
       dispatch(ToggleLikePostFailure());
     }
-  };
-};
-
-export const ToggleLikePostSuccess = (payload) => {
-  return {
-    type: postActionTypes.TOGGLE_LIKE_POST_SUCCESS,
-    payload: payload,
   };
 };
 
@@ -252,18 +244,10 @@ export const ToggleFollowUserRequest = (uid, isFollowed) => {
     try {
       if (isFollowed) dispatch(UnfollowRequest(uid));
       else dispatch(followRequest(uid));
-      dispatch(ToggleFollowUserSuccess(uid));
     } catch (e) {
       console.log(e);
       dispatch(ToggleFollowUserFailure());
     }
-  };
-};
-
-export const ToggleFollowUserSuccess = (uid) => {
-  return {
-    type: postActionTypes.TOGGLE_FOLLOW_USER_SUCCESS,
-    payload: uid,
   };
 };
 

@@ -23,6 +23,7 @@ const FollowListItem = ({item}) => {
     dispatch,
     item.uid,
     isFollowed,
+    isSelf,
     setIsFollowed,
   );
   return (
@@ -64,9 +65,11 @@ const FollowListItem = ({item}) => {
   );
 };
 
-function getEventHandlers(dispatch, uid, isFollowed, setIsFollowed) {
+function getEventHandlers(dispatch, uid, isFollowed, isSelf, setIsFollowed) {
   const _onPressAvatar = () => {
-    navigation.push('ProfileX', {uid: uid});
+    !isSelf
+      ? navigation.push('ProfileX', {uid: uid})
+      : navigation.push('Profile');
   };
   const _onPressFollow = async () => {
     await dispatch(ToggleFollowUserRequest(uid, isFollowed));

@@ -8,12 +8,15 @@ import {
   notificationTypes,
   widthPercentageToDP,
 } from '../../constants';
+import {navigation} from '../../navigations/RootNavigation';
 
 const NotificationItem = ({item}) => {
-  const {_getNotificationText} = getEventHandlers(item.type);
-
+  const {_getNotificationText, _onPress} = getEventHandlers(
+    item.type,
+    item.from,
+  );
   return (
-    <TouchableOpacity>
+    <TouchableOpacity onPress={_onPress}>
       <View style={styles.container}>
         <View style={styles.row}>
           <View>
@@ -54,17 +57,16 @@ const NotificationItem = ({item}) => {
   );
 };
 
-function getEventHandlers(type) {
+function getEventHandlers(type, uid) {
   const _onPress = async () => {
     switch (type) {
       case notificationTypes.LIKE_MY_POST:
       case notificationTypes.SOMEONE_POSTS:
       case notificationTypes.COMMENT_MY_POST:
-      //move to post
+        //move to post
+        break;
       case notificationTypes.FOLLOWED_ME:
-      //move to profile
-      default:
-      //do nothing
+        navigation.push('ProfileX', {uid: uid});
     }
   };
   const _getNotificationText = () => {
