@@ -1,13 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Platform,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {RefreshControl, StatusBar, StyleSheet, View} from 'react-native';
 import {Avatar, Header, Text} from 'react-native-elements';
-import AppScreen from '../../components/AppScreen';
 import TabComponent from '../../components/ProfileTab';
 import PostButton from '../../components/PostButton';
 import {useSelector} from '../../store';
@@ -32,106 +25,109 @@ const Profile = () => {
     _onRefresh,
     _onPressFollowers,
     _onPressFollowing,
+    _onPressLikedPosts,
+    _onPressSharedPosts,
   } = getEventHandlers(dispatch, setRefreshing, userState.name, userState.uid);
   useEffect(() => {
     _onRefresh();
   }, []);
   return (
-    <AppScreen>
-      <ScrollView
-        contentContainerStyle={{flex: 1, backgroundColor: 'white'}}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={_onRefresh}
-            progressViewOffset={heightPercentageToDP(10)}
-          />
-        }>
-        <Header
-          backgroundColor="transparent"
-          placement="center"
+    <ScrollView
+      contentContainerStyle={{flex: 1, backgroundColor: 'white'}}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={_onRefresh}
+          progressViewOffset={heightPercentageToDP(10)}
+        />
+      }>
+      <StatusBar barStyle="dark-content" />
+      <Header
+        backgroundColor="transparent"
+        placement="center"
+        leftComponent={{
+          icon: 'arrow-back',
+          color: '#000',
+          size: fontscale(27),
+          onPress: _onPressBack,
+        }}
+        centerComponent={{
+          text: 'My Profile',
+          style: {color: '#000', fontSize: fontscale(24)},
+        }}
+        rightComponent={{
+          icon: 'settings',
+          color: '#000',
+          size: fontscale(24),
+        }}
+      />
+      <View style={styles.profileContainer}>
+        <Avatar
+          rounded
+          size="xlarge"
+          source={userState.avatar ? {uri: userState.avatar} : null}
+          title={!userState.avatar ? userState.initials : null}
+          titleStyle={{fontSize: fontscale(50)}}
           containerStyle={{
-            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
-          }}
-          leftComponent={{
-            icon: 'arrow-back',
-            color: '#000',
-            size: fontscale(27),
-            onPress: _onPressBack,
-          }}
-          centerComponent={{
-            text: 'My Profile',
-            style: {color: '#000', fontSize: fontscale(24)},
-          }}
-          rightComponent={{
-            icon: 'settings',
-            color: '#000',
-            size: fontscale(24),
+            backgroundColor: '#523',
+            margin: widthPercentageToDP(6),
           }}
         />
-        <View style={styles.profileContainer}>
-          <Avatar
-            rounded
-            size="xlarge"
-            source={userState.avatar ? {uri: userState.avatar} : null}
-            title={!userState.avatar ? userState.initials : null}
-            titleStyle={{fontSize: fontscale(50)}}
-            containerStyle={{
-              backgroundColor: '#523',
-              margin: widthPercentageToDP(6),
-            }}
-          />
-          <Text h4 h4Style={{fontWeight: '300'}}>
-            {useState.id ? userState.name + '-' + userState.id : userState.name}
-          </Text>
-          <Text h4 h4Style={styles.text}>
-            {userState.bio}
-          </Text>
+        <Text h4 h4Style={{fontWeight: '300'}}>
+          {userState.id ? userState.name + '-' + userState.id : userState.name}
+        </Text>
+        <Text h4 h4Style={styles.text}>
+          {userState.bio}
+        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: heightPercentageToDP(3),
+          }}>
           <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              marginTop: heightPercentageToDP(3),
-            }}>
-            <View
-              style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
-              <TabComponent name="Posts" count={extraInfoState.posts.length} />
-              <TabComponent
-                name="Followers"
-                count={extraInfoState.followers.length}
-                onPress={() => _onPressFollowers()}
-              />
-              <TabComponent
-                name="Following"
-                count={userState.followings.length}
-                onPress={() => _onPressFollowing()}
-              />
-            </View>
+            style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
+            <TabComponent
+              name="Posts"
+              count={extraInfoState.posts.length}
+              onPress={_onPressSharedPosts}
+            />
+            <TabComponent
+              name="Followers"
+              count={extraInfoState.followers.length}
+              onPress={_onPressFollowers}
+            />
+            <TabComponent
+              name="Following"
+              count={userState.followings.length}
+              onPress={_onPressFollowing}
+            />
           </View>
         </View>
-        <View style={styles.postContainer}>
-          <PostButton
-            title="Edit Profile"
-            iconName="edit"
-            type="feather"
-            size={fontscale(20)}
-            onPress={() => _onPressEditProfile()}
-          />
-          <PostButton title="Add Post" iconName="add" size={fontscale(22)} />
-          <PostButton
-            title="Shared Posts"
-            iconName="bookmark-outline"
-            size={fontscale(22)}
-            onPress={() => console.log(userState)}
-          />
-          <PostButton
-            title="Liked Posts"
-            iconName="favorite-outline"
-            size={fontscale(22)}
-          />
-        </View>
-      </ScrollView>
-    </AppScreen>
+      </View>
+      <View style={styles.postContainer}>
+        <PostButton
+          title="Edit Profile"
+          iconName="edit"
+          type="feather"
+          size={fontscale(20)}
+          onPress={_onPressEditProfile}
+        />
+        <PostButton title="Add Post" iconName="add" size={fontscale(22)} />
+        <PostButton
+          title="Shared Posts"
+          iconName="bookmark-outline"
+          size={fontscale(22)}
+          onPress={_onPressSharedPosts}
+        />
+        <PostButton
+          title="Liked Posts"
+          iconName="favorite-outline"
+          size={fontscale(22)}
+          onPress={_onPressLikedPosts}
+        />
+      </View>
+    </ScrollView>
   );
 };
 
@@ -165,13 +161,20 @@ function getEventHandlers(dispatch, setRefreshing, name, uid) {
       },
     });
   };
-
+  const _onPressLikedPosts = () => {
+    navigation.push('LikedPosts');
+  };
+  const _onPressSharedPosts = () => {
+    navigation.push('SharedPosts');
+  };
   return {
     _onPressBack,
     _onPressEditProfile,
     _onRefresh,
     _onPressFollowers,
     _onPressFollowing,
+    _onPressLikedPosts,
+    _onPressSharedPosts,
   };
 }
 

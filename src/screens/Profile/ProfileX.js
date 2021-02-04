@@ -1,14 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {
-  FlatList,
-  Platform,
-  RefreshControl,
-  StatusBar,
-  StyleSheet,
-  View,
-} from 'react-native';
+import {FlatList, StatusBar, StyleSheet, View} from 'react-native';
 import {Avatar, Header, Text} from 'react-native-elements';
-import AppScreen from '../../components/AppScreen';
 import TabComponent from '../../components/ProfileTab';
 import {useSelector} from '../../store';
 import {useDispatch} from 'react-redux';
@@ -18,15 +10,16 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
-import {ScrollView} from 'react-native-gesture-handler';
 import firestore from '@react-native-firebase/firestore';
 import PostItem from '../../components/PostItem';
+import Loading from '../../components/Loading';
 
 const ProfileX = ({route}) => {
   const dispatch = useDispatch();
   const uid = route.params.uid;
   const currentUser = useSelector((state) => state.user.userInfo);
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [userState, setUserState] = useState({
     avatar: null,
     bio: '',
@@ -40,9 +33,14 @@ const ProfileX = ({route}) => {
     name: '',
     uid: '',
   });
-  const {_headerComponent, _onRefresh, _renderItem} = getEventHandlers(
+  const {
+    _headerComponent,
+    _onPressBack,
+    _onRefresh,
+    _renderItem,
+  } = getEventHandlers(
     currentUser,
-    dispatch,
+    setLoading,
     setRefreshing,
     setUserState,
     userState.name,
@@ -52,32 +50,46 @@ const ProfileX = ({route}) => {
   useEffect(() => {
     _onRefresh();
   }, []);
+  if (loading) return <Loading isVisible={loading} />;
   return (
-    <AppScreen>
-      <View style={styles.postContainer}>
-        <FlatList
-          data={userState.posts}
-          keyExtractor={(item) => item.postId}
-          //refreshing={refreshing}
-          renderItem={_renderItem}
-          initialNumToRender={2}
-          maxToRenderPerBatch={3}
-          onEndReachedThreshold={0.9}
-          ListHeaderComponent={_headerComponent}
-          contentContainerStyle={{backgroundColor: 'white'}}
-          nestedScrollEnabled
-          refreshing={refreshing}
-          onRefresh={_onRefresh}
-          progressViewOffset={heightPercentageToDP(10)}
-        />
-      </View>
-    </AppScreen>
+    <View style={styles.postContainer}>
+      <StatusBar barStyle="dark-content" />
+      <Header
+        backgroundColor="transparent"
+        placement="center"
+        leftComponent={{
+          icon: 'arrow-back',
+          color: '#000',
+          size: fontscale(27),
+          onPress: _onPressBack,
+        }}
+        centerComponent={{
+          text: userState.name,
+          style: {color: '#000', fontSize: fontscale(24)},
+        }}
+        containerStyle={{backgroundColor: 'white'}}
+      />
+      <FlatList
+        data={userState.posts}
+        keyExtractor={(item) => item.postId}
+        renderItem={_renderItem}
+        initialNumToRender={2}
+        maxToRenderPerBatch={3}
+        onEndReachedThreshold={0.9}
+        ListHeaderComponent={_headerComponent}
+        contentContainerStyle={{backgroundColor: 'white'}}
+        nestedScrollEnabled
+        refreshing={refreshing}
+        onRefresh={_onRefresh}
+        progressViewOffset={heightPercentageToDP(10)}
+      />
+    </View>
   );
 };
 
 function getEventHandlers(
   currentUser,
-  dispatch,
+  setLoading,
   setRefreshing,
   setUserState,
   name,
@@ -125,6 +137,7 @@ function getEventHandlers(
       followers: followers,
     });
     setRefreshing(false);
+    setLoading(false);
   };
   const _onPressFollowers = () => {
     navigation.push('FollowList', {
@@ -137,69 +150,50 @@ function getEventHandlers(
   };
   const _headerComponent = () => {
     return (
-      <>
-        <Header
-          backgroundColor="transparent"
-          placement="center"
+      <View style={styles.profileContainer}>
+        <Avatar
+          rounded
+          size="xlarge"
+          source={userState.avatar ? {uri: userState.avatar} : null}
+          title={!userState.avatar ? userState.initials : null}
+          titleStyle={{fontSize: fontscale(50)}}
           containerStyle={{
-            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
-          }}
-          leftComponent={{
-            icon: 'arrow-back',
-            color: '#000',
-            size: fontscale(27),
-            onPress: _onPressBack,
-          }}
-          centerComponent={{
-            text: userState.name,
-            style: {color: '#000', fontSize: fontscale(24)},
+            backgroundColor: '#523',
+            margin: widthPercentageToDP(6),
           }}
         />
-        <View style={styles.profileContainer}>
-          <Avatar
-            rounded
-            size="xlarge"
-            source={userState.avatar ? {uri: userState.avatar} : null}
-            title={!userState.avatar ? userState.initials : null}
-            titleStyle={{fontSize: fontscale(50)}}
-            containerStyle={{
-              backgroundColor: '#523',
-              margin: widthPercentageToDP(6),
-            }}
-          />
-          <Text h4 h4Style={{fontWeight: '300'}}>
-            {useState.id ? userState.name + '-' + userState.id : userState.name}
-          </Text>
-          <Text h4 h4Style={styles.text}>
-            {userState.bio}
-          </Text>
+        <Text h4 h4Style={{fontWeight: '300'}}>
+          {userState.id ? userState.name + '-' + userState.id : userState.name}
+        </Text>
+        <Text h4 h4Style={styles.text}>
+          {userState.bio}
+        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: heightPercentageToDP(3),
+          }}>
           <View
             style={{
-              flexDirection: 'row',
+              flex: 1,
               justifyContent: 'center',
-              marginTop: heightPercentageToDP(3),
+              flexDirection: 'row',
             }}>
-            <View
-              style={{
-                flex: 1,
-                justifyContent: 'center',
-                flexDirection: 'row',
-              }}>
-              <TabComponent name="Posts" count={userState.posts.length} />
-              <TabComponent
-                name="Followers"
-                count={userState.followers.length}
-                onPress={() => _onPressFollowers()}
-              />
-              <TabComponent
-                name="Following"
-                count={userState.followings.length}
-                onPress={() => _onPressFollowing()}
-              />
-            </View>
+            <TabComponent name="Posts" count={userState.posts.length} />
+            <TabComponent
+              name="Followers"
+              count={userState.followers.length}
+              onPress={() => _onPressFollowers()}
+            />
+            <TabComponent
+              name="Following"
+              count={userState.followings.length}
+              onPress={() => _onPressFollowing()}
+            />
           </View>
         </View>
-      </>
+      </View>
     );
   };
   const _onPressFollowing = () => {

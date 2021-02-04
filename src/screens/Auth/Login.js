@@ -1,5 +1,11 @@
-import React, {useState} from 'react';
-import {ScrollView, StyleSheet, TouchableOpacity, View} from 'react-native';
+import React from 'react';
+import {
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import {Avatar, Button, Input, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -26,114 +32,117 @@ const Login = () => {
     dispatch,
   );
   return (
-    <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
-      <Loading isVisible={loading} />
-      <View style={styles.container}>
-        <Avatar
-          rounded
-          size={widthPercentageToDP(32)}
-          source={require('../../assets/logo.png')}
-          imageProps={{resizeMode: 'stretch'}}
-          containerStyle={{
-            backgroundColor: '#523',
-            margin: widthPercentageToDP(6),
-          }}
-        />
-        <View
-          style={{
-            flex: 1,
-            width: '100%',
-            backgroundColor: 'white',
-            borderTopLeftRadius: widthPercentageToDP(12),
-            alignItems: 'center',
-          }}>
-          <Text
-            h1
-            h1Style={{marginTop: heightPercentageToDP(5), fontWeight: '200'}}>
-            Login
-          </Text>
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#61c0ff" />
+      <ScrollView style={{flex: 1, backgroundColor: 'white'}}>
+        <Loading isVisible={loading} />
+        <View style={styles.container}>
+          <Avatar
+            rounded
+            size={widthPercentageToDP(32)}
+            source={require('../../assets/logo.png')}
+            imageProps={{resizeMode: 'stretch'}}
+            containerStyle={{
+              backgroundColor: '#523',
+              margin: widthPercentageToDP(6),
+            }}
+          />
           <View
             style={{
-              width: widthPercentageToDP(80),
-              marginTop: heightPercentageToDP(4),
-              alignItems: 'flex-end',
+              flex: 1,
+              width: '100%',
+              backgroundColor: 'white',
+              borderTopLeftRadius: widthPercentageToDP(12),
+              alignItems: 'center',
             }}>
-            <Formik
-              initialValues={{email: '', password: ''}}
-              validationSchema={validationSchema}
-              onSubmit={_onLogin}>
-              {({
-                errors,
-                handleChange,
-                handleSubmit,
-                setFieldTouched,
-                touched,
-              }) => (
-                <>
-                  <Input
-                    autoCapitalize="none"
-                    errorMessage={touched.email ? errors.email : ''}
-                    errorStyle={styles.errorText}
-                    inputStyle={[styles.text, {fontSize: fontscale(18)}]}
-                    label="Email"
-                    labelStyle={styles.text}
-                    onBlur={() => setFieldTouched('email')}
-                    onChangeText={handleChange('email')}
-                    textContentType="emailAddress"
-                    onSubmitEditing={() => {
-                      this.password.focus();
-                    }}
-                  />
-                  <Input
-                    autoCapitalize="none"
-                    errorMessage={touched.password ? errors.password : ''}
-                    errorStyle={styles.errorText}
-                    inputStyle={[styles.text, styles.titleText]}
-                    label="Password"
-                    labelStyle={styles.text}
-                    onBlur={() => setFieldTouched('password')}
-                    onChangeText={handleChange('password')}
-                    secureTextEntry
-                    textContentType="password"
-                    ref={(input) => {
-                      this.password = input;
-                    }}
-                  />
-                  <TouchableOpacity
-                    style={{marginEnd: widthPercentageToDP(3)}}
-                    onPress={_onPressForgotPassword}>
-                    <Text style={styles.buttonText}>Forgot Password?</Text>
-                  </TouchableOpacity>
-                  <Button
-                    buttonStyle={styles.submit}
-                    onPress={handleSubmit}
-                    title={'Login'}
-                    titleStyle={[
-                      styles.text,
-                      {color: 'white', fontSize: fontscale(20)},
-                    ]}
-                  />
-                </>
-              )}
-            </Formik>
+            <Text
+              h1
+              h1Style={{marginTop: heightPercentageToDP(5), fontWeight: '200'}}>
+              Login
+            </Text>
             <View
               style={{
                 width: widthPercentageToDP(80),
-                justifyContent: 'center',
-                alignItems: 'center',
+                marginTop: heightPercentageToDP(4),
+                alignItems: 'flex-end',
               }}>
-              <TouchableOpacity
-                style={{marginTop: heightPercentageToDP(2)}}
-                onPress={_onPressRegister}>
-                <Text style={styles.buttonText}>
-                  Don't have account? Sign Up
-                </Text>
-              </TouchableOpacity>
+              <Formik
+                initialValues={{email: '', password: ''}}
+                validationSchema={validationSchema}
+                onSubmit={_onLogin}>
+                {({
+                  errors,
+                  handleChange,
+                  handleSubmit,
+                  setFieldTouched,
+                  touched,
+                }) => (
+                  <>
+                    <Input
+                      autoCapitalize="none"
+                      errorMessage={touched.email ? errors.email : ''}
+                      errorStyle={styles.errorText}
+                      inputStyle={[styles.text, {fontSize: fontscale(18)}]}
+                      label="Email"
+                      labelStyle={styles.text}
+                      onBlur={() => setFieldTouched('email')}
+                      onChangeText={handleChange('email')}
+                      textContentType="emailAddress"
+                      onSubmitEditing={() => {
+                        this.password.focus();
+                      }}
+                    />
+                    <Input
+                      autoCapitalize="none"
+                      errorMessage={touched.password ? errors.password : ''}
+                      errorStyle={styles.errorText}
+                      inputStyle={[styles.text, styles.titleText]}
+                      label="Password"
+                      labelStyle={styles.text}
+                      onBlur={() => setFieldTouched('password')}
+                      onChangeText={handleChange('password')}
+                      secureTextEntry
+                      textContentType="password"
+                      ref={(input) => {
+                        this.password = input;
+                      }}
+                    />
+                    <TouchableOpacity
+                      style={{marginEnd: widthPercentageToDP(3)}}
+                      onPress={_onPressForgotPassword}>
+                      <Text style={styles.buttonText}>Forgot Password?</Text>
+                    </TouchableOpacity>
+                    <Button
+                      buttonStyle={styles.submit}
+                      onPress={handleSubmit}
+                      title={'Login'}
+                      titleStyle={[
+                        styles.text,
+                        {color: 'white', fontSize: fontscale(20)},
+                      ]}
+                    />
+                  </>
+                )}
+              </Formik>
+              <View
+                style={{
+                  width: widthPercentageToDP(80),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <TouchableOpacity
+                  style={{marginTop: heightPercentageToDP(2)}}
+                  onPress={_onPressRegister}>
+                  <Text style={styles.buttonText}>
+                    Don't have account? Sign Up
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </>
   );
 };
 

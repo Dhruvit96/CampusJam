@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, Platform, StatusBar, View} from 'react-native';
+import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import {useDispatch} from 'react-redux';
 import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
 import {FetchNotificationListRequest} from '../../actions/notificationActions';
 import NotificationItem from '../../components/NotificationItem';
-import AppScreen from '../../components/AppScreen';
 const Notification = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
@@ -16,28 +15,24 @@ const Notification = () => {
     _onRefresh();
   }, []);
   return (
-    <AppScreen>
-      <View style={{flex: 1, backgroundColor: 'white'}}>
-        <Header
-          backgroundColor="transparent"
-          placement="center"
-          containerStyle={{
-            marginTop: Platform.OS ? -StatusBar.currentHeight : 0,
-          }}
-          centerComponent={{
-            text: 'Notifications',
-            style: {color: '#000', fontSize: fontscale(24)},
-          }}
-        />
-        <FlatList
-          data={notificationData}
-          keyExtractor={(item) => item.id}
-          refreshing={refreshing}
-          renderItem={_renderItem}
-          onRefresh={_onRefresh}
-        />
-      </View>
-    </AppScreen>
+    <View style={{flex: 1, backgroundColor: 'white'}}>
+      <StatusBar barStyle="dark-content" />
+      <Header
+        backgroundColor="transparent"
+        placement="center"
+        centerComponent={{
+          text: 'Notifications',
+          style: {color: '#000', fontSize: fontscale(24)},
+        }}
+      />
+      <FlatList
+        data={notificationData}
+        keyExtractor={(item) => item.id}
+        refreshing={refreshing}
+        renderItem={_renderItem}
+        onRefresh={_onRefresh}
+      />
+    </View>
   );
 };
 

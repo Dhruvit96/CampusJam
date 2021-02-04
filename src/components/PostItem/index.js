@@ -22,6 +22,7 @@ class PostItem extends PureComponent {
     this.state = {
       count: 0,
       isFollowed: false,
+      isLiked: false,
     };
   }
 
@@ -29,6 +30,7 @@ class PostItem extends PureComponent {
     this.setState({
       count: this.props.item.likedBy.length,
       isFollowed: this.props.item.isFollowed,
+      isLiked: this.props.item.isLiked,
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
@@ -39,7 +41,7 @@ class PostItem extends PureComponent {
       this.props.dispatch,
       this.props.item.uid,
       this.props.item.postId,
-      this.props.item.isLiked,
+      this.state.isLiked,
       this.props.item.isFollowed,
       this.props.item.isSelf,
     );
@@ -78,7 +80,10 @@ class PostItem extends PureComponent {
                 type="clear"
                 onPress={() => {
                   _onPressFollow();
-                  this.setState({isFollowed: !this.state.isFollowed});
+                  this.setState({
+                    ...this.state,
+                    isFollowed: !this.state.isFollowed,
+                  });
                 }}
                 title={this.state.isFollowed ? 'Following' : 'Follow'}
                 containerStyle={{
@@ -114,12 +119,20 @@ class PostItem extends PureComponent {
           <TouchableOpacity
             onPress={() => {
               _onPressLike();
-              if (this.props.item.isLiked) {
+              if (this.state.isLiked) {
                 this.animation.play(0, 17);
-                this.setState({count: this.state.count - 1});
+                this.setState({
+                  ...this.state,
+                  count: this.state.count - 1,
+                  isLiked: !this.state.isLiked,
+                });
               } else {
                 this.animation.play(25, 60);
-                this.setState({count: this.state.count + 1});
+                this.setState({
+                  ...this.state,
+                  count: this.state.count + 1,
+                  isLiked: !this.state.isLiked,
+                });
               }
             }}>
             <LottieView

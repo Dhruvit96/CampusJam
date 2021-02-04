@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {TouchableOpacity} from 'react-native';
-import {StyleSheet, View} from 'react-native';
+import {StatusBar, StyleSheet, View} from 'react-native';
 import {Button, Input, Icon, Text} from 'react-native-elements';
 import {Formik} from 'formik';
 import * as Yup from 'yup';
@@ -24,6 +24,7 @@ const ForgotPassword = () => {
   const {_onPressSend, _onPressBack} = getEventHandlers(setLoading, dispatch);
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       <Loading isVisible={loading} />
       <View
         style={{

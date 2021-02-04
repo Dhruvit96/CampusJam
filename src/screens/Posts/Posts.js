@@ -1,12 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, Platform, StatusBar, View} from 'react-native';
+import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import {useDispatch} from 'react-redux';
 import {
   FetchPostListRequest,
   LoadMorePostListRequest,
 } from '../../actions/postActions';
-import AppScreen from '../../components/AppScreen';
 import PostItem from '../../components/PostItem';
 import LottieView from 'lottie-react-native';
 import {fontscale, widthPercentageToDP} from '../../constants';
@@ -28,37 +27,34 @@ const Posts = () => {
     _onRefresh();
   }, []);
   return (
-    <AppScreen>
-      <View style={{flex: 1, backgroundColor: 'white'}}>
-        <Header
-          backgroundColor="transparent"
-          placement="center"
-          containerStyle={{
-            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
-          }}
-          centerComponent={{
-            text: 'Posts',
-            style: {color: '#000', fontSize: fontscale(24)},
-          }}
-          rightComponent={{
-            icon: 'search',
-            color: '#000',
-            size: fontscale(30),
-          }}
-        />
-        <FlatList
-          ref={ref}
-          data={postData.posts}
-          keyExtractor={(item) => item.postId}
-          refreshing={refreshing}
-          renderItem={_renderItem}
-          onEndReachedThreshold={0.5}
-          onEndReached={_loadMore}
-          ListFooterComponent={_renderFooter}
-          onRefresh={_onRefresh}
-        />
-      </View>
-    </AppScreen>
+    <View style={{flex: 1, backgroundColor: 'white'}}>
+      <StatusBar barStyle="dark-content" />
+      <Header
+        backgroundColor="transparent"
+        placement="center"
+        centerComponent={{
+          text: 'Posts',
+          style: {color: '#000', fontSize: fontscale(24)},
+        }}
+        rightComponent={{
+          icon: 'search',
+          color: '#000',
+          size: fontscale(30),
+        }}
+      />
+      <FlatList
+        ref={ref}
+        data={postData.posts}
+        extraData={refreshing}
+        keyExtractor={(item) => item.postId}
+        refreshing={refreshing}
+        renderItem={_renderItem}
+        onEndReachedThreshold={0.5}
+        onEndReached={_loadMore}
+        ListFooterComponent={_renderFooter}
+        onRefresh={_onRefresh}
+      />
+    </View>
   );
 };
 

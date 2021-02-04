@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, FlatList} from 'react-native';
+import {View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
 
@@ -58,11 +58,5 @@ function getEventHandlers(setRefreshing, setFollowersData) {
     _onRefresh,
   };
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default FollowersList;

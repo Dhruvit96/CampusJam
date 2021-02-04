@@ -4,7 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Notification from '../screens/Notifications/Notification';
-import Posts from '../screens/Posts/Posts';
+import {LikedPosts, Post, Posts, SharedPosts} from '../screens/Posts';
 import {
   EditProfile,
   FollowersList,
@@ -14,9 +14,8 @@ import {
 } from '../screens/Profile';
 import StudentData from '../screens/StudentData/StudentData';
 import {ButtonGroup, Header} from 'react-native-elements';
-import {StatusBar, Platform, View} from 'react-native';
+import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
-import AppScreen from '../components/AppScreen';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -97,6 +96,8 @@ const PostModule = () => {
   return (
     <PostStack.Navigator screenOptions={screenOptions}>
       <PostStack.Screen name="Posts" component={Posts} />
+      <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
+      <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <PostStack.Screen name="Profile" component={Profile} />
       <PostStack.Screen name="ProfileX" component={ProfileX} />
       <PostStack.Screen name="FollowList" component={FollowListModule} />
@@ -108,8 +109,11 @@ const NotificationModule = () => {
   return (
     <NotificationStack.Navigator screenOptions={screenOptions}>
       <NotificationStack.Screen name="Notification" component={Notification} />
+      <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
+      <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <NotificationStack.Screen name="Profile" component={Profile} />
       <NotificationStack.Screen name="ProfileX" component={ProfileX} />
+      <NotificationStack.Screen name="Post" component={Post} />
       <NotificationStack.Screen
         name="FollowList"
         component={FollowListModule}
@@ -122,6 +126,8 @@ const ProfileModule = () => {
   return (
     <ProfileStack.Navigator screenOptions={screenOptions}>
       <ProfileStack.Screen name="Profile" component={Profile} />
+      <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
+      <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <ProfileStack.Screen name="FollowList" component={FollowListModule} />
       <ProfileStack.Screen name="ProfileX" component={ProfileX} />
     </ProfileStack.Navigator>
@@ -143,34 +149,30 @@ const TabBar = ({navigation, state}) => {
     setSelectedIndex(state.index);
   }, [state.index]);
   return (
-    <AppScreen style={{flex: 0}}>
-      <View style={{backgroundColor: 'white'}}>
-        <Header
-          backgroundColor="transparent"
-          placement="center"
-          containerStyle={{
-            marginTop: Platform.OS == 'android' ? -StatusBar.currentHeight : 0,
-          }}
-          leftComponent={{
-            icon: 'arrow-back',
-            color: '#000',
-            size: fontscale(24),
-            onPress: () => {
-              navigation.goBack();
-            },
-          }}
-          centerComponent={{
-            text: route.params.title,
-            style: {color: '#000', fontSize: fontscale(24)},
-          }}
-        />
-        <ButtonGroup
-          buttons={buttons}
-          selectedIndex={selectedIndex}
-          onPress={updateIndex}
-        />
-      </View>
-    </AppScreen>
+    <View style={{backgroundColor: 'white'}}>
+      <StatusBar barStyle="dark-content" />
+      <Header
+        backgroundColor="transparent"
+        placement="center"
+        leftComponent={{
+          icon: 'arrow-back',
+          color: '#000',
+          size: fontscale(24),
+          onPress: () => {
+            navigation.goBack();
+          },
+        }}
+        centerComponent={{
+          text: route.params.title,
+          style: {color: '#000', fontSize: fontscale(24)},
+        }}
+      />
+      <ButtonGroup
+        buttons={buttons}
+        selectedIndex={selectedIndex}
+        onPress={updateIndex}
+      />
+    </View>
   );
 };
 

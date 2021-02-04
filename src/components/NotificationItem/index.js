@@ -14,6 +14,7 @@ const NotificationItem = ({item}) => {
   const {_getNotificationText, _onPress} = getEventHandlers(
     item.type,
     item.from,
+    item.postId,
   );
   return (
     <TouchableOpacity onPress={_onPress}>
@@ -57,13 +58,13 @@ const NotificationItem = ({item}) => {
   );
 };
 
-function getEventHandlers(type, uid) {
+function getEventHandlers(type, uid, pid) {
   const _onPress = async () => {
     switch (type) {
       case notificationTypes.LIKE_MY_POST:
       case notificationTypes.SOMEONE_POSTS:
       case notificationTypes.COMMENT_MY_POST:
-        //move to post
+        navigation.push('Post', {pid: pid});
         break;
       case notificationTypes.FOLLOWED_ME:
         navigation.push('ProfileX', {uid: uid});
