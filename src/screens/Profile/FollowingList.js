@@ -2,13 +2,16 @@ import React, {useState, useEffect} from 'react';
 import {View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
-
+import EmptyList from '../../components/EmptyList';
 const FollowingList = ({route}) => {
   const [uid, setUid] = useState('');
   const [refreshing, setRefreshing] = useState(false);
   const [isfirstTime, setIsFirstTime] = useState(true);
   const [followingsData, setFollowingsData] = useState([]);
-  const {_onRefresh} = getEventHandlers(setRefreshing, setFollowingsData);
+  const {_onRefresh, _renderEmpty} = getEventHandlers(
+    setRefreshing,
+    setFollowingsData,
+  );
   useEffect(() => {
     if (typeof route.params !== 'undefined') {
       setUid(route.params.uid);
@@ -24,6 +27,7 @@ const FollowingList = ({route}) => {
         data={followingsData}
         keyExtractor={(item) => item.uid}
         refreshing={refreshing}
+        ListEmptyComponent={_renderEmpty}
         renderItem={({item}) => <FollowListItem item={item} />}
         onRefresh={() => _onRefresh(uid)}
       />
@@ -53,8 +57,10 @@ function getEventHandlers(setRefreshing, setFollowingsData) {
     setFollowingsData(followingsData);
     setRefreshing(false);
   };
+  const _renderEmpty = () => <EmptyList message="No followings to show." />;
   return {
     _onRefresh,
+    _renderEmpty,
   };
 }
 

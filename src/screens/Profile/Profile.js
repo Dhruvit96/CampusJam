@@ -74,7 +74,7 @@ const Profile = () => {
           }}
         />
         <Text h4 h4Style={{fontWeight: '300'}}>
-          {userState.id ? userState.name + '-' + userState.id : userState.name}
+          {userState.name + '-' + userState.id}
         </Text>
         <Text h4 h4Style={styles.text}>
           {userState.bio}

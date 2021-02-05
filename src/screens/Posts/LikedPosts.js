@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
+import EmptyList from '../../components/EmptyList';
 import LottieView from 'lottie-react-native';
 import firestore from '@react-native-firebase/firestore';
 import {
@@ -20,6 +21,7 @@ const LikedPosts = () => {
     _onPressBack,
     _onRefresh,
     _loadMore,
+    _renderEmpty,
     _renderItem,
     _renderFooter,
   } = getEventHandlers(
@@ -57,6 +59,7 @@ const LikedPosts = () => {
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
+        ListEmptyComponent={_renderEmpty}
         onEndReachedThreshold={0.5}
         onEndReached={_loadMore}
         ListFooterComponent={_renderFooter}
@@ -101,12 +104,12 @@ function getEventHandlers(
           postId: doc.id,
           initials: userData.initials,
           name: userData.name,
-          isFollowed: user.followings.indexOf(postData.uid) >= 0,
           isSelf: user.uid == postData.uid,
           isLiked: postData.likedBy.indexOf(user.uid) >= 0,
         });
       }),
     );
+    if (posts.length < LIMIT_POSTS_PER_LOADING) setLoaded(true);
     setPostsData(posts);
     setRefreshing(false);
   };
@@ -135,7 +138,6 @@ function getEventHandlers(
             postId: doc.id,
             initials: userData.initials,
             name: userData.name,
-            isFollowed: user.followings.indexOf(postData.uid) >= 0,
             isSelf: user.uid == postData.uid,
             isLiked: postData.likedBy.indexOf(user.uid) >= 0,
           });
@@ -145,6 +147,7 @@ function getEventHandlers(
       setPostsData([...postsData, ...payload]);
     }
   };
+  const _renderEmpty = () => <EmptyList message="No posts to show." />;
   const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
   const _renderFooter = () => {
     return !loaded && !refreshing ? (
@@ -160,6 +163,7 @@ function getEventHandlers(
     _onPressBack,
     _onRefresh,
     _loadMore,
+    _renderEmpty,
     _renderItem,
     _renderFooter,
   };

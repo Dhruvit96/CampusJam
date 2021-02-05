@@ -7,6 +7,7 @@ import {
   LoadMorePostListRequest,
 } from '../../actions/postActions';
 import PostItem from '../../components/PostItem';
+import EmptyList from '../../components/EmptyList';
 import LottieView from 'lottie-react-native';
 import {fontscale, widthPercentageToDP} from '../../constants';
 import {useSelector} from '../../store';
@@ -17,12 +18,13 @@ const Posts = () => {
   const postData = useSelector((state) => state.post);
   const ref = React.useRef(null);
   useScrollToTop(ref);
-  const {_onRefresh, _loadMore, _renderItem, _renderFooter} = getEventHandlers(
-    dispatch,
-    setRefreshing,
-    refreshing,
-    postData.loaded,
-  );
+  const {
+    _onRefresh,
+    _loadMore,
+    _renderEmpty,
+    _renderItem,
+    _renderFooter,
+  } = getEventHandlers(dispatch, setRefreshing, refreshing, postData.loaded);
   useEffect(() => {
     _onRefresh();
   }, []);
@@ -49,6 +51,7 @@ const Posts = () => {
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
+        ListEmptyComponent={_renderEmpty}
         onEndReachedThreshold={0.5}
         onEndReached={_loadMore}
         ListFooterComponent={_renderFooter}
@@ -69,6 +72,7 @@ function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
       await dispatch(LoadMorePostListRequest());
     }
   };
+  const _renderEmpty = () => <EmptyList message="No posts to show." />;
   const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
   const _renderFooter = () => {
     return !loaded && !refreshing ? (
@@ -83,6 +87,7 @@ function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
   return {
     _onRefresh,
     _loadMore,
+    _renderEmpty,
     _renderItem,
     _renderFooter,
   };

@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {FlatList, StatusBar, StyleSheet, View} from 'react-native';
-import {Avatar, Header, Text} from 'react-native-elements';
+import {Avatar, Button, Header, Text} from 'react-native-elements';
 import TabComponent from '../../components/ProfileTab';
 import {useSelector} from '../../store';
 import {useDispatch} from 'react-redux';
@@ -13,6 +13,7 @@ import {navigation} from '../../navigations/RootNavigation';
 import firestore from '@react-native-firebase/firestore';
 import PostItem from '../../components/PostItem';
 import Loading from '../../components/Loading';
+import {ToggleFollowUserRequest} from '../../actions/postActions';
 
 const ProfileX = ({route}) => {
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ const ProfileX = ({route}) => {
   const currentUser = useSelector((state) => state.user.userInfo);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isFollowed, setIsFollowed] = useState(true);
   const [userState, setUserState] = useState({
     avatar: null,
     bio: '',
@@ -40,6 +42,9 @@ const ProfileX = ({route}) => {
     _renderItem,
   } = getEventHandlers(
     currentUser,
+    dispatch,
+    isFollowed,
+    setIsFollowed,
     setLoading,
     setRefreshing,
     setUserState,
@@ -52,7 +57,7 @@ const ProfileX = ({route}) => {
   }, []);
   if (loading) return <Loading isVisible={loading} />;
   return (
-    <View style={styles.postContainer}>
+    <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <Header
         backgroundColor="transparent"
@@ -73,9 +78,6 @@ const ProfileX = ({route}) => {
         data={userState.posts}
         keyExtractor={(item) => item.postId}
         renderItem={_renderItem}
-        initialNumToRender={2}
-        maxToRenderPerBatch={3}
-        onEndReachedThreshold={0.9}
         ListHeaderComponent={_headerComponent}
         contentContainerStyle={{backgroundColor: 'white'}}
         nestedScrollEnabled
@@ -89,6 +91,9 @@ const ProfileX = ({route}) => {
 
 function getEventHandlers(
   currentUser,
+  dispatch,
+  isFollowed,
+  setIsFollowed,
   setLoading,
   setRefreshing,
   setUserState,
@@ -118,7 +123,6 @@ function getEventHandlers(
           postId: doc.id,
           initials: user.initials,
           name: user.name,
-          isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
           isSelf: currentUser.uid == postData.uid,
           isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
         });
@@ -126,7 +130,7 @@ function getEventHandlers(
     );
     let followersData = await firestore()
       .collection('users')
-      .where('followings', 'array-contains', currentUser.uid)
+      .where('followings', 'array-contains', uid)
       .get();
     let followers = [];
     followersData.forEach((ref) => followers.push(ref.id));
@@ -136,6 +140,7 @@ function getEventHandlers(
       posts: posts,
       followers: followers,
     });
+    setIsFollowed(currentUser.followings.indexOf(uid) > -1);
     setRefreshing(false);
     setLoading(false);
   };
@@ -150,24 +155,64 @@ function getEventHandlers(
   };
   const _headerComponent = () => {
     return (
-      <View style={styles.profileContainer}>
-        <Avatar
-          rounded
-          size="xlarge"
-          source={userState.avatar ? {uri: userState.avatar} : null}
-          title={!userState.avatar ? userState.initials : null}
-          titleStyle={{fontSize: fontscale(50)}}
-          containerStyle={{
-            backgroundColor: '#523',
-            margin: widthPercentageToDP(6),
-          }}
-        />
-        <Text h4 h4Style={{fontWeight: '300'}}>
-          {userState.id ? userState.name + '-' + userState.id : userState.name}
-        </Text>
-        <Text h4 h4Style={styles.text}>
-          {userState.bio}
-        </Text>
+      <>
+        <View style={styles.profileContainer}>
+          <Avatar
+            rounded
+            size={widthPercentageToDP(28)}
+            source={userState.avatar ? {uri: userState.avatar} : null}
+            title={!userState.avatar ? userState.initials : null}
+            titleStyle={{fontSize: fontscale(50)}}
+            containerStyle={{
+              backgroundColor: '#523',
+              margin: widthPercentageToDP(6),
+              alignSelf: 'center',
+            }}
+          />
+          <View
+            style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <Text style={{fontSize: fontscale(18)}}>
+              {userState.name + '-' + userState.id}
+            </Text>
+            {userState.bio ? (
+              <Text
+                h4
+                h4Style={[
+                  styles.text,
+                  {
+                    marginTop: heightPercentageToDP(1),
+                    marginBottom: heightPercentageToDP(1),
+                  },
+                ]}>
+                {userState.bio}
+              </Text>
+            ) : null}
+            <Button
+              type="clear"
+              onPress={async () => {
+                await dispatch(ToggleFollowUserRequest(uid, isFollowed));
+                if (!isFollowed) userState.followers.push(currentUser.uid);
+                else {
+                  userState.followers.splice(
+                    userState.followers.indexOf(currentUser.uid),
+                    userState.followers.indexOf(currentUser.uid) + 1,
+                  );
+                }
+                setIsFollowed(!isFollowed);
+              }}
+              title={isFollowed ? 'Following' : 'Follow'}
+              containerStyle={{
+                width: widthPercentageToDP(24),
+                marginTop: !userState.bio ? heightPercentageToDP(2) : 0,
+                backgroundColor: isFollowed ? '#f3f3f3' : '#61c0ff',
+              }}
+              titleStyle={{
+                color: isFollowed ? '#61c0ff' : '#f3f3f3',
+                fontSize: fontscale(15),
+              }}
+            />
+          </View>
+        </View>
         <View
           style={{
             flexDirection: 'row',
@@ -175,25 +220,21 @@ function getEventHandlers(
             marginTop: heightPercentageToDP(3),
           }}>
           <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              flexDirection: 'row',
-            }}>
+            style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
             <TabComponent name="Posts" count={userState.posts.length} />
             <TabComponent
               name="Followers"
               count={userState.followers.length}
-              onPress={() => _onPressFollowers()}
+              onPress={_onPressFollowers}
             />
             <TabComponent
               name="Following"
               count={userState.followings.length}
-              onPress={() => _onPressFollowing()}
+              onPress={_onPressFollowing}
             />
           </View>
         </View>
-      </View>
+      </>
     );
   };
   const _onPressFollowing = () => {
@@ -226,18 +267,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  postContainer: {
-    flex: 8,
-    justifyContent: 'space-evenly',
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  emptyContainer: {
+    flex: 1,
     alignItems: 'center',
+    marginTop: heightPercentageToDP(10),
   },
   profileContainer: {
     flex: 9,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   text: {
-    fontSize: fontscale(19),
+    fontSize: fontscale(18),
     color: 'grey',
     padding: 2,
     fontWeight: 'normal',

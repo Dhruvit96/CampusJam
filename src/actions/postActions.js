@@ -41,7 +41,6 @@ export const FetchPostListRequest = () => {
             postId: doc.id,
             initials: userData.initials,
             name: userData.name,
-            isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
             isSelf: currentUser.uid == postData.uid,
             isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
           });
@@ -99,7 +98,6 @@ export const LoadMorePostListRequest = () => {
             postId: doc.id,
             initials: userData.initials,
             name: userData.name,
-            isFollowed: currentUser.followings.indexOf(postData.uid) >= 0,
             isSelf: currentUser.uid == postData.uid,
             isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
           });

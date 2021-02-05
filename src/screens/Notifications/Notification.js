@@ -6,11 +6,15 @@ import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
 import {FetchNotificationListRequest} from '../../actions/notificationActions';
 import NotificationItem from '../../components/NotificationItem';
+import EmptyList from '../../components/EmptyList';
 const Notification = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const notificationData = useSelector((state) => state.notification);
-  const {_onRefresh, _renderItem} = getEventHandlers(dispatch, setRefreshing);
+  const {_onRefresh, _renderItem, _renderEmpty} = getEventHandlers(
+    dispatch,
+    setRefreshing,
+  );
   useEffect(() => {
     _onRefresh();
   }, []);
@@ -29,6 +33,7 @@ const Notification = () => {
         data={notificationData}
         keyExtractor={(item) => item.id}
         refreshing={refreshing}
+        ListEmptyComponent={_renderEmpty}
         renderItem={_renderItem}
         onRefresh={_onRefresh}
       />
@@ -45,9 +50,11 @@ function getEventHandlers(dispatch, setRefreshing) {
   const _renderItem = ({item, index}) => (
     <NotificationItem index={index} item={item} />
   );
+  const _renderEmpty = () => <EmptyList message="No new notificans." />;
   return {
     _onRefresh,
     _renderItem,
+    _renderEmpty,
   };
 }
 

@@ -11,13 +11,13 @@ import {
 import {navigation} from '../../navigations/RootNavigation';
 
 const NotificationItem = ({item}) => {
-  const {_getNotificationText, _onPress} = getEventHandlers(
+  const {_getNotificationText, _onPress, _onPressAvatar} = getEventHandlers(
     item.type,
     item.from,
     item.postId,
   );
   return (
-    <TouchableOpacity onPress={_onPress}>
+    <>
       <View style={styles.container}>
         <View style={styles.row}>
           <View>
@@ -26,24 +26,27 @@ const NotificationItem = ({item}) => {
               size={fontscale(50)}
               source={item.userInfo.avatar ? {uri: item.userInfo.avatar} : null}
               title={!item.userInfo.avatar ? item.userInfo.initials : null}
+              onPress={_onPressAvatar}
               titleStyle={{fontSize: fontscale(17)}}
               containerStyle={{backgroundColor: '#523'}}
             />
           </View>
-          <View
-            style={{
-              marginStart: widthPercentageToDP(3),
-              marginEnd: widthPercentageToDP(13.2),
-            }}>
-            <Text style={styles.name}>
-              {item.userInfo.name + _getNotificationText()}
-            </Text>
-            <Text style={styles.text}>
-              {moment(item.created_at).fromNow() == 'a few seconds ago'
-                ? 'Just now'
-                : moment(item.created_at).fromNow()}
-            </Text>
-          </View>
+          <TouchableOpacity onPress={_onPress}>
+            <View
+              style={{
+                marginStart: widthPercentageToDP(3),
+                marginEnd: widthPercentageToDP(13.2),
+              }}>
+              <Text style={styles.name}>
+                {item.userInfo.name + _getNotificationText()}
+              </Text>
+              <Text style={styles.text}>
+                {moment(item.created_at).fromNow() == 'a few seconds ago'
+                  ? 'Just now'
+                  : moment(item.created_at).fromNow()}
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
       <View
@@ -54,12 +57,12 @@ const NotificationItem = ({item}) => {
         }}>
         <Divider style={{backgroundColor: 'black', height: 1}} />
       </View>
-    </TouchableOpacity>
+    </>
   );
 };
 
 function getEventHandlers(type, uid, pid) {
-  const _onPress = async () => {
+  const _onPress = () => {
     switch (type) {
       case notificationTypes.LIKE_MY_POST:
       case notificationTypes.SOMEONE_POSTS:
@@ -69,6 +72,9 @@ function getEventHandlers(type, uid, pid) {
       case notificationTypes.FOLLOWED_ME:
         navigation.push('ProfileX', {uid: uid});
     }
+  };
+  const _onPressAvatar = () => {
+    navigation.push('ProfileX', {uid: uid});
   };
   const _getNotificationText = () => {
     switch (type) {
@@ -86,6 +92,7 @@ function getEventHandlers(type, uid, pid) {
   };
   return {
     _onPress,
+    _onPressAvatar,
     _getNotificationText,
   };
 }

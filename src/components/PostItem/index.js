@@ -2,10 +2,7 @@ import React, {PureComponent} from 'react';
 import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Image, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {
-  ToggleFollowUserRequest,
-  ToggleLikePostRequest,
-} from '../../actions/postActions';
+import {ToggleLikePostRequest} from '../../actions/postActions';
 import LottieView from 'lottie-react-native';
 import moment from 'moment';
 import {
@@ -21,7 +18,6 @@ class PostItem extends PureComponent {
     super();
     this.state = {
       count: 0,
-      isFollowed: false,
       isLiked: false,
     };
   }
@@ -29,7 +25,6 @@ class PostItem extends PureComponent {
   componentDidMount() {
     this.setState({
       count: this.props.item.likedBy.length,
-      isFollowed: this.props.item.isFollowed,
       isLiked: this.props.item.isLiked,
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
@@ -37,12 +32,11 @@ class PostItem extends PureComponent {
   }
 
   render() {
-    const {_onPressAvatar, _onPressLike, _onPressFollow} = getEventHandlers(
+    const {_onPressAvatar, _onPressLike} = getEventHandlers(
       this.props.dispatch,
       this.props.item.uid,
       this.props.item.postId,
       this.state.isLiked,
-      this.props.item.isFollowed,
       this.props.item.isSelf,
     );
     return (
@@ -74,30 +68,6 @@ class PostItem extends PureComponent {
                 : moment(this.props.item.created_at).fromNow()}
             </Text>
           </View>
-          {!this.props.item.isSelf ? (
-            <View style={styles.rightComponent}>
-              <Button
-                type="clear"
-                onPress={() => {
-                  _onPressFollow();
-                  this.setState({
-                    ...this.state,
-                    isFollowed: !this.state.isFollowed,
-                  });
-                }}
-                title={this.state.isFollowed ? 'Following' : 'Follow'}
-                containerStyle={{
-                  width: widthPercentageToDP(25),
-                  backgroundColor: this.state.isFollowed
-                    ? '#f3f3f3'
-                    : '#61c0ff',
-                }}
-                titleStyle={{
-                  color: this.state.isFollowed ? '#61c0ff' : '#f3f3f3',
-                }}
-              />
-            </View>
-          ) : null}
         </View>
         {this.props.item.text ? (
           <Text style={{...styles.text, marginTop: heightPercentageToDP(2)}}>
@@ -165,7 +135,7 @@ class PostItem extends PureComponent {
   }
 }
 
-function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed, isSelf) {
+function getEventHandlers(dispatch, uid, postId, isLiked, isSelf) {
   const _onPressAvatar = async () => {
     if (isSelf) navigation.push('Profile');
     else
@@ -176,13 +146,9 @@ function getEventHandlers(dispatch, uid, postId, isLiked, isFollowed, isSelf) {
   const _onPressLike = async () => {
     await dispatch(ToggleLikePostRequest(uid, postId, isLiked));
   };
-  const _onPressFollow = async () => {
-    await dispatch(ToggleFollowUserRequest(uid, isFollowed));
-  };
   return {
     _onPressAvatar,
     _onPressLike,
-    _onPressFollow,
   };
 }
 

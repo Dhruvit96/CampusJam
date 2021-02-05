@@ -70,9 +70,9 @@ export const FetchNotificationListFailure = () => {
   };
 };
 
-export const FetchNotificationListSuccess = (payload) => {
+export const FetchNotificationListSuccess = (notifications) => {
   return {
     type: notificationActionTypes.FETCH_NOTIFICATIONS_SUCCESS,
-    payload: payload,
+    payload: notifications,
   };
 };
