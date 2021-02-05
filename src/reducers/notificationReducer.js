@@ -10,6 +10,7 @@ const reducer = (state = defaultState, action) => {
       return state;
     case notificationActionTypes.FETCH_NOTIFICATIONS_FAILURE:
     case notificationActionTypes.CREATE_NOTIFICATION_FAILURE:
+    case notificationActionTypes.DELETE_NOTIFICATION_FAILURE:
       Alert.alert('Error', action.payload.message);
       return state;
     default:

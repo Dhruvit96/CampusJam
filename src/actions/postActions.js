@@ -5,6 +5,7 @@ import {
   seenTypes,
   uploadPhotoAsync,
   FieldValue,
+  notificationActionTypes,
 } from '../constants';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
@@ -13,7 +14,10 @@ import {
   UnfollowRequest,
   UpdateExtraInfoRequest,
 } from '../actions/userActions';
-import {CreateNotificationRequest} from '../actions/notificationActions';
+import {
+  CreateNotificationRequest,
+  DeleteNotificationRequest,
+} from '../actions/notificationActions';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 export const FetchPostListRequest = () => {
@@ -196,12 +200,19 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
   return async (dispatch) => {
     try {
       let uid = store.getState().user.userInfo.uid;
-      if (isLiked)
+      if (isLiked) {
         await firestore()
           .collection('posts')
           .doc(postId)
           .update({likedBy: FieldValue.arrayRemove(uid)});
-      else {
+        dispatch(
+          DeleteNotificationRequest({
+            userIds: [postUserId],
+            uid: uid,
+            type: notificationTypes.LIKE_MY_POST,
+          }),
+        );
+      } else {
         await firestore()
           .collection('posts')
           .doc(postId)

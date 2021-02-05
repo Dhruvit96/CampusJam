@@ -9,6 +9,7 @@ import {
   EditProfile,
   FollowersList,
   FollowingList,
+  FollowingX,
   Profile,
   ProfileX,
 } from '../screens/Profile';
@@ -16,6 +17,7 @@ import StudentData from '../screens/StudentData/StudentData';
 import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
+import Settings from '../screens/Settings/Settings';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -88,6 +90,7 @@ export const HomeModule = () => {
     <HomeStack.Navigator screenOptions={screenOptions}>
       <HomeStack.Screen name="Home" component={HomeTab} />
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
+      <HomeStack.Screen name="Settings" component={Settings} />
     </HomeStack.Navigator>
   );
 };
@@ -96,11 +99,12 @@ const PostModule = () => {
   return (
     <PostStack.Navigator screenOptions={screenOptions}>
       <PostStack.Screen name="Posts" component={Posts} />
-      <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
-      <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
+      <PostStack.Screen name="LikedPosts" component={LikedPosts} />
+      <PostStack.Screen name="SharedPosts" component={SharedPosts} />
       <PostStack.Screen name="Profile" component={Profile} />
       <PostStack.Screen name="ProfileX" component={ProfileX} />
       <PostStack.Screen name="FollowList" component={FollowListModule} />
+      <PostStack.Screen name="FollowingX" component={FollowingX} />
     </PostStack.Navigator>
   );
 };
@@ -109,11 +113,12 @@ const NotificationModule = () => {
   return (
     <NotificationStack.Navigator screenOptions={screenOptions}>
       <NotificationStack.Screen name="Notification" component={Notification} />
-      <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
-      <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
+      <NotificationStack.Screen name="LikedPosts" component={LikedPosts} />
+      <NotificationStack.Screen name="SharedPosts" component={SharedPosts} />
       <NotificationStack.Screen name="Profile" component={Profile} />
       <NotificationStack.Screen name="ProfileX" component={ProfileX} />
       <NotificationStack.Screen name="Post" component={Post} />
+      <NotificationStack.Screen name="FollowingX" component={FollowingX} />
       <NotificationStack.Screen
         name="FollowList"
         component={FollowListModule}
@@ -129,6 +134,7 @@ const ProfileModule = () => {
       <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
       <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <ProfileStack.Screen name="FollowList" component={FollowListModule} />
+      <ProfileStack.Screen name="FollowingX" component={FollowingX} />
       <ProfileStack.Screen name="ProfileX" component={ProfileX} />
     </ProfileStack.Navigator>
   );

@@ -50,7 +50,7 @@ function getEventHandlers(dispatch, setRefreshing) {
   const _renderItem = ({item, index}) => (
     <NotificationItem index={index} item={item} />
   );
-  const _renderEmpty = () => <EmptyList message="No new notificans." />;
+  const _renderEmpty = () => <EmptyList message="No new notifications." />;
   return {
     _onRefresh,
     _renderItem,

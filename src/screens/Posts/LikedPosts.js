@@ -10,10 +10,9 @@ import {
   LIMIT_POSTS_PER_LOADING,
   widthPercentageToDP,
 } from '../../constants';
-import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
-const LikedPosts = () => {
-  const user = useSelector((state) => state.user.userInfo);
+const LikedPosts = ({route}) => {
+  const user = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [postsData, setPostsData] = useState([]);

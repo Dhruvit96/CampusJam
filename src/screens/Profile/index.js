@@ -3,3 +3,4 @@ export {default as ProfileX} from './ProfileX';
 export {default as EditProfile} from './EditProfile';
 export {default as FollowersList} from './FollowersList';
 export {default as FollowingList} from './FollowingList';
+export {default as FollowingX} from './FollowingX';

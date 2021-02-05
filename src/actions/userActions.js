@@ -8,7 +8,10 @@ import {
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
-import {CreateNotificationRequest} from '../actions/notificationActions';
+import {
+  CreateNotificationRequest,
+  DeleteNotificationRequest,
+} from '../actions/notificationActions';
 
 export const LoginRequest = (user) => {
   return async (dispatch) => {
@@ -71,19 +74,26 @@ export const LoginSuccess = (payload) => {
 export const LogoutRequest = () => {
   return async (dispatch) => {
     try {
-      auth().signOut();
-      dispatch({
-        type: userActionTypes.LOGOUT_SUCCESS,
-        payload: {},
-      });
+      await auth().signOut();
+      dispatch(LogoutSuccess());
     } catch (e) {
-      dispatch({
-        type: userActionTypes.LOGOUT_FAILURE,
-        payload: {
-          message: 'Can not logout now!',
-        },
-      });
+      dispatch(LogoutFailure());
     }
+  };
+};
+
+export const LogoutSuccess = () => {
+  return {
+    type: userActionTypes.LOGOUT_SUCCESS,
+  };
+};
+
+export const LogoutFailure = () => {
+  return {
+    type: userActionTypes.LOGOUT_FAILURE,
+    payload: {
+      message: 'Can not logout now!',
+    },
   };
 };
 
@@ -215,7 +225,12 @@ export const FetchExtraInfoRequest = () => {
         .where('uid', '==', currentUser.uid)
         .orderBy('created_at', 'desc')
         .get();
-      let posts = [];
+      let posts = await firestore()
+        .collection('posts')
+        .where('likedBy', 'array-contains', currentUser.uid)
+        .get();
+      let likedPosts = posts.size;
+      posts = [];
       postData.forEach((ref) => posts.push(ref.id));
       let followersData = await firestore()
         .collection('users')
@@ -236,6 +251,7 @@ export const FetchExtraInfoRequest = () => {
         extraInfo: {
           posts: posts,
           followers: followers,
+          likedPosts: likedPosts,
         },
       };
       dispatch(FetchExtraInfoSuccess(payload));
@@ -402,6 +418,13 @@ export const UnfollowRequest = (uid) => {
           .update({
             followings: FieldValue.arrayRemove(uid),
           });
+        dispatch(
+          DeleteNotificationRequest({
+            userIds: [uid],
+            uid: currentUser.uid,
+            type: notificationTypes.FOLLOWED_ME,
+          }),
+        );
       }
       dispatch(UnfollowSuccess(uid));
     } catch (e) {

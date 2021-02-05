@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {useSelector} from '../store';
 import AuthStack from './AuthStack';
@@ -8,7 +8,7 @@ import {HomeModule} from './TabBar';
 
 const index = () => {
   const user = useSelector((state) => state.user);
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     let timer = setTimeout(() => {
       setIsLoading(false);

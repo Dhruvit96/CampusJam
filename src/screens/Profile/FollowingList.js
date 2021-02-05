@@ -3,8 +3,8 @@ import {View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
 import EmptyList from '../../components/EmptyList';
-const FollowingList = ({route}) => {
-  const [uid, setUid] = useState('');
+const FollowingList = ({route, userId}) => {
+  const [uid, setUid] = useState(userId);
   const [refreshing, setRefreshing] = useState(false);
   const [isfirstTime, setIsFirstTime] = useState(true);
   const [followingsData, setFollowingsData] = useState([]);
@@ -13,14 +13,19 @@ const FollowingList = ({route}) => {
     setFollowingsData,
   );
   useEffect(() => {
-    if (typeof route.params !== 'undefined') {
+    if (typeof route?.params !== 'undefined') {
       setUid(route.params.uid);
       if (isfirstTime) {
         _onRefresh(route.params.uid);
         setIsFirstTime(false);
       }
+    } else if (typeof userId !== 'undefined') {
+      if (isfirstTime) {
+        _onRefresh(userId);
+        setIsFirstTime(false);
+      }
     }
-  }, [route.params]);
+  }, [route]);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
       <FlatList

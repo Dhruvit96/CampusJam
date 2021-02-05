@@ -13,6 +13,41 @@ export const CreateNotificationRequest = (notification) => {
   };
 };
 
+export const DeleteNotificationRequest = ({userIds, uid, type}) => {
+  return async (dispatch) => {
+    try {
+      let time = Date.now() - 60 * 1000 * 5;
+      let notificationdata = await firestore()
+        .collection('notifications')
+        .where('userIds', '==', userIds)
+        .where('from', '==', uid)
+        .where('type', '==', type)
+        .where('created_at', '>=', time)
+        .get();
+      await Promise.all(
+        notificationdata.docs.map(async (doc) => {
+          return await firestore()
+            .collection('notifications')
+            .doc(doc.id)
+            .delete();
+        }),
+      );
+    } catch (e) {
+      console.warn(e);
+      dispatch(DeleteNotificationFailure());
+    }
+  };
+};
+
+export const DeleteNotificationFailure = () => {
+  return {
+    type: notificationActionTypes.DELETE_NOTIFICATION_FAILURE,
+    payload: {
+      message: 'Notifications Failed!',
+    },
+  };
+};
+
 export const CreateNotificationFailure = () => {
   return {
     type: notificationActionTypes.CREATE_NOTIFICATION_FAILURE,

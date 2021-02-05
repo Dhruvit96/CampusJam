@@ -23,6 +23,7 @@ const defaultState = {
   extraInfo: {
     followers: [],
     posts: [],
+    likedPosts: 0,
   },
   loading: false,
 };
@@ -30,7 +31,7 @@ const defaultState = {
 const reducer = (state = defaultState, action) => {
   switch (action.type) {
     case userActionTypes.LOGOUT_SUCCESS:
-      state = [...defaultState];
+      state = {...defaultState};
       return state;
     case userActionTypes.LOGIN_SUCCESS:
       state = {

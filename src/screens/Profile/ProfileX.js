@@ -38,6 +38,8 @@ const ProfileX = ({route}) => {
   const {
     _headerComponent,
     _onPressBack,
+    _onPressFollowingX,
+    _onPressLikedPosts,
     _onRefresh,
     _renderItem,
   } = getEventHandlers(
@@ -48,7 +50,6 @@ const ProfileX = ({route}) => {
     setLoading,
     setRefreshing,
     setUserState,
-    userState.name,
     uid,
     userState,
   );
@@ -74,17 +75,77 @@ const ProfileX = ({route}) => {
         }}
         containerStyle={{backgroundColor: 'white'}}
       />
-      <FlatList
-        data={userState.posts}
-        keyExtractor={(item) => item.postId}
-        renderItem={_renderItem}
-        ListHeaderComponent={_headerComponent}
-        contentContainerStyle={{backgroundColor: 'white'}}
-        nestedScrollEnabled
-        refreshing={refreshing}
-        onRefresh={_onRefresh}
-        progressViewOffset={heightPercentageToDP(10)}
-      />
+      {userState.isStudent ? (
+        <FlatList
+          data={userState.posts}
+          keyExtractor={(item) => item.postId}
+          renderItem={_renderItem}
+          ListHeaderComponent={_headerComponent}
+          contentContainerStyle={{backgroundColor: 'white'}}
+          nestedScrollEnabled
+          refreshing={refreshing}
+          onRefresh={_onRefresh}
+          progressViewOffset={heightPercentageToDP(10)}
+        />
+      ) : (
+        <>
+          <View style={styles.profileContainer}>
+            <View
+              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+              <Avatar
+                rounded
+                size={widthPercentageToDP(28)}
+                source={userState.avatar ? {uri: userState.avatar} : null}
+                title={!userState.avatar ? userState.initials : null}
+                titleStyle={{fontSize: fontscale(50)}}
+                containerStyle={{
+                  backgroundColor: '#523',
+                  margin: widthPercentageToDP(6),
+                  alignSelf: 'center',
+                }}
+              />
+            </View>
+            <View
+              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+              <Text style={{fontSize: fontscale(18)}}>{userState.name}</Text>
+              {userState.bio ? (
+                <Text
+                  h4
+                  h4Style={[
+                    styles.text,
+                    {
+                      marginTop: heightPercentageToDP(1),
+                      marginBottom: heightPercentageToDP(1),
+                    },
+                  ]}>
+                  {userState.bio}
+                </Text>
+              ) : null}
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              marginTop: heightPercentageToDP(3),
+            }}>
+            <View
+              style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
+              <TabComponent
+                name="Liked Posts"
+                count={userState.likedPosts}
+                onPress={_onPressLikedPosts}
+              />
+              <TabComponent
+                name="Following"
+                count={userState.followings.length}
+                onPress={_onPressFollowingX}
+              />
+            </View>
+          </View>
+          <View style={{flex: 20}} />
+        </>
+      )}
     </View>
   );
 };
@@ -97,7 +158,6 @@ function getEventHandlers(
   setLoading,
   setRefreshing,
   setUserState,
-  name,
   uid,
   userState,
 ) {
@@ -108,36 +168,48 @@ function getEventHandlers(
     setRefreshing(true);
     let user = await firestore().collection('users').doc(uid).get();
     user = user.data();
-    let postsData = await firestore()
-      .collection('posts')
-      .where('uid', '==', uid)
-      .orderBy('created_at', 'desc')
-      .get();
+    let postsData;
     let posts = [];
-    await Promise.all(
-      postsData.docs.map(async (doc) => {
-        let postData = doc.data();
-        return posts.push({
-          ...postData,
-          avatar: user.avatar,
-          postId: doc.id,
-          initials: user.initials,
-          name: user.name,
-          isSelf: currentUser.uid == postData.uid,
-          isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
-        });
-      }),
-    );
-    let followersData = await firestore()
-      .collection('users')
-      .where('followings', 'array-contains', uid)
-      .get();
+    let likedPosts = 0;
     let followers = [];
-    followersData.forEach((ref) => followers.push(ref.id));
+    if (typeof user.id === 'undefined') {
+      let posts = await firestore()
+        .collection('posts')
+        .where('likedBy', 'array-contains', uid)
+        .get();
+      likedPosts = posts.size;
+    } else {
+      postsData = await firestore()
+        .collection('posts')
+        .where('uid', '==', uid)
+        .orderBy('created_at', 'desc')
+        .get();
+
+      await Promise.all(
+        postsData.docs.map(async (doc) => {
+          let postData = doc.data();
+          return posts.push({
+            ...postData,
+            avatar: user.avatar,
+            postId: doc.id,
+            initials: user.initials,
+            name: user.name,
+            isSelf: currentUser.uid == postData.uid,
+            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
+          });
+        }),
+      );
+      let followersData = await firestore()
+        .collection('users')
+        .where('followings', 'array-contains', uid)
+        .get();
+      followersData.forEach((ref) => followers.push(ref.id));
+    }
     setUserState({
       ...user,
       isStudent: typeof user.id === 'string',
       posts: posts,
+      likedPosts: likedPosts,
       followers: followers,
     });
     setIsFollowed(currentUser.followings.indexOf(uid) > -1);
@@ -148,9 +220,29 @@ function getEventHandlers(
     navigation.push('FollowList', {
       screen: 'Followers',
       params: {
-        title: name,
+        title: userState.name,
         uid: uid,
       },
+    });
+  };
+  const _onPressFollowing = () => {
+    navigation.push('FollowList', {
+      screen: 'Following',
+      params: {
+        title: userState.name,
+        uid: uid,
+      },
+    });
+  };
+  const _onPressFollowingX = () => {
+    navigation.push('FollowingX', {uid: uid});
+  };
+  const _onPressLikedPosts = () => {
+    navigation.push('LikedPosts', {
+      avatar: userState.avatar,
+      initials: userState.initials,
+      name: userState.name,
+      uid: uid,
     });
   };
   const _headerComponent = () => {
@@ -237,16 +329,6 @@ function getEventHandlers(
       </>
     );
   };
-  const _onPressFollowing = () => {
-    navigation.push('FollowList', {
-      screen: 'Following',
-      params: {
-        title: name,
-        uid: uid,
-      },
-    });
-  };
-
   const _renderItem = ({item, index}) => (
     <PostItem index={index} item={item} profileX={uid} />
   );
@@ -256,6 +338,8 @@ function getEventHandlers(
     _onPressBack,
     _onPressFollowers,
     _onPressFollowing,
+    _onPressFollowingX,
+    _onPressLikedPosts,
     _onRefresh,
     _renderItem,
   };
