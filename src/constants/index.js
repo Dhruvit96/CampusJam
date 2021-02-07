@@ -46,6 +46,7 @@ export const notificationTypes = {
   COMMENT_MY_POST: 2,
   FOLLOWED_ME: 3,
   SOMEONE_POSTS: 4,
+  REPLIED_COMMENT: 5,
 };
 
 export const seenTypes = {

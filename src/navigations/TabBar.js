@@ -18,6 +18,9 @@ import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
 import Settings from '../screens/Settings/Settings';
+import Search from '../screens/Search';
+import AddComment from '../screens/AddComment';
+import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -53,11 +56,13 @@ const HomeTab = () => {
           else if (route.name === 'Profile') iconName = 'user';
           return <FontAwesome name={iconName} size={size} color={color} />;
         },
+        tabBarVisible: getFocusedRouteNameFromRoute(route) !== 'AddComment',
       })}
       tabBarOptions={{
         activeTintColor: '#61c0ff',
         inactiveTintColor: 'grey',
         showLabel: false,
+        keyboardHidesTabBar: true,
       }}>
       <Tab.Screen
         name="Home"
@@ -99,8 +104,10 @@ const PostModule = () => {
   return (
     <PostStack.Navigator screenOptions={screenOptions}>
       <PostStack.Screen name="Posts" component={Posts} />
+      <PostStack.Screen name="AddComment" component={AddComment} />
       <PostStack.Screen name="LikedPosts" component={LikedPosts} />
       <PostStack.Screen name="SharedPosts" component={SharedPosts} />
+      <PostStack.Screen name="Search" component={Search} />
       <PostStack.Screen name="Profile" component={Profile} />
       <PostStack.Screen name="ProfileX" component={ProfileX} />
       <PostStack.Screen name="FollowList" component={FollowListModule} />
@@ -113,6 +120,7 @@ const NotificationModule = () => {
   return (
     <NotificationStack.Navigator screenOptions={screenOptions}>
       <NotificationStack.Screen name="Notification" component={Notification} />
+      <NotificationStack.Screen name="AddComment" component={AddComment} />
       <NotificationStack.Screen name="LikedPosts" component={LikedPosts} />
       <NotificationStack.Screen name="SharedPosts" component={SharedPosts} />
       <NotificationStack.Screen name="Profile" component={Profile} />
@@ -131,6 +139,7 @@ const ProfileModule = () => {
   return (
     <ProfileStack.Navigator screenOptions={screenOptions}>
       <ProfileStack.Screen name="Profile" component={Profile} />
+      <ProfileStack.Screen name="AddComment" component={AddComment} />
       <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
       <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <ProfileStack.Screen name="FollowList" component={FollowListModule} />

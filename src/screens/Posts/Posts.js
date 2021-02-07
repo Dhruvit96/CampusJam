@@ -12,6 +12,7 @@ import LottieView from 'lottie-react-native';
 import {fontscale, widthPercentageToDP} from '../../constants';
 import {useSelector} from '../../store';
 import {useScrollToTop} from '@react-navigation/native';
+import {navigation} from '../../navigations/RootNavigation';
 const Posts = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
@@ -20,6 +21,7 @@ const Posts = () => {
   useScrollToTop(ref);
   const {
     _onRefresh,
+    _onPressSearch,
     _loadMore,
     _renderEmpty,
     _renderItem,
@@ -41,6 +43,7 @@ const Posts = () => {
         rightComponent={{
           icon: 'search',
           color: '#000',
+          onPress: _onPressSearch,
           size: fontscale(30),
         }}
       />
@@ -67,6 +70,9 @@ function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
     await dispatch(FetchPostListRequest());
     setRefreshing(false);
   };
+  const _onPressSearch = () => {
+    navigation.push('Search');
+  };
   const _loadMore = async ({distanceFromEnd}) => {
     if (distanceFromEnd >= 0 && !loaded) {
       await dispatch(LoadMorePostListRequest());
@@ -86,6 +92,7 @@ function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
   };
   return {
     _onRefresh,
+    _onPressSearch,
     _loadMore,
     _renderEmpty,
     _renderItem,

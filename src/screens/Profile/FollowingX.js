@@ -1,5 +1,5 @@
 import React from 'react';
-import {ButtonGroup, Header} from 'react-native-elements';
+import {Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../../constants';
 import FollowingList from './FollowingList';

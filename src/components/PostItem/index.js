@@ -32,7 +32,7 @@ class PostItem extends PureComponent {
   }
 
   render() {
-    const {_onPressAvatar, _onPressLike} = getEventHandlers(
+    const {_onPressAvatar, _onPressComment, _onPressLike} = getEventHandlers(
       this.props.dispatch,
       this.props.item.uid,
       this.props.item.postId,
@@ -123,11 +123,13 @@ class PostItem extends PureComponent {
               flexDirection: 'row',
               ...styles.rightComponent,
             }}>
-            <Icon
-              name="chat-bubble-outline"
-              size={fontscale(22)}
-              style={{transform: [{rotateY: '180deg'}]}}
-            />
+            <TouchableOpacity onPress={_onPressComment}>
+              <Icon
+                name="chat-bubble-outline"
+                size={fontscale(22)}
+                style={{transform: [{rotateY: '180deg'}]}}
+              />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -143,11 +145,15 @@ function getEventHandlers(dispatch, uid, postId, isLiked, isSelf) {
         uid: uid,
       });
   };
+  const _onPressComment = async () => {
+    navigation.push('AddComment', {postId: postId, uid: uid});
+  };
   const _onPressLike = async () => {
     await dispatch(ToggleLikePostRequest(uid, postId, isLiked));
   };
   return {
     _onPressAvatar,
+    _onPressComment,
     _onPressLike,
   };
 }

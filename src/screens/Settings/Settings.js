@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     margin: widthPercentageToDP(10),
     marginBottom: -widthPercentageToDP(4),
     borderRadius: widthPercentageToDP(1),
-    padding: widthPercentageToDP(2),
+    padding: widthPercentageToDP(3.5),
     borderWidth: 1.5,
     alignItems: 'center',
     borderColor: 'grey',

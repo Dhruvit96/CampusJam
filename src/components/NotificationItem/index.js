@@ -67,10 +67,13 @@ function getEventHandlers(type, uid, pid) {
       case notificationTypes.LIKE_MY_POST:
       case notificationTypes.SOMEONE_POSTS:
       case notificationTypes.COMMENT_MY_POST:
+      case notificationTypes.REPLIED_COMMENT:
         navigation.push('Post', {pid: pid});
         break;
       case notificationTypes.FOLLOWED_ME:
         navigation.push('ProfileX', {uid: uid});
+      default:
+        return;
     }
   };
   const _onPressAvatar = () => {
@@ -86,8 +89,10 @@ function getEventHandlers(type, uid, pid) {
         return ' commented on your post';
       case notificationTypes.FOLLOWED_ME:
         return ' started following you';
+      case notificationTypes.REPLIED_COMMENT:
+        return ' replied to your comment';
       default:
-        return '';
+        return ' ';
     }
   };
   return {
