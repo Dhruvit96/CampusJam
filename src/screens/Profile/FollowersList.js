@@ -7,20 +7,23 @@ import EmptyList from '../../components/EmptyList';
 const FollowersList = ({route}) => {
   const [uid, setUid] = useState('');
   const [refreshing, setRefreshing] = useState(false);
-  const [isfirstTime, setIsFirstTime] = useState(true);
+  const [isFirstTime, setIsFirstTime] = useState(true);
   const [followersData, setFollowersData] = useState([]);
   const {_onRefresh, _renderEmpty} = getEventHandlers(
     setRefreshing,
     setFollowersData,
   );
   useEffect(() => {
-    if (typeof route.params !== 'undefined') {
-      setUid(route.params.uid);
-      if (isfirstTime) {
-        _onRefresh(route.params.uid);
-        setIsFirstTime(false);
+    async function fetchData() {
+      if (typeof route.params !== 'undefined') {
+        setUid(route.params.uid);
+        if (isFirstTime) {
+          await _onRefresh(route.params.uid);
+          setIsFirstTime(false);
+        }
       }
     }
+    fetchData();
   }, [route.params]);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -28,7 +31,7 @@ const FollowersList = ({route}) => {
         data={followersData}
         keyExtractor={(item) => item.uid}
         refreshing={refreshing}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={isFirstTime ? null : _renderEmpty}
         renderItem={({item}) => <FollowListItem item={item} />}
         onRefresh={() => _onRefresh(uid)}
       />

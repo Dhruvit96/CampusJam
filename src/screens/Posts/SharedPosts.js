@@ -15,6 +15,7 @@ import {navigation} from '../../navigations/RootNavigation';
 const SharedPosts = () => {
   const user = useSelector((state) => state.user.userInfo);
   const [refreshing, setRefreshing] = useState(false);
+  const [first, setFirst] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const [postsData, setPostsData] = useState([]);
   const {
@@ -34,7 +35,11 @@ const SharedPosts = () => {
     user,
   );
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -59,7 +64,7 @@ const SharedPosts = () => {
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={first ? null : _renderEmpty}
         onEndReachedThreshold={0.5}
         onEndReached={_loadMore}
         ListFooterComponent={_renderFooter}

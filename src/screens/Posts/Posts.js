@@ -16,6 +16,7 @@ import {navigation} from '../../navigations/RootNavigation';
 const Posts = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
+  const [first, setFirst] = useState(true);
   const postData = useSelector((state) => state.post);
   const ref = React.useRef(null);
   useScrollToTop(ref);
@@ -29,6 +30,11 @@ const Posts = () => {
   } = getEventHandlers(dispatch, setRefreshing, refreshing, postData.loaded);
   useEffect(() => {
     _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -54,7 +60,7 @@ const Posts = () => {
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={first ? null : _renderEmpty}
         onEndReachedThreshold={0.5}
         onEndReached={_loadMore}
         ListFooterComponent={_renderFooter}

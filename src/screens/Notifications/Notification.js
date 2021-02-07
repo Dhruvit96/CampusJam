@@ -10,13 +10,18 @@ import EmptyList from '../../components/EmptyList';
 const Notification = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
+  const [first, setFirst] = useState(true);
   const notificationData = useSelector((state) => state.notification);
   const {_onRefresh, _renderItem, _renderEmpty} = getEventHandlers(
     dispatch,
     setRefreshing,
   );
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -33,7 +38,7 @@ const Notification = () => {
         data={notificationData}
         keyExtractor={(item) => item.id}
         refreshing={refreshing}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={first ? null : _renderEmpty}
         renderItem={_renderItem}
         onRefresh={_onRefresh}
       />

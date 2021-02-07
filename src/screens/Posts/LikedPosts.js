@@ -15,6 +15,7 @@ const LikedPosts = ({route}) => {
   const user = route.params;
   const [refreshing, setRefreshing] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [first, setFirst] = useState(true);
   const [postsData, setPostsData] = useState([]);
   const {
     _onPressBack,
@@ -33,7 +34,11 @@ const LikedPosts = ({route}) => {
     user,
   );
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -58,7 +63,7 @@ const LikedPosts = ({route}) => {
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={first ? null : _renderEmpty}
         onEndReachedThreshold={0.5}
         onEndReached={_loadMore}
         ListFooterComponent={_renderFooter}

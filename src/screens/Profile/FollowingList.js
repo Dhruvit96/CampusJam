@@ -6,25 +6,28 @@ import EmptyList from '../../components/EmptyList';
 const FollowingList = ({route, userId}) => {
   const [uid, setUid] = useState(userId);
   const [refreshing, setRefreshing] = useState(false);
-  const [isfirstTime, setIsFirstTime] = useState(true);
+  const [isFirstTime, setIsFirstTime] = useState(true);
   const [followingsData, setFollowingsData] = useState([]);
   const {_onRefresh, _renderEmpty} = getEventHandlers(
     setRefreshing,
     setFollowingsData,
   );
   useEffect(() => {
-    if (typeof route?.params !== 'undefined') {
-      setUid(route.params.uid);
-      if (isfirstTime) {
-        _onRefresh(route.params.uid);
-        setIsFirstTime(false);
-      }
-    } else if (typeof userId !== 'undefined') {
-      if (isfirstTime) {
-        _onRefresh(userId);
-        setIsFirstTime(false);
+    async function fetchData() {
+      if (typeof route?.params !== 'undefined') {
+        setUid(route.params.uid);
+        if (isFirstTime) {
+          await _onRefresh(route.params.uid);
+          setIsFirstTime(false);
+        }
+      } else if (typeof userId !== 'undefined') {
+        if (isFirstTime) {
+          await _onRefresh(userId);
+          setIsFirstTime(false);
+        }
       }
     }
+    fetchData();
   }, [route]);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -32,7 +35,7 @@ const FollowingList = ({route, userId}) => {
         data={followingsData}
         keyExtractor={(item) => item.uid}
         refreshing={refreshing}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={isFirstTime ? null : _renderEmpty}
         renderItem={({item}) => <FollowListItem item={item} />}
         onRefresh={() => _onRefresh(uid)}
       />

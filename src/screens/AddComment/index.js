@@ -17,6 +17,7 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import firestore from '@react-native-firebase/firestore';
+import EmptyList from '../../components/EmptyList';
 import {navigation} from '../../navigations/RootNavigation';
 import {useSelector} from '../../store.js';
 import {useDispatch} from 'react-redux';
@@ -31,12 +32,14 @@ const AddComment = ({route}) => {
   const [replyId, setReplyId] = useState();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [first, setFirst] = useState(true);
   const [commentsData, setCommentData] = useState([]);
   const [comment, setComment] = useState('');
   const {
     _addComment,
     _onPressBack,
     _onRefresh,
+    _renderEmpty,
     _renderItem,
     _renderSectionHeader,
   } = getEventHandlers(
@@ -57,7 +60,11 @@ const AddComment = ({route}) => {
     userId,
   );
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={styles.container}>
@@ -81,6 +88,7 @@ const AddComment = ({route}) => {
         keyExtractor={(item) => (item.replyId ? item.replyId : item.commentId)}
         renderItem={_renderItem}
         refreshing={refreshing}
+        ListEmptyComponent={first ? null : _renderEmpty}
         onRefresh={_onRefresh}
         renderSectionHeader={_renderSectionHeader}
       />
@@ -205,6 +213,8 @@ function getEventHandlers(
     setCommentData(commentData);
     setRefreshing(false);
   };
+  const _renderEmpty = () => <EmptyList message={'No comments'} />;
+
   const _addComment = async () => {
     setLoading(true);
     if (replyTo.length == 0) {
@@ -324,6 +334,7 @@ function getEventHandlers(
     _addComment,
     _onPressBack,
     _onRefresh,
+    _renderEmpty,
     _renderItem,
     _renderSectionHeader,
   };
