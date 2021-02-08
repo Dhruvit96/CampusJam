@@ -5,11 +5,11 @@ import {
   seenTypes,
   uploadPhotoAsync,
   FieldValue,
-  notificationActionTypes,
 } from '../constants';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
 import {
+  DeleteSharedPostSuccess,
   followRequest,
   UnfollowRequest,
   UpdateExtraInfoRequest,
@@ -137,7 +137,7 @@ export const CreatePostRequest = ({image, text}) => {
   return async (dispatch) => {
     try {
       let currentUser = {...store.getState().user.userInfo};
-      let followers = {...store.getState().user.extraInfo};
+      let followers = {...store.getState().user.extraInfo.followers};
       let imageUri = await ImageManipulator.manipulateAsync(
         image,
         [{resize: {width: 580}}],
@@ -193,6 +193,43 @@ export const CreatePostFailure = () => {
     payload: {
       message: 'Can not post this post!',
     },
+  };
+};
+
+export const DeletePostRequest = (postId) => {
+  return async (dispatch) => {
+    try {
+      let uid = {...store.getState().user.userInfo.uid};
+      await firestore().collection('posts').doc(postId).delete();
+      dispatch(
+        DeleteNotificationRequest({
+          postId: postId,
+          uid: uid,
+          type: notificationTypes.SOMEONE_POSTS,
+        }),
+      );
+      dispatch(DeleteSharedPostSuccess(postId));
+      dispatch(DeletePostSuccess(postId));
+    } catch (e) {
+      console.warn(e);
+      dispatch();
+    }
+  };
+};
+
+export const DeletePostFailure = () => {
+  return {
+    type: postActionTypes.DELETE_POST_FAILURE,
+    payload: {
+      message: 'Can not delete post.',
+    },
+  };
+};
+
+export const DeletePostSuccess = (postId) => {
+  return {
+    type: postActionTypes.DELETE_POST_SUCCESS,
+    payload: postId,
   };
 };
 

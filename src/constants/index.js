@@ -24,6 +24,7 @@ export const userActionTypes = {
   TOGGLE_LOADING: 'TOGGLE_LOADING',
   UPDATE_NOTIFICATION_SETTING_SUCCESS: 'UPDATE_NOTIFICATION_SETTING_SUCCESS',
   UPDATE_NOTIFICATION_SETTING_FAILURE: 'UPDATE_NOTIFICATION_SETTING_FAILURE',
+  DELETE_POST_SUCCESS: 'DELETE_POST_SUCCESS',
 };
 
 export const postActionTypes = {
@@ -32,8 +33,8 @@ export const postActionTypes = {
   FETCH_POST_LIST_FAILURE: 'FETCH_POST_LIST_FAILURE',
   LOAD_MORE_POST_LIST_SUCCESS: 'LOAD_MORE_POST_LIST_SUCCESS',
   LOAD_MORE_POST_LIST_FAILURE: 'LOAD_MORE_POST_LIST_FAILURE',
-  COMMENT_POST_SUCCESS: 'COMMENT_POST_SUCCESS',
-  COMMENT_POST_FAILURE: 'COMMENT_POST_FAILURE',
+  DELETE_POST_SUCCESS: 'DELETE_POST_SUCCESS',
+  DELETE_POST_FAILURE: 'DELETE_POST_FAILURE',
   TOGGLE_ALL_LOADED_SUCCESS: 'TOGGLE_ALL_LOADED_SUCCESS',
   TOGGLE_LIKE_POST_FAILURE: 'TOGGLE_LIKE_POST_FAILURE',
   TOGGLE_FOLLOW_USER_FAILURE: 'TOGGLE_FOLLOW_USER_FAILURE',
@@ -126,4 +127,13 @@ export const heightPercentageToDP = (heightPercent) => {
 
 export const fontscale = (size) => {
   return (screenWidth / 375) * size;
+};
+
+export const findWithAttr = (array, attr, value) => {
+  for (var i = 0; i < array.length; i += 1) {
+    if (array[i][attr] === value) {
+      return i;
+    }
+  }
+  return -1;
 };

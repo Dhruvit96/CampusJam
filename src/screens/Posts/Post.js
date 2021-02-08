@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
+import EmptyList from '../../components/EmptyList';
 import firestore from '@react-native-firebase/firestore';
 import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
@@ -52,34 +53,47 @@ function getEventHandlers(setPostData, setRefreshing, pid, user) {
   const _onPressBack = () => {
     navigation.goBack();
   };
-  const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
+  const _renderItem = ({item, index}) => (
+    <PostItem
+      index={index}
+      item={item}
+      delete={true}
+      onDeletePost={() => {
+        navigation.goBack();
+      }}
+    />
+  );
+  const _renderEmpty = () => <EmptyList message="Post is deleted" />;
   const _onRefresh = async () => {
     setRefreshing(true);
     let postData = await firestore().collection('posts').doc(pid).get();
-    postData = postData.data();
-    let userData = await firestore()
-      .collection('users')
-      .doc(postData.uid)
-      .get();
-    userData = userData.data();
-    setPostData([
-      {
-        ...postData,
-        avatar: userData.avatar,
-        postId: pid,
-        initials: userData.initials,
-        name: userData.name,
-        isFollowed: user.followings.indexOf(postData.uid) >= 0,
-        isSelf: user.uid == postData.uid,
-        isLiked: postData.likedBy.indexOf(user.uid) >= 0,
-      },
-    ]);
+    if (postData.exists) {
+      postData = postData.data();
+      let userData = await firestore()
+        .collection('users')
+        .doc(postData.uid)
+        .get();
+      userData = userData.data();
+      setPostData([
+        {
+          ...postData,
+          avatar: userData.avatar,
+          postId: pid,
+          initials: userData.initials,
+          name: userData.name,
+          isFollowed: user.followings.indexOf(postData.uid) >= 0,
+          isSelf: user.uid == postData.uid,
+          isLiked: postData.likedBy.indexOf(user.uid) >= 0,
+        },
+      ]);
+    }
     setRefreshing(false);
   };
   return {
     _onPressBack,
     _onRefresh,
     _renderItem,
+    _renderEmpty,
   };
 }
 

@@ -56,7 +56,6 @@ const HomeTab = () => {
           else if (route.name === 'Profile') iconName = 'user';
           return <FontAwesome name={iconName} size={size} color={color} />;
         },
-        tabBarVisible: getFocusedRouteNameFromRoute(route) !== 'AddComment',
       })}
       tabBarOptions={{
         activeTintColor: '#61c0ff',
@@ -96,6 +95,7 @@ export const HomeModule = () => {
       <HomeStack.Screen name="Home" component={HomeTab} />
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
       <HomeStack.Screen name="Settings" component={Settings} />
+      <HomeStack.Screen name="AddComment" component={AddComment} />
     </HomeStack.Navigator>
   );
 };
@@ -104,7 +104,6 @@ const PostModule = () => {
   return (
     <PostStack.Navigator screenOptions={screenOptions}>
       <PostStack.Screen name="Posts" component={Posts} />
-      <PostStack.Screen name="AddComment" component={AddComment} />
       <PostStack.Screen name="LikedPosts" component={LikedPosts} />
       <PostStack.Screen name="SharedPosts" component={SharedPosts} />
       <PostStack.Screen name="Search" component={Search} />
@@ -120,7 +119,6 @@ const NotificationModule = () => {
   return (
     <NotificationStack.Navigator screenOptions={screenOptions}>
       <NotificationStack.Screen name="Notification" component={Notification} />
-      <NotificationStack.Screen name="AddComment" component={AddComment} />
       <NotificationStack.Screen name="LikedPosts" component={LikedPosts} />
       <NotificationStack.Screen name="SharedPosts" component={SharedPosts} />
       <NotificationStack.Screen name="Profile" component={Profile} />
@@ -139,7 +137,6 @@ const ProfileModule = () => {
   return (
     <ProfileStack.Navigator screenOptions={screenOptions}>
       <ProfileStack.Screen name="Profile" component={Profile} />
-      <ProfileStack.Screen name="AddComment" component={AddComment} />
       <ProfileStack.Screen name="LikedPosts" component={LikedPosts} />
       <ProfileStack.Screen name="SharedPosts" component={SharedPosts} />
       <ProfileStack.Screen name="FollowList" component={FollowListModule} />

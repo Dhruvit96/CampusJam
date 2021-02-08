@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flex: 1,
-    height: heightPercentageToDP(5),
+    height: heightPercentageToDP(5.5),
     margin: widthPercentageToDP(5),
     marginStart: widthPercentageToDP(3),
     marginBottom: heightPercentageToDP(2),

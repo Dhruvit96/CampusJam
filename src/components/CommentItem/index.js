@@ -59,6 +59,7 @@ function getEventHandlers(uid, isSelf) {
     !isSelf
       ? navigation.push('ProfileX', {uid: uid})
       : navigation.push('Profile');
+    navigation.goBack();
   };
   return {
     _onPressAvatar,

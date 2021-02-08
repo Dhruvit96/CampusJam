@@ -1,8 +1,11 @@
 import React, {PureComponent} from 'react';
-import {StyleSheet, View, TouchableOpacity} from 'react-native';
-import {Avatar, Button, Image, Text} from 'react-native-elements';
+import {Alert, StyleSheet, View, TouchableOpacity} from 'react-native';
+import {Avatar, Button, Image, Overlay, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {ToggleLikePostRequest} from '../../actions/postActions';
+import {
+  ToggleLikePostRequest,
+  DeletePostRequest,
+} from '../../actions/postActions';
 import LottieView from 'lottie-react-native';
 import moment from 'moment';
 import {
@@ -19,6 +22,7 @@ class PostItem extends PureComponent {
     this.state = {
       count: 0,
       isLiked: false,
+      visible: false,
     };
   }
 
@@ -26,19 +30,30 @@ class PostItem extends PureComponent {
     this.setState({
       count: this.props.item.likedBy.length,
       isLiked: this.props.item.isLiked,
+      visible: false,
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
   }
 
   render() {
-    const {_onPressAvatar, _onPressComment, _onPressLike} = getEventHandlers(
+    const {
+      _onPressAvatar,
+      _onPressComment,
+      _onPressDelete,
+      _onPressLike,
+    } = getEventHandlers(
       this.props.dispatch,
-      this.props.item.uid,
-      this.props.item.postId,
+      this.props.index,
       this.state.isLiked,
       this.props.item.isSelf,
+      this.props.onDeletePost,
+      this.props.item.postId,
+      this.props.item.uid,
     );
+    const _toggleVisible = () => {
+      this.setState({...this.state, visible: !this.state.visible});
+    };
     return (
       <View style={styles.container}>
         <View style={styles.row}>
@@ -68,6 +83,39 @@ class PostItem extends PureComponent {
                 : moment(this.props.item.created_at).fromNow()}
             </Text>
           </View>
+          {this.props.delete && this.props.item.isSelf ? (
+            <>
+              <Overlay
+                isVisible={this.state.visible}
+                overlayStyle={{borderRadius: widthPercentageToDP(2)}}
+                onBackdropPress={_toggleVisible}>
+                <View
+                  style={{
+                    width: widthPercentageToDP(40),
+                    height: heightPercentageToDP(10),
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Button
+                    type="clear"
+                    title="Edit post"
+                    titleStyle={{color: 'black', fontWeight: '100'}}
+                  />
+                  <Button
+                    type="clear"
+                    title="Delete post"
+                    titleStyle={{color: 'black', fontWeight: '100'}}
+                    onPress={_onPressDelete}
+                  />
+                </View>
+              </Overlay>
+              <View style={styles.rightComponent}>
+                <TouchableOpacity onPress={_toggleVisible}>
+                  <Icon name="more-vert" size={fontscale(24)} />
+                </TouchableOpacity>
+              </View>
+            </>
+          ) : null}
         </View>
         {this.props.item.text ? (
           <Text style={{...styles.text, marginTop: heightPercentageToDP(2)}}>
@@ -137,13 +185,37 @@ class PostItem extends PureComponent {
   }
 }
 
-function getEventHandlers(dispatch, uid, postId, isLiked, isSelf) {
+function getEventHandlers(
+  dispatch,
+  index,
+  isLiked,
+  isSelf,
+  onDeletePost,
+  postId,
+  uid,
+) {
   const _onPressAvatar = async () => {
     if (isSelf) navigation.push('Profile');
     else
       navigation.push('ProfileX', {
         uid: uid,
       });
+  };
+  const _onPressDelete = () => {
+    Alert.alert('Delete post', 'Post will be permanently deleted', [
+      {
+        text: 'Cancel',
+        onPress: null,
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: async () => {
+          await dispatch(DeletePostRequest(postId));
+          onDeletePost && onDeletePost(index);
+        },
+      },
+    ]);
   };
   const _onPressComment = async () => {
     navigation.push('AddComment', {postId: postId, uid: uid});
@@ -154,6 +226,7 @@ function getEventHandlers(dispatch, uid, postId, isLiked, isSelf) {
   return {
     _onPressAvatar,
     _onPressComment,
+    _onPressDelete,
     _onPressLike,
   };
 }

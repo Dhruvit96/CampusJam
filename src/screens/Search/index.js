@@ -47,7 +47,7 @@ const Search = () => {
       />
       <View
         style={{
-          height: heightPercentageToDP(5),
+          height: heightPercentageToDP(5.5),
           margin: widthPercentageToDP(5),
           marginBottom: 0,
           borderRadius: widthPercentageToDP(12),

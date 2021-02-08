@@ -220,7 +220,7 @@ export const FetchExtraInfoRequest = () => {
     try {
       let currentUser = {...store.getState().user.userInfo};
 
-      let postData = await firestore()
+      let postsData = await firestore()
         .collection('posts')
         .where('uid', '==', currentUser.uid)
         .orderBy('created_at', 'desc')
@@ -231,7 +231,20 @@ export const FetchExtraInfoRequest = () => {
         .get();
       let likedPosts = posts.size;
       posts = [];
-      postData.forEach((ref) => posts.push(ref.id));
+      await Promise.all(
+        postsData.docs.map(async (doc) => {
+          let postData = doc.data();
+          return posts.push({
+            ...postData,
+            avatar: currentUser.avatar,
+            postId: doc.id,
+            initials: currentUser.initials,
+            name: currentUser.name,
+            isSelf: true,
+            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
+          });
+        }),
+      );
       let followersData = await firestore()
         .collection('users')
         .where('followings', 'array-contains', currentUser.uid)
@@ -445,5 +458,12 @@ export const UnfollowSuccess = (user) => {
   return {
     type: userActionTypes.UNFOLLOW_SUCCESS,
     payload: user,
+  };
+};
+
+export const DeleteSharedPostSuccess = (postId) => {
+  return {
+    type: userActionTypes.DELETE_POST_SUCCESS,
+    payload: postId,
   };
 };
