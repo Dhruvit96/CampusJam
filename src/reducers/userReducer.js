@@ -84,9 +84,9 @@ const reducer = (state = defaultState, action) => {
     case userActionTypes.UPDATE_EXTRA_INFO_SUCCESS:
       state = {
         ...state,
-        exraInfo: {
-          ...state.exraInfo,
-          posts: [action.payload.postId, ...state.extraInfo.posts],
+        extraInfo: {
+          ...state.extraInfo,
+          posts: [action.payload, ...state.extraInfo.posts],
         },
       };
       return state;

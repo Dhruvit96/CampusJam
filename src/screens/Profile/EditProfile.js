@@ -128,13 +128,14 @@ function getEventHandlers(dispatch, setLoading, setAvatar) {
   const _onPressChangeAvatar = async () => {
     const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
-      alert('Sorry, we need camera roll permissions to make this work!');
+      alert('Sorry, we need storage permissions to make this work!');
     } else {
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.6,
+        allowsMultipleSelection: false,
       });
       if (!result.cancelled) {
         setAvatar(result.uri);

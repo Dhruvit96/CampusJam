@@ -22,6 +22,7 @@ const Profile = () => {
   const {
     _onPressBack,
     _onPressEditProfile,
+    _onPressAddPost,
     _onRefresh,
     _onPressFollowers,
     _onPressFollowing,
@@ -129,7 +130,12 @@ const Profile = () => {
               size={fontscale(20)}
               onPress={_onPressEditProfile}
             />
-            <PostButton title="Add Post" iconName="add" size={fontscale(22)} />
+            <PostButton
+              title="Add Post"
+              iconName="add"
+              size={fontscale(22)}
+              onPress={_onPressAddPost}
+            />
             <PostButton
               title="Shared Posts"
               iconName="bookmark-outline"
@@ -235,6 +241,9 @@ function getEventHandlers(
   const _onPressBack = () => {
     navigation.goBack();
   };
+  const _onPressAddPost = () => {
+    navigation.push('AddPost');
+  };
   const _onPressEditProfile = () => {
     navigation.push('EditProfile');
   };
@@ -282,6 +291,7 @@ function getEventHandlers(
     _onPressBack,
     _onPressEditProfile,
     _onRefresh,
+    _onPressAddPost,
     _onPressFollowers,
     _onPressFollowing,
     _onPressFollowingX,

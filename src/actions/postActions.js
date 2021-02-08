@@ -11,6 +11,7 @@ import {store} from '../store';
 import {
   DeleteSharedPostSuccess,
   followRequest,
+  ToggleLoading,
   UnfollowRequest,
   UpdateExtraInfoRequest,
 } from '../actions/userActions';
@@ -136,37 +137,36 @@ export const LoadMorePostListSuccess = (payload) => {
 export const CreatePostRequest = ({image, text}) => {
   return async (dispatch) => {
     try {
+      await dispatch(ToggleLoading());
       let currentUser = {...store.getState().user.userInfo};
-      let followers = {...store.getState().user.extraInfo.followers};
-      let imageUri = await ImageManipulator.manipulateAsync(
-        image,
-        [{resize: {width: 580}}],
-        {format: 'jpeg'},
-      );
-      let scale = imageUri.height / imageUri.width;
+      let followers = [...store.getState().user.extraInfo.followers];
       let time = Date.now();
-      let uploadedImageUri = await uploadPhotoAsync(
-        imageUri.uri,
-        `photos/${currentUser.uid}/${time}`,
-      );
+      let uploadedImageUri = null;
+      let scale = 0;
+      if (typeof image !== 'undefined') {
+        let imageUri = await ImageManipulator.manipulateAsync(
+          image,
+          [{resize: {width: 580}}],
+          {format: 'jpeg'},
+        );
+        scale = imageUri.height / imageUri.width;
+        uploadedImageUri = await uploadPhotoAsync(
+          imageUri.uri,
+          `photos/${currentUser.uid}/${time}`,
+        );
+      }
       let data = {
         image: uploadedImageUri,
         scale: scale,
-        text: text,
+        text: text?.trim(),
         created_at: time,
         uid: currentUser.uid,
         likedBy: [],
       };
       await firestore()
         .collection('posts')
-        .add({...data})
+        .add(data)
         .then(async (ref) => {
-          await firestore()
-            .collection('user')
-            .doc(currentUser.uid)
-            .update({
-              posts: FieldValue.arrayUnion(ref.id),
-            });
           dispatch(
             CreateNotificationRequest({
               postId: ref.id,
@@ -177,13 +177,31 @@ export const CreatePostRequest = ({image, text}) => {
               type: notificationTypes.SOMEONE_POSTS,
             }),
           );
-          dispatch(UpdateExtraInfoRequest(ref.id));
+          data = {
+            ...data,
+            avatar: currentUser.avatar,
+            postId: ref.id,
+            initials: currentUser.initials,
+            name: currentUser.name,
+            isSelf: true,
+            isLiked: false,
+          };
+          dispatch(UpdateExtraInfoRequest(data));
+          dispatch(CreatePostSuccess(data));
         });
-
-      dispatch(FetchPostListRequest());
     } catch (e) {
+      console.warn(e);
       dispatch(CreatePostFailure());
+    } finally {
+      dispatch(ToggleLoading());
     }
+  };
+};
+
+export const CreatePostSuccess = (payload) => {
+  return {
+    type: postActionTypes.CREATE_POST_SUCCESS,
+    payload: payload,
   };
 };
 

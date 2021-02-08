@@ -23,6 +23,8 @@ class PostItem extends PureComponent {
       count: 0,
       isLiked: false,
       visible: false,
+      lines: 0,
+      textShown: false,
     };
   }
 
@@ -31,6 +33,8 @@ class PostItem extends PureComponent {
       count: this.props.item.likedBy.length,
       isLiked: this.props.item.isLiked,
       visible: false,
+      lines: 0,
+      textShown: false,
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
@@ -53,6 +57,12 @@ class PostItem extends PureComponent {
     );
     const _toggleVisible = () => {
       this.setState({...this.state, visible: !this.state.visible});
+    };
+    const _onTextLayout = (ref) => {
+      this.setState({...this.state, lines: ref.nativeEvent.lines.length});
+    };
+    const _onPressReadMore = () => {
+      this.setState({...this.state, textShown: true});
     };
     return (
       <View style={styles.container}>
@@ -118,21 +128,44 @@ class PostItem extends PureComponent {
           ) : null}
         </View>
         {this.props.item.text ? (
-          <Text style={{...styles.text, marginTop: heightPercentageToDP(2)}}>
-            {this.props.item.text}
-          </Text>
+          <>
+            <Text
+              style={{
+                fontSize: fontscale(16),
+                marginTop: heightPercentageToDP(2),
+                marginStart: widthPercentageToDP(4),
+              }}
+              onTextLayout={_onTextLayout}
+              numberOfLines={this.state.textShown ? this.state.lines : 4}>
+              {this.props.item.text}
+            </Text>
+            {this.state.lines > 4 && !this.state.textShown ? (
+              <Text
+                onPress={_onPressReadMore}
+                style={{
+                  fontSize: fontscale(13),
+                  color: 'grey',
+                  marginTop: heightPercentageToDP(1),
+                  marginStart: widthPercentageToDP(4),
+                }}>
+                Read More
+              </Text>
+            ) : null}
+          </>
         ) : null}
-        <Image
-          source={{uri: this.props.item.image}}
-          style={{
-            width: widthPercentageToDP(84),
-            height: this.props.item.scale * widthPercentageToDP(84),
-            resizeMode: 'cover',
-            marginTop: heightPercentageToDP(1),
-            marginBottom: heightPercentageToDP(1),
-            borderRadius: widthPercentageToDP(3),
-          }}
-        />
+        {this.props.item.image ? (
+          <Image
+            source={{uri: this.props.item.image}}
+            style={{
+              width: widthPercentageToDP(90),
+              height: this.props.item.scale * widthPercentageToDP(90),
+              resizeMode: 'cover',
+              marginTop: heightPercentageToDP(1),
+              marginBottom: heightPercentageToDP(1),
+              borderRadius: widthPercentageToDP(3),
+            }}
+          />
+        ) : null}
         <View style={styles.row}>
           <TouchableOpacity
             onPress={() => {
@@ -233,9 +266,9 @@ function getEventHandlers(
 
 const styles = StyleSheet.create({
   container: {
-    margin: widthPercentageToDP(4),
+    margin: widthPercentageToDP(3),
     paddingBottom: 0,
-    padding: widthPercentageToDP(4),
+    padding: widthPercentageToDP(2),
     shadowColor: '#000',
     shadowOffset: {
       width: 0,

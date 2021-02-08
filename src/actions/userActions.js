@@ -297,12 +297,10 @@ export const FetchExtraInfoSuccess = (extraInfo) => {
   };
 };
 
-export const UpdateExtraInfoRequest = (postId) => {
+export const UpdateExtraInfoRequest = (payload) => {
   return {
     type: userActionTypes.UPDATE_EXTRA_INFO_SUCCESS,
-    payload: {
-      postId: postId,
-    },
+    payload: payload,
   };
 };
 
@@ -313,10 +311,7 @@ export const UpdateUserInfoRequest = ({avatar, bio, name}) => {
       let photo = avatar
         ? avatar == currentUser.avatar
           ? avatar
-          : await uploadPhotoAsync(
-              avatar,
-              'profile/' + currentUser.uid + '/' + Date.now(),
-            )
+          : await uploadPhotoAsync(avatar, `profile/${currentUser.uid}/avatar`)
         : null;
       let userInfo = {
         avatar: photo,

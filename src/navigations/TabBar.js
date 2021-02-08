@@ -21,6 +21,7 @@ import Settings from '../screens/Settings/Settings';
 import Search from '../screens/Search';
 import AddComment from '../screens/AddComment';
 import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
+import AddPost from '../screens/AddPost';
 
 const Tab = createBottomTabNavigator();
 const HomeStack = createStackNavigator();
@@ -96,6 +97,7 @@ export const HomeModule = () => {
       <HomeStack.Screen name="EditProfile" component={EditProfile} />
       <HomeStack.Screen name="Settings" component={Settings} />
       <HomeStack.Screen name="AddComment" component={AddComment} />
+      <HomeStack.Screen name="AddPost" component={AddPost} />
     </HomeStack.Navigator>
   );
 };

@@ -8,8 +8,10 @@ const reducer = (state = defaultState, action) => {
       state = {...state, posts: [...action.payload]};
       return state;
     case postActionTypes.LOAD_MORE_POST_LIST_SUCCESS:
-      state = {...state, posts: [...state.posts.concat(action.payload)]};
+      state = {...state, posts: [...state.posts, ...action.payload]};
       return state;
+    case postActionTypes.CREATE_POST_SUCCESS:
+      state = {...state, posts: [action.payload, ...state.posts]};
     case postActionTypes.DELETE_POST_SUCCESS:
       let index = findWithAttr(state.posts, 'postId', action.payload);
       if (index >= 0)
@@ -29,6 +31,7 @@ const reducer = (state = defaultState, action) => {
     case postActionTypes.TOGGLE_LIKE_POST_FAILURE:
     case postActionTypes.TOGGLE_FOLLOW_USER_FAILURE:
     case postActionTypes.DELETE_POST_FAILURE:
+    case postActionTypes.CREATE_POST_FAILURE:
       Alert.alert('Error', action.payload.message);
       return state;
     default:
