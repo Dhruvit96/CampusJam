@@ -45,7 +45,7 @@ const FollowListItem = ({item}) => {
             <Text style={styles.name}>{item.name}</Text>
             {item.id ? <Text style={styles.text}>{item.id}</Text> : null}
           </View>
-          {!isSelf ? (
+          {!isSelf && item.id ? (
             <View style={styles.rightComponent}>
               <Button
                 type="clear"

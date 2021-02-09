@@ -3,14 +3,17 @@ import {View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
 import EmptyList from '../../components/EmptyList';
+import {useSelector} from '../../store';
 const FollowingList = ({route, userId}) => {
   const [uid, setUid] = useState(userId);
   const [refreshing, setRefreshing] = useState(false);
   const [isFirstTime, setIsFirstTime] = useState(true);
   const [followingsData, setFollowingsData] = useState([]);
+  const currentUserId = useSelector((state) => state.user.userInfo.uid);
   const {_onRefresh, _renderEmpty} = getEventHandlers(
     setRefreshing,
     setFollowingsData,
+    currentUserId,
   );
   useEffect(() => {
     async function fetchData() {
@@ -43,16 +46,18 @@ const FollowingList = ({route, userId}) => {
   );
 };
 
-function getEventHandlers(setRefreshing, setFollowingsData) {
+function getEventHandlers(setRefreshing, setFollowingsData, currentUserId) {
   const _onRefresh = async (uid) => {
     setRefreshing(true);
     let userData = await firestore().collection('users').doc(uid).get();
     userData = userData.data();
     let followingsData = [];
+    let index = -1;
     await Promise.all(
-      userData.followings.map(async (id) => {
+      userData.followings.map(async (id, i) => {
         let followingData = await firestore().collection('users').doc(id).get();
         followingData = followingData.data();
+        if (id === currentUserId) index = i;
         return followingsData.push({
           avatar: followingData.avatar,
           id: followingData.id,
@@ -62,6 +67,12 @@ function getEventHandlers(setRefreshing, setFollowingsData) {
         });
       }),
     );
+    if (index > -1)
+      followingsData = [
+        followingsData[index],
+        ...followingsData.slice(0, index),
+        ...followingsData.slice(index + 1),
+      ];
     setFollowingsData(followingsData);
     setRefreshing(false);
   };

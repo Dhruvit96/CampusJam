@@ -9,8 +9,10 @@ import {
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
 import {
+  DecreaseLikedPostCountRequest,
   DeleteSharedPostSuccess,
   followRequest,
+  IncreaseLikedPostCountRequest,
   ToggleLoading,
   UnfollowRequest,
   UpdateExtraInfoRequest,
@@ -217,7 +219,7 @@ export const CreatePostFailure = () => {
 export const DeletePostRequest = (postId) => {
   return async (dispatch) => {
     try {
-      let uid = {...store.getState().user.userInfo.uid};
+      let uid = store.getState().user.userInfo.uid;
       await firestore().collection('posts').doc(postId).delete();
       dispatch(
         DeleteNotificationRequest({
@@ -260,6 +262,7 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           .collection('posts')
           .doc(postId)
           .update({likedBy: FieldValue.arrayRemove(uid)});
+        dispatch(DecreaseLikedPostCountRequest());
         dispatch(
           DeleteNotificationRequest({
             userIds: [postUserId],
@@ -274,6 +277,7 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           .update({
             likedBy: FieldValue.arrayUnion(uid),
           });
+        dispatch(IncreaseLikedPostCountRequest());
         if (postUserId != uid) {
           dispatch(
             CreateNotificationRequest({

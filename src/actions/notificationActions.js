@@ -16,7 +16,7 @@ export const CreateNotificationRequest = (notification) => {
 export const DeleteNotificationRequest = ({userIds, uid, type, postId}) => {
   return async (dispatch) => {
     try {
-      let time = Date.now() - 60 * 1000 * 5;
+      let time = Date.now() - 60 * 1000 * 10;
       let notificationdata = postId
         ? await firestore()
             .collection('notifications')

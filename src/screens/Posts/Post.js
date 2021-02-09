@@ -12,12 +12,12 @@ const Post = ({route}) => {
   const pid = route.params.pid;
   const [refreshing, setRefreshing] = useState(false);
   const [postData, setPostData] = useState([]);
-  const {_onPressBack, _onRefresh, _renderItem} = getEventHandlers(
-    setPostData,
-    setRefreshing,
-    pid,
-    user,
-  );
+  const {
+    _onPressBack,
+    _onRefresh,
+    _renderItem,
+    _renderEmpty,
+  } = getEventHandlers(setPostData, setRefreshing, pid, user);
   useEffect(() => {
     _onRefresh();
   }, []);
@@ -41,6 +41,7 @@ const Post = ({route}) => {
       <FlatList
         data={postData}
         extraData={refreshing}
+        ListEmptyComponent={_renderEmpty}
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}

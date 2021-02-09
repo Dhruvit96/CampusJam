@@ -17,10 +17,9 @@ import StudentData from '../screens/StudentData/StudentData';
 import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
-import Settings from '../screens/Settings/Settings';
+import {ChangePassword, Settings} from '../screens/Settings';
 import Search from '../screens/Search';
 import AddComment from '../screens/AddComment';
-import {getFocusedRouteNameFromRoute} from '@react-navigation/native';
 import AddPost from '../screens/AddPost';
 
 const Tab = createBottomTabNavigator();
@@ -98,6 +97,7 @@ export const HomeModule = () => {
       <HomeStack.Screen name="Settings" component={Settings} />
       <HomeStack.Screen name="AddComment" component={AddComment} />
       <HomeStack.Screen name="AddPost" component={AddPost} />
+      <HomeStack.Screen name="ChangePassword" component={ChangePassword} />
     </HomeStack.Navigator>
   );
 };

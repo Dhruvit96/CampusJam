@@ -40,6 +40,24 @@ const reducer = (state = defaultState, action) => {
         userInfo: {...action.payload.userInfo},
       };
       return state;
+    case userActionTypes.INCREASE_LIKED_POST_COUNT:
+      state = {
+        ...state,
+        extraInfo: {
+          ...state.extraInfo,
+          likedPosts: state.extraInfo.likedPosts + 1,
+        },
+      };
+      return state;
+    case userActionTypes.DECREASE_LIKED_POST_COUNT:
+      state = {
+        ...state,
+        extraInfo: {
+          ...state.extraInfo,
+          likedPosts: state.extraInfo.likedPosts + 1,
+        },
+      };
+      return state;
     case userActionTypes.LOGIN_FAILURE:
     case userActionTypes.FOLLOW_FAILURE:
     case userActionTypes.REGISTER_FAILURE:

@@ -13,13 +13,10 @@ import {
   DeleteNotificationRequest,
 } from '../actions/notificationActions';
 
-export const LoginRequest = (user) => {
+export const LoginRequest = ({email, password}) => {
   return async (dispatch) => {
     try {
-      const ref = await auth().signInWithEmailAndPassword(
-        user.email,
-        user.password,
-      );
+      const ref = await auth().signInWithEmailAndPassword(email, password);
       if (ref.user.emailVerified) {
         let user = await firestore()
           .collection('users')
@@ -30,6 +27,7 @@ export const LoginRequest = (user) => {
           logined: true,
           userInfo: {
             ...user,
+            email: email,
             isStudent: typeof user.id === 'string',
             uid: ref.user.uid,
           },
@@ -141,9 +139,6 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
         case 'auth//weak-password':
           errorMessage = 'Password is too weak.';
           break;
-        case 'auth/wrong-password':
-          errorMessage = 'Invalid email address or password.';
-          break;
         case 'auth/too-many-requests':
           errorMessage = 'Too many request. Try again in a minute.';
           break;
@@ -159,7 +154,11 @@ export const passwordResetRequest = (email) => {
   return async (dispatch) => {
     try {
       await auth().sendPasswordResetEmail(email);
-      dispatch(passwordResetRequest());
+      dispatch(
+        passwordResetSuccess(
+          'Please check your inbox for password reset mail.',
+        ),
+      );
     } catch (error) {
       let errorMessage = '';
       switch (error.code) {
@@ -168,6 +167,39 @@ export const passwordResetRequest = (email) => {
           break;
         case 'auth/user-not-found':
           errorMessage = 'User with this email does not exist.';
+          break;
+        case 'auth/too-many-requests':
+          errorMessage = 'Too many request. Try again in a minute.';
+          break;
+        default:
+          errorMessage = 'Check your internet connection.';
+      }
+      dispatch(passwordResetFailure(errorMessage));
+    }
+  };
+};
+
+export const ChangePasswordRequest = ({password, newPassword}) => {
+  return async (dispatch) => {
+    try {
+      let email = store.getState().user.userInfo.email;
+      await auth()
+        .signInWithEmailAndPassword(email, password)
+        .then(async (ref) => {
+          await ref.user.updatePassword(newPassword);
+        });
+      dispatch(passwordResetSuccess('Password Changed successfully.'));
+    } catch (error) {
+      let errorMessage = '';
+      switch (error.code) {
+        case 'auth/invalid-email':
+          errorMessage = 'Invalid email address format.';
+          break;
+        case 'auth/user-not-found':
+          errorMessage = 'User with this email does not exist.';
+          break;
+        case 'auth/wrong-password':
+          errorMessage = 'Invalid password.';
           break;
         case 'auth/too-many-requests':
           errorMessage = 'Too many request. Try again in a minute.';
@@ -189,10 +221,10 @@ export const passwordResetFailure = (errorMessage) => {
   };
 };
 
-export const passwordResetSuccess = () => {
+export const passwordResetSuccess = (message) => {
   return {
     payload: {
-      message: 'Please check your inbox for password reset mail.',
+      message,
     },
     type: userActionTypes.PASSWORD_RESET_SUCCESS,
   };
@@ -313,10 +345,18 @@ export const UpdateUserInfoRequest = ({avatar, bio, name}) => {
           ? avatar
           : await uploadPhotoAsync(avatar, `profile/${currentUser.uid}/avatar`)
         : null;
+      let userName = name.replace(/\w\S*/g, function (txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+      let initials = userName
+        .match(/\b(\w)/g)
+        .join('')
+        .slice(0, 2);
       let userInfo = {
         avatar: photo,
         bio: bio,
-        name: name,
+        initials: initials,
+        name: userName,
       };
       firestore().collection('users').doc(currentUser.uid).update(userInfo);
       dispatch(UpdateUserInfoSuccess(userInfo));
@@ -460,5 +500,17 @@ export const DeleteSharedPostSuccess = (postId) => {
   return {
     type: userActionTypes.DELETE_POST_SUCCESS,
     payload: postId,
+  };
+};
+
+export const IncreaseLikedPostCountRequest = () => {
+  return {
+    type: userActionTypes.INCREASE_LIKED_POST_COUNT,
+  };
+};
+
+export const DecreaseLikedPostCountRequest = () => {
+  return {
+    type: userActionTypes.DECREASE_LIKED_POST_COUNT,
   };
 };

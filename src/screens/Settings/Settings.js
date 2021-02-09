@@ -31,7 +31,11 @@ const Settings = () => {
           style: {color: '#000', fontSize: fontscale(24)},
         }}
       />
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          navigation.push('ChangePassword');
+        }}>
         <Icon name="lock-outline" />
         <Text style={styles.buttonText}>Change Password</Text>
         <View style={styles.leftIcon}>
