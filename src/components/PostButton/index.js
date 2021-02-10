@@ -15,6 +15,7 @@ const PostButton = ({size, onPress, title, type, iconName}) => {
         borderColor: '#6a6a6a',
         borderWidth: 0.8,
         flexDirection: 'row',
+        borderRadius: widthPercentageToDP(2),
         paddingTop: heightPercentageToDP(0.6),
         paddingBottom: heightPercentageToDP(0.8),
         paddingStart: widthPercentageToDP(11),

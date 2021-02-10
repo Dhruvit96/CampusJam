@@ -87,6 +87,7 @@ function getEventHandlers(
   };
   const _onRefresh = async () => {
     setRefreshing(true);
+    setLoaded(false);
     let postsData = await firestore()
       .collection('posts')
       .where('likedBy', 'array-contains', user.uid)

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     width: '80%',
     margin: widthPercentageToDP(10),
     marginBottom: -widthPercentageToDP(4),
-    borderRadius: widthPercentageToDP(1),
+    borderRadius: widthPercentageToDP(2),
     padding: widthPercentageToDP(3.5),
     borderWidth: 1.5,
     alignItems: 'center',

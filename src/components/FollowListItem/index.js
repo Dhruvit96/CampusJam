@@ -55,6 +55,9 @@ const FollowListItem = ({item}) => {
                   width: widthPercentageToDP(25),
                   backgroundColor: isFollowed ? '#f3f3f3' : '#61c0ff',
                 }}
+                buttonStyle={{
+                  borderRadius: widthPercentageToDP(2),
+                }}
                 titleStyle={{color: isFollowed ? '#61c0ff' : '#f3f3f3'}}
               />
             </View>

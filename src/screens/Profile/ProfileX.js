@@ -302,6 +302,9 @@ function getEventHandlers(
                 color: isFollowed ? '#61c0ff' : '#f3f3f3',
                 fontSize: fontscale(15),
               }}
+              buttonStyle={{
+                borderRadius: widthPercentageToDP(2),
+              }}
             />
           </View>
         </View>

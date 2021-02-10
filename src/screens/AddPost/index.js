@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {Avatar, Button, Header, Icon, Text} from 'react-native-elements';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
 import {
   fontscale,
   heightPercentageToDP,
@@ -94,6 +96,7 @@ const AddPost = ({route}) => {
                 buttonStyle={{
                   width: widthPercentageToDP(24),
                   backgroundColor: '#61c0ff',
+                  borderRadius: widthPercentageToDP(2),
                 }}
                 onPress={route.params ? _onPressUpdate : _onPressPost}
                 loading={loading}
@@ -127,28 +130,25 @@ const AddPost = ({route}) => {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'flex-start',
+          alignItems: 'center',
+          justifyContent: 'center',
           backgroundColor: 'white',
           padding: widthPercentageToDP(3),
           paddingStart: widthPercentageToDP(6),
         }}>
-        <TouchableOpacity onPress={_onPressImage}>
-          <Icon
-            name="image"
-            style={{marginEnd: widthPercentageToDP(4)}}
-            size={fontscale(24)}
-          />
+        <TouchableOpacity onPress={_onPressImage} style={styles.iconContainer}>
+          <FontAwesome name="picture-o" size={fontscale(20)} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={_onPressCamera}>
-          <Icon
-            name="photo-camera"
-            style={{marginEnd: widthPercentageToDP(4)}}
-            size={fontscale(24)}
-          />
+        <TouchableOpacity onPress={_onPressCamera} style={styles.iconContainer}>
+          <Feather name="camera" size={fontscale(20)} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={_onPressRemove}>
-          <Icon name="highlight-remove" size={fontscale(24)} />
-        </TouchableOpacity>
+        {image ? (
+          <TouchableOpacity
+            onPress={_onPressRemove}
+            style={styles.iconContainer}>
+            <Feather name="x" size={fontscale(20)} />
+          </TouchableOpacity>
+        ) : null}
       </View>
     </>
   );
@@ -231,6 +231,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  iconContainer: {
+    marginEnd: widthPercentageToDP(4),
+    borderRadius: widthPercentageToDP(10),
+    borderWidth: widthPercentageToDP(0.6),
+    padding: widthPercentageToDP(2),
   },
   name: {
     fontSize: fontscale(16),

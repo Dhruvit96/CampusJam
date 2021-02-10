@@ -86,7 +86,9 @@ class PostItem extends PureComponent {
             />
           </View>
           <View style={{marginStart: widthPercentageToDP(3)}}>
-            <Text style={styles.name}>{this.props.item.name}</Text>
+            <TouchableOpacity onPress={_onPressAvatar}>
+              <Text style={styles.name}>{this.props.item.name}</Text>
+            </TouchableOpacity>
             <Text style={styles.text}>
               {moment(this.props.item.created_at).fromNow() ==
               'a few seconds ago'
@@ -303,7 +305,7 @@ const styles = StyleSheet.create({
   },
   rightComponent: {
     position: 'absolute',
-    end: 0,
+    end: widthPercentageToDP(2),
     alignSelf: 'center',
   },
   text: {

@@ -107,6 +107,7 @@ const EditProfile = () => {
                   title={'Update'}
                   buttonStyle={{
                     width: widthPercentageToDP(48),
+                    borderRadius: widthPercentageToDP(2),
                     marginStart: widthPercentageToDP(18),
                     backgroundColor: '#61c0ff',
                   }}

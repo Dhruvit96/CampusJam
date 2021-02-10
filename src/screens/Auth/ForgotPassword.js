@@ -125,6 +125,7 @@ function getEventHandlers(setLoading, dispatch) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: '#61c0ff',
+    borderRadius: widthPercentageToDP(2),
     width: widthPercentageToDP(70),
     height: heightPercentageToDP(6.5),
     marginEnd: widthPercentageToDP(2),

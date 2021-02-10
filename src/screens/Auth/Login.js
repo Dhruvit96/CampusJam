@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
   },
   submit: {
     backgroundColor: '#61c0ff',
+    borderRadius: widthPercentageToDP(2),
     width: widthPercentageToDP(76),
     height: heightPercentageToDP(6.5),
     marginEnd: widthPercentageToDP(2),
