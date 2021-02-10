@@ -16,6 +16,7 @@ import {
   ToggleLoading,
   UnfollowRequest,
   UpdateExtraInfoRequest,
+  UpdateSharedPostRequest,
 } from '../actions/userActions';
 import {
   CreateNotificationRequest,
@@ -53,6 +54,8 @@ export const FetchPostListRequest = () => {
           });
         }),
       );
+      if (payload.length < LIMIT_POSTS_PER_LOADING)
+        dispatch(ToggleAllLoadedSuccess(true));
       dispatch(FetchPostListSuccess(payload));
     } catch (e) {
       console.log(e);
@@ -216,11 +219,74 @@ export const CreatePostFailure = () => {
   };
 };
 
+export const UpdatePostRequest = ({postId, image, text}) => {
+  return async (dispatch) => {
+    try {
+      await dispatch(ToggleLoading());
+      let post = store.getState().user.extraInfo.posts;
+      post = post.filter((x) => x.postId === postId)[0];
+      let scale = post.scale,
+        uploadedImageUri = post.image;
+      if (image !== post.image) {
+        let imageUri = await ImageManipulator.manipulateAsync(
+          image,
+          [{resize: {width: 580}}],
+          {format: 'jpeg'},
+        );
+        scale = imageUri.height / imageUri.width;
+        uploadedImageUri = await uploadPhotoAsync(
+          imageUri.uri,
+          `photos/${currentUser.uid}/${time}`,
+        );
+      }
+      let data = {
+        image: uploadedImageUri,
+        text: text,
+        scale: scale,
+      };
+      await firestore().collection('posts').doc(postId).update(data);
+      dispatch(UpdatePostSuccess({data, postId}));
+      dispatch(UpdateSharedPostRequest({data, postId}));
+    } catch (e) {
+      console.warn(e);
+      dispatch(UpdatePostFailure());
+    } finally {
+      dispatch(ToggleLoading());
+    }
+  };
+};
+
+export const UpdatePostSuccess = (payload) => {
+  return {
+    type: postActionTypes.UPDATE_POST_SUCCESS,
+    payload: payload,
+  };
+};
+
+export const UpdatePostFailure = () => {
+  return {
+    type: postActionTypes.UPDATE_POST_FAILURE,
+    payload: {
+      message: 'Can not update this post!',
+    },
+  };
+};
+
 export const DeletePostRequest = (postId) => {
   return async (dispatch) => {
     try {
       let uid = store.getState().user.userInfo.uid;
       await firestore().collection('posts').doc(postId).delete();
+      let data = await firestore()
+        .collection('comments')
+        .where('postId', '==', postId)
+        .get();
+      await Promise.all(
+        data.docs.map(async (doc) => {
+          await firestore().collection('comments').doc(`${doc.id}`).delete();
+          return 0;
+        }),
+      );
       dispatch(
         DeleteNotificationRequest({
           postId: postId,

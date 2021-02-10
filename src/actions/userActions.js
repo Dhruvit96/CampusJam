@@ -376,6 +376,13 @@ export const UpdateUserInfoFailure = () => {
   };
 };
 
+export const UpdateSharedPostRequest = (payload) => {
+  return {
+    type: userActionTypes.UPDATE_SHARED_POST_SUCCESS,
+    payload: payload,
+  };
+};
+
 export const UpdateUserInfoSuccess = (user) => {
   return {
     type: userActionTypes.UPDATE_USER_INFO_SUCCESS,

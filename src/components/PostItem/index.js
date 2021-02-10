@@ -44,6 +44,7 @@ class PostItem extends PureComponent {
     const {
       _onPressAvatar,
       _onPressComment,
+      _onPressEdit,
       _onPressDelete,
       _onPressLike,
     } = getEventHandlers(
@@ -109,6 +110,10 @@ class PostItem extends PureComponent {
                   <Button
                     type="clear"
                     title="Edit post"
+                    onPress={() => {
+                      _toggleVisible();
+                      _onPressEdit();
+                    }}
                     titleStyle={{color: 'black', fontWeight: '100'}}
                   />
                   <Button
@@ -250,6 +255,9 @@ function getEventHandlers(
       },
     ]);
   };
+  const _onPressEdit = () => {
+    navigation.push('AddPost', {postId: postId});
+  };
   const _onPressComment = async () => {
     navigation.push('AddComment', {postId: postId, uid: uid});
   };
@@ -259,6 +267,7 @@ function getEventHandlers(
   return {
     _onPressAvatar,
     _onPressComment,
+    _onPressEdit,
     _onPressDelete,
     _onPressLike,
   };

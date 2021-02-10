@@ -29,6 +29,7 @@ const defaultState = {
 };
 
 const reducer = (state = defaultState, action) => {
+  let index = 0;
   switch (action.type) {
     case userActionTypes.LOGOUT_SUCCESS:
       state = {...defaultState};
@@ -117,6 +118,27 @@ const reducer = (state = defaultState, action) => {
             ...state.userInfo?.notificationSettings,
             ...action.payload,
           },
+        },
+      };
+      return state;
+    case userActionTypes.UPDATE_SHARED_POST_SUCCESS:
+      index = findWithAttr(
+        state.extraInfo.posts,
+        'postId',
+        action.payload.postId,
+      );
+      state = {
+        ...state,
+        extraInfo: {
+          ...state.extraInfo,
+          posts: [
+            ...state.extraInfo.posts.slice(0, index),
+            {
+              ...state.extraInfo.posts[index],
+              ...action.payload.data,
+            },
+            ...state.extraInfo.posts.slice(index + 1),
+          ],
         },
       };
       return state;

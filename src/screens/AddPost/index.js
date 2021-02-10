@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   Image,
@@ -18,23 +18,42 @@ import * as ImagePicker from 'expo-image-picker';
 import {useSelector} from '../../store';
 import {TextInput} from 'react-native';
 import {useDispatch} from 'react-redux';
-import {CreatePostRequest} from '../../actions/postActions';
+import {CreatePostRequest, UpdatePostRequest} from '../../actions/postActions';
 import {navigation} from '../../navigations/RootNavigation';
 
-const AddPost = () => {
+const AddPost = ({route}) => {
   const user = useSelector((state) => state.user.userInfo);
   const loading = useSelector((state) => state.user.loading);
+  let post = useSelector((state) => state.user.extraInfo.posts);
   const [text, setText] = useState('');
   const [image, setImage] = useState();
   const [scale, setScale] = useState(0);
   const dispatch = useDispatch();
+  useEffect(() => {
+    if (typeof route.params !== 'undefined') {
+      post = post.filter((x) => x.postId === route.params.postId)[0];
+      setImage(post.image);
+      setText(post.text);
+      setScale(post.scale);
+    }
+  }, []);
   const {
     _onChangeText,
     _onPressBack,
     _onPressCamera,
     _onPressImage,
     _onPressPost,
-  } = getEventHandlers(dispatch, image, setImage, setScale, setText, text);
+    _onPressRemove,
+    _onPressUpdate,
+  } = getEventHandlers(
+    dispatch,
+    image,
+    route.params?.postId,
+    setImage,
+    setScale,
+    setText,
+    text,
+  );
   return (
     <>
       <View style={styles.container}>
@@ -49,7 +68,7 @@ const AddPost = () => {
             onPress: _onPressBack,
           }}
           centerComponent={{
-            text: 'Create Post',
+            text: route.params ? 'Edit Post' : 'Create Post',
             style: {color: '#61c0ff', fontSize: fontscale(24)},
           }}
         />
@@ -71,12 +90,12 @@ const AddPost = () => {
             </View>
             <View style={styles.rightComponent}>
               <Button
-                title="Post"
+                title={route.params ? 'Update' : 'Post'}
                 buttonStyle={{
                   width: widthPercentageToDP(24),
                   backgroundColor: '#61c0ff',
                 }}
-                onPress={_onPressPost}
+                onPress={route.params ? _onPressUpdate : _onPressPost}
                 loading={loading}
                 disabled={text.length == 0 && typeof image === 'undefined'}
               />
@@ -121,14 +140,29 @@ const AddPost = () => {
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={_onPressCamera}>
-          <Icon name="photo-camera" size={fontscale(24)} />
+          <Icon
+            name="photo-camera"
+            style={{marginEnd: widthPercentageToDP(4)}}
+            size={fontscale(24)}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={_onPressRemove}>
+          <Icon name="highlight-remove" size={fontscale(24)} />
         </TouchableOpacity>
       </View>
     </>
   );
 };
 
-function getEventHandlers(dispatch, image, setImage, setScale, setText, text) {
+function getEventHandlers(
+  dispatch,
+  image,
+  postId,
+  setImage,
+  setScale,
+  setText,
+  text,
+) {
   const _onChangeText = (text) => setText(text);
   const _onPressBack = () => navigation.goBack();
   const _onPressCamera = async () => {
@@ -175,12 +209,21 @@ function getEventHandlers(dispatch, image, setImage, setScale, setText, text) {
     await dispatch(CreatePostRequest({image: image, text: text}));
     navigation.goBack();
   };
+  const _onPressUpdate = async () => {
+    await dispatch(UpdatePostRequest({postId, image, text}));
+    navigation.goBack();
+  };
+  const _onPressRemove = () => {
+    setImage(null);
+  };
   return {
     _onChangeText,
     _onPressBack,
     _onPressCamera,
     _onPressImage,
     _onPressPost,
+    _onPressRemove,
+    _onPressUpdate,
   };
 }
 

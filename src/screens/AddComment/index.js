@@ -10,6 +10,7 @@ import {
 import {Avatar, Button, Header, Icon, Text} from 'react-native-elements';
 import CommentItem from '../../components/CommentItem/index.js';
 import {
+  FieldValue,
   fontscale,
   heightPercentageToDP,
   notificationTypes,
@@ -225,6 +226,7 @@ function getEventHandlers(
           text: comment,
           postId: postId,
           create_at: Date.now(),
+          replies: [],
         })
         .then((doc) => {
           let data = {
@@ -263,7 +265,11 @@ function getEventHandlers(
           text: comment,
           create_at: Date.now(),
         })
-        .then((doc) => {
+        .then(async (doc) => {
+          await firestore()
+            .collection('comments')
+            .doc(`${replyId.commentId}`)
+            .update({replies: FieldValue.arrayUnion(uid)});
           let index = 0;
           let data = commentsData.filter((ref, i) => {
             if (ref.title.commentId == replyId.commentId) {

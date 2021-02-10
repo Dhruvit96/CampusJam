@@ -3,6 +3,7 @@ import {Alert} from 'react-native';
 const defaultState = {loaded: false, posts: []};
 
 const reducer = (state = defaultState, action) => {
+  let index = 0;
   switch (action.type) {
     case postActionTypes.FETCH_POST_LIST_SUCCESS:
       state = {...state, posts: [...action.payload]};
@@ -12,8 +13,20 @@ const reducer = (state = defaultState, action) => {
       return state;
     case postActionTypes.CREATE_POST_SUCCESS:
       state = {...state, posts: [action.payload, ...state.posts]};
+      return state;
+    case postActionTypes.UPDATE_POST_SUCCESS:
+      index = findWithAttr(state.posts, 'postId', action.payload.postId);
+      state = {
+        ...state,
+        posts: [
+          ...state.posts.slice(0, index),
+          {...state.posts[index], ...action.payload.data},
+          ...state.posts.slice(index + 1),
+        ],
+      };
+      return state;
     case postActionTypes.DELETE_POST_SUCCESS:
-      let index = findWithAttr(state.posts, 'postId', action.payload);
+      index = findWithAttr(state.posts, 'postId', action.payload);
       if (index >= 0)
         state = {
           ...state,
@@ -32,6 +45,7 @@ const reducer = (state = defaultState, action) => {
     case postActionTypes.TOGGLE_FOLLOW_USER_FAILURE:
     case postActionTypes.DELETE_POST_FAILURE:
     case postActionTypes.CREATE_POST_FAILURE:
+    case postActionTypes.UPDATE_POST_FAILURE:
       Alert.alert('Error', action.payload.message);
       return state;
     default:
