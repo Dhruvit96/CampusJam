@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, FlatList} from 'react-native';
+import {Alert, View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
 import EmptyList from '../../components/EmptyList';
@@ -48,33 +48,41 @@ const FollowingList = ({route, userId}) => {
 
 function getEventHandlers(setRefreshing, setFollowingsData, currentUserId) {
   const _onRefresh = async (uid) => {
-    setRefreshing(true);
-    let userData = await firestore().collection('users').doc(uid).get();
-    userData = userData.data();
-    let followingsData = [];
-    let index = -1;
-    await Promise.all(
-      userData.followings.map(async (id, i) => {
-        let followingData = await firestore().collection('users').doc(id).get();
-        followingData = followingData.data();
-        if (id === currentUserId) index = i;
-        return followingsData.push({
-          avatar: followingData.avatar,
-          id: followingData.id,
-          initials: followingData.initials,
-          name: followingData.name,
-          uid: id,
-        });
-      }),
-    );
-    if (index > -1)
-      followingsData = [
-        followingsData[index],
-        ...followingsData.slice(0, index),
-        ...followingsData.slice(index + 1),
-      ];
-    setFollowingsData(followingsData);
-    setRefreshing(false);
+    try {
+      setRefreshing(true);
+      let userData = await firestore().collection('users').doc(uid).get();
+      userData = userData.data();
+      let followingsData = [];
+      let index = -1;
+      await Promise.all(
+        userData.followings.map(async (id, i) => {
+          let followingData = await firestore()
+            .collection('users')
+            .doc(id)
+            .get();
+          followingData = followingData.data();
+          if (id === currentUserId) index = i;
+          return followingsData.push({
+            avatar: followingData.avatar,
+            id: followingData.id,
+            initials: followingData.initials,
+            name: followingData.name,
+            uid: id,
+          });
+        }),
+      );
+      if (index > -1)
+        followingsData = [
+          followingsData[index],
+          ...followingsData.slice(0, index),
+          ...followingsData.slice(index + 1),
+        ];
+      setFollowingsData(followingsData);
+      setRefreshing(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not load following list');
+    }
   };
   const _renderEmpty = () => <EmptyList message="No followings to show." />;
   return {

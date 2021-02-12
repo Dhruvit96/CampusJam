@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {Header, Icon, Text} from 'react-native-elements';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   StatusBar,
   TextInput,
@@ -14,7 +15,7 @@ import {
 } from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
 import firestore from '@react-native-firebase/firestore';
-import SearchItem from '../../components/SearchItem.js';
+import SearchItem from '../../components/SearchItem';
 const Search = () => {
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -78,54 +79,59 @@ const Search = () => {
 
 function getEventHandlers(loading, query, setQuery, setUserData, setLoading) {
   const _searchUser = async (txt) => {
-    setQuery(txt);
-    let text = txt.replace(/\w\S*/g, function (txt) {
-      return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-    if (txt.length == 0) setUserData([]);
-    else {
-      setLoading(true);
-      let userData1 = await firestore()
-        .collection('users')
-        .where('name', '>=', text)
-        .where('name', '<=', text + '\uf8ff')
-        .get();
-      let userData2 = await firestore()
-        .collection('users')
-        .where('id', '>=', text.toUpperCase())
-        .where('id', '<=', text.toUpperCase() + '\uf8ff')
-        .get();
-      let users = [];
-      let ids = [];
-      await Promise.all(
-        userData1.docs.map((doc) => {
-          let data = doc.data();
-          ids.push(doc.id);
-          return users.push({
-            avatar: data.avatar,
-            id: data.id,
-            initials: data.initials,
-            name: data.name,
-            uid: doc.id,
-          });
-        }),
-      );
-      await Promise.all(
-        userData2.docs.map((doc) => {
-          let data = doc.data();
-          if (ids.indexOf(doc.id) > 0) return;
-          return users.push({
-            avatar: data.avatar,
-            id: data.id,
-            initials: data.initials,
-            name: data.name,
-            uid: doc.id,
-          });
-        }),
-      );
-      setUserData(users);
+    try {
+      setQuery(txt);
+      let text = txt.replace(/\w\S*/g, function (txt) {
+        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      });
+      if (txt.length == 0) setUserData([]);
+      else {
+        setLoading(true);
+        let userData1 = await firestore()
+          .collection('users')
+          .where('name', '>=', text)
+          .where('name', '<=', text + '\uf8ff')
+          .get();
+        let userData2 = await firestore()
+          .collection('users')
+          .where('id', '>=', text.toUpperCase())
+          .where('id', '<=', text.toUpperCase() + '\uf8ff')
+          .get();
+        let users = [];
+        let ids = [];
+        await Promise.all(
+          userData1.docs.map((doc) => {
+            let data = doc.data();
+            ids.push(doc.id);
+            return users.push({
+              avatar: data.avatar,
+              id: data.id,
+              initials: data.initials,
+              name: data.name,
+              uid: doc.id,
+            });
+          }),
+        );
+        await Promise.all(
+          userData2.docs.map((doc) => {
+            let data = doc.data();
+            if (ids.indexOf(doc.id) > 0) return;
+            return users.push({
+              avatar: data.avatar,
+              id: data.id,
+              initials: data.initials,
+              name: data.name,
+              uid: doc.id,
+            });
+          }),
+        );
+        setUserData(users);
+      }
+      setLoading(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not Search at time');
     }
-    setLoading(false);
   };
   const _renderEmpty = () =>
     loading ? (

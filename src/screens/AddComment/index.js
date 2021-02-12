@@ -14,7 +14,6 @@ import {
   fontscale,
   heightPercentageToDP,
   notificationTypes,
-  seenTypes,
   widthPercentageToDP,
 } from '../../constants';
 import firestore from '@react-native-firebase/firestore';
@@ -23,6 +22,7 @@ import {navigation} from '../../navigations/RootNavigation';
 import {useSelector} from '../../store.js';
 import {useDispatch} from 'react-redux';
 import {CreateNotificationRequest} from '../../actions/notificationActions.js';
+import {PostRequestFailure} from '../../actions/postActions.js';
 
 const AddComment = ({route}) => {
   const postId = route.params.postId;
@@ -217,110 +217,112 @@ function getEventHandlers(
   const _renderEmpty = () => <EmptyList message={'No comments'} />;
 
   const _addComment = async () => {
-    setLoading(true);
-    if (replyTo.length == 0) {
-      await firestore()
-        .collection('comments')
-        .add({
-          uid: uid,
-          text: comment,
-          postId: postId,
-          create_at: Date.now(),
-          replies: [],
-        })
-        .then((doc) => {
-          let data = {
-            title: {
-              uid: uid,
-              text: comment,
+    try {
+      setLoading(true);
+      if (replyTo.length == 0) {
+        await firestore()
+          .collection('comments')
+          .add({
+            uid: uid,
+            text: comment,
+            postId: postId,
+            create_at: Date.now(),
+            replies: [],
+          })
+          .then((doc) => {
+            let data = {
+              title: {
+                uid: uid,
+                text: comment,
+                postId: postId,
+                create_at: Date.now(),
+                avatar: user.avatar,
+                initials: user.initials,
+                name: user.name,
+                commentId: doc.id,
+              },
+              data: [],
+            };
+            setCommentData([data, ...commentsData]);
+          });
+        if (userId != uid)
+          dispatch(
+            CreateNotificationRequest({
               postId: postId,
-              create_at: Date.now(),
-              avatar: user.avatar,
-              initials: user.initials,
-              name: user.name,
-              commentId: doc.id,
-            },
-            data: [],
-          };
-          setCommentData([data, ...commentsData]);
-        });
-      if (userId != uid)
-        dispatch(
-          CreateNotificationRequest({
-            postId: postId,
-            userIds: [userId],
-            from: uid,
-            created_at: Date.now(),
-            seen: seenTypes.NOTSEEN,
-            type: notificationTypes.COMMENT_MY_POST,
-          }),
-        );
-    } else {
-      await firestore()
-        .collection('comments')
-        .doc(`${replyId.commentId}`)
-        .collection('replies')
-        .add({
-          uid: uid,
-          text: comment,
-          create_at: Date.now(),
-        })
-        .then(async (doc) => {
-          await firestore()
-            .collection('comments')
-            .doc(`${replyId.commentId}`)
-            .update({replies: FieldValue.arrayUnion(uid)});
-          let index = 0;
-          let data = commentsData.filter((ref, i) => {
-            if (ref.title.commentId == replyId.commentId) {
-              index = i;
-              return true;
-            } else return false;
-          })[0];
-          data.data = [
-            ...data.data,
-            {
-              uid: uid,
-              text: comment,
-              create_at: Date.now(),
-              avatar: user.avatar,
-              initials: user.initials,
-              name: user.name,
-              commentId: doc.id,
-            },
-          ];
-          setCommentData([
-            ...commentsData.slice(0, index),
-            data,
-            ...commentsData.slice(index + 1),
-          ]);
-        });
-      if (userId != uid)
-        dispatch(
-          CreateNotificationRequest({
-            postId: postId,
-            userIds: [userId],
-            from: uid,
-            created_at: Date.now(),
-            seen: seenTypes.NOTSEEN,
-            type: notificationTypes.COMMENT_MY_POST,
-          }),
-        );
-      if (replyId.uid != uid)
-        dispatch(
-          CreateNotificationRequest({
-            postId: postId,
-            userIds: [replyId.uid],
-            from: uid,
-            created_at: Date.now(),
-            seen: seenTypes.NOTSEEN,
-            type: notificationTypes.REPLIED_COMMENT,
-          }),
-        );
+              userIds: [userId],
+              from: uid,
+              created_at: Date.now(),
+              type: notificationTypes.COMMENT_MY_POST,
+            }),
+          );
+      } else {
+        await firestore()
+          .collection('comments')
+          .doc(`${replyId.commentId}`)
+          .collection('replies')
+          .add({
+            uid: uid,
+            text: comment,
+            create_at: Date.now(),
+          })
+          .then(async (doc) => {
+            await firestore()
+              .collection('comments')
+              .doc(`${replyId.commentId}`)
+              .update({replies: FieldValue.arrayUnion(uid)});
+            let index = 0;
+            let data = commentsData.filter((ref, i) => {
+              if (ref.title.commentId == replyId.commentId) {
+                index = i;
+                return true;
+              } else return false;
+            })[0];
+            data.data = [
+              ...data.data,
+              {
+                uid: uid,
+                text: comment,
+                create_at: Date.now(),
+                avatar: user.avatar,
+                initials: user.initials,
+                name: user.name,
+                commentId: doc.id,
+              },
+            ];
+            setCommentData([
+              ...commentsData.slice(0, index),
+              data,
+              ...commentsData.slice(index + 1),
+            ]);
+          });
+        if (userId != uid && userId != replyId.uid)
+          dispatch(
+            CreateNotificationRequest({
+              postId: postId,
+              userIds: [userId],
+              from: uid,
+              created_at: Date.now(),
+              type: notificationTypes.COMMENT_MY_POST,
+            }),
+          );
+        if (replyId.uid != uid)
+          dispatch(
+            CreateNotificationRequest({
+              postId: postId,
+              userIds: [replyId.uid],
+              from: uid,
+              created_at: Date.now(),
+              type: notificationTypes.REPLIED_COMMENT,
+            }),
+          );
+      }
+      setComment('');
+      setReplyTo('');
+      setLoading(false);
+    } catch (e) {
+      console.warn(e);
+      dispatch(PostRequestFailure('Can not add comment'));
     }
-    setComment('');
-    setReplyTo('');
-    setLoading(false);
   };
   const _renderItem = ({item}) => (
     <CommentItem

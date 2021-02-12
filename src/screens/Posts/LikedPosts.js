@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StatusBar, View} from 'react-native';
+import {Alert, FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
 import EmptyList from '../../components/EmptyList';
@@ -11,6 +11,7 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
+
 const LikedPosts = ({route}) => {
   const user = route.params;
   const [refreshing, setRefreshing] = useState(false);
@@ -86,58 +87,25 @@ function getEventHandlers(
     navigation.goBack();
   };
   const _onRefresh = async () => {
-    setRefreshing(true);
-    setLoaded(false);
-    let postsData = await firestore()
-      .collection('posts')
-      .where('likedBy', 'array-contains', user.uid)
-      .orderBy('created_at', 'desc')
-      .limit(LIMIT_POSTS_PER_LOADING)
-      .get();
-    let posts = [];
-    await Promise.all(
-      postsData.docs.map(async (doc) => {
-        let postData = doc.data();
-        let userData = await firestore()
-          .collection('users')
-          .doc(postData.uid)
-          .get();
-        userData = userData.data();
-        return posts.push({
-          ...postData,
-          avatar: userData.avatar,
-          postId: doc.id,
-          initials: userData.initials,
-          name: userData.name,
-          isSelf: user.uid == postData.uid,
-          isLiked: postData.likedBy.indexOf(user.uid) >= 0,
-        });
-      }),
-    );
-    if (posts.length < LIMIT_POSTS_PER_LOADING) setLoaded(true);
-    setPostsData(posts);
-    setRefreshing(false);
-  };
-  const _loadMore = async ({distanceFromEnd}) => {
-    if (distanceFromEnd >= 0 && !loaded) {
-      let starting = postsData[postsData.length - 1].created_at;
-      let posts = await firestore()
+    try {
+      setRefreshing(true);
+      setLoaded(false);
+      let postsData = await firestore()
         .collection('posts')
         .where('likedBy', 'array-contains', user.uid)
         .orderBy('created_at', 'desc')
-        .startAfter(starting)
         .limit(LIMIT_POSTS_PER_LOADING)
         .get();
-      let payload = [];
+      let posts = [];
       await Promise.all(
-        posts.docs.map(async (doc) => {
+        postsData.docs.map(async (doc) => {
           let postData = doc.data();
           let userData = await firestore()
             .collection('users')
             .doc(postData.uid)
             .get();
           userData = userData.data();
-          return payload.push({
+          return posts.push({
             ...postData,
             avatar: userData.avatar,
             postId: doc.id,
@@ -148,8 +116,51 @@ function getEventHandlers(
           });
         }),
       );
-      if (payload.length < LIMIT_POSTS_PER_LOADING) setLoaded(true);
-      setPostsData([...postsData, ...payload]);
+      if (posts.length < LIMIT_POSTS_PER_LOADING) setLoaded(true);
+      setPostsData(posts);
+      setRefreshing(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not load posts');
+    }
+  };
+  const _loadMore = async ({distanceFromEnd}) => {
+    try {
+      if (distanceFromEnd >= 0 && !loaded) {
+        let starting = postsData[postsData.length - 1].created_at;
+        let posts = await firestore()
+          .collection('posts')
+          .where('likedBy', 'array-contains', user.uid)
+          .orderBy('created_at', 'desc')
+          .startAfter(starting)
+          .limit(LIMIT_POSTS_PER_LOADING)
+          .get();
+        let payload = [];
+        await Promise.all(
+          posts.docs.map(async (doc) => {
+            let postData = doc.data();
+            let userData = await firestore()
+              .collection('users')
+              .doc(postData.uid)
+              .get();
+            userData = userData.data();
+            return payload.push({
+              ...postData,
+              avatar: userData.avatar,
+              postId: doc.id,
+              initials: userData.initials,
+              name: userData.name,
+              isSelf: user.uid == postData.uid,
+              isLiked: postData.likedBy.indexOf(user.uid) >= 0,
+            });
+          }),
+        );
+        if (payload.length < LIMIT_POSTS_PER_LOADING) setLoaded(true);
+        setPostsData([...postsData, ...payload]);
+      }
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not load more posts');
     }
   };
   const _renderEmpty = () => <EmptyList message="No posts to show." />;

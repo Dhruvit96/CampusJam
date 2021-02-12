@@ -1,7 +1,6 @@
 import {
   userActionTypes,
   notificationTypes,
-  seenTypes,
   uploadPhotoAsync,
   FieldValue,
 } from '../constants';
@@ -12,6 +11,15 @@ import {
   CreateNotificationRequest,
   DeleteNotificationRequest,
 } from '../actions/notificationActions';
+
+export const UserRequestFailure = (errorMessage) => {
+  return {
+    type: userActionTypes.USER_REQUEST_FAILURE,
+    payload: {
+      message: errorMessage,
+    },
+  };
+};
 
 export const LoginRequest = ({email, password}) => {
   return async (dispatch) => {
@@ -54,14 +62,7 @@ export const LoginRequest = ({email, password}) => {
     }
   };
 };
-export const LoginFailure = (errorMessage) => {
-  return {
-    type: userActionTypes.LOGIN_FAILURE,
-    payload: {
-      message: errorMessage,
-    },
-  };
-};
+
 export const LoginSuccess = (payload) => {
   return {
     type: userActionTypes.LOGIN_SUCCESS,
@@ -75,7 +76,7 @@ export const LogoutRequest = () => {
       await auth().signOut();
       dispatch(LogoutSuccess());
     } catch (e) {
-      dispatch(LogoutFailure());
+      dispatch(UserRequestFailure('Can not logout now!'));
     }
   };
 };
@@ -83,15 +84,6 @@ export const LogoutRequest = () => {
 export const LogoutSuccess = () => {
   return {
     type: userActionTypes.LOGOUT_SUCCESS,
-  };
-};
-
-export const LogoutFailure = () => {
-  return {
-    type: userActionTypes.LOGOUT_FAILURE,
-    payload: {
-      message: 'Can not logout now!',
-    },
   };
 };
 
@@ -107,25 +99,15 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
           : null;
       let name = firstName + ' ' + lastName;
       let initials = firstName[0].toUpperCase() + lastName[0].toUpperCase();
-      await firestore()
-        .collection('users')
-        .doc(ref.user.uid)
-        .set({
-          avatar: null,
-          bio: null,
-          email: email,
-          followings: [],
-          id: id,
-          initials: initials,
-          name: name,
-          notificationSettings: {
-            posts: true,
-            comments: true,
-            likes: true,
-            followed: true,
-            pauseAll: false,
-          },
-        });
+      await firestore().collection('users').doc(ref.user.uid).set({
+        avatar: null,
+        bio: null,
+        email: email,
+        followings: [],
+        id: id,
+        initials: initials,
+        name: name,
+      });
       dispatch(RegisterSuccess());
     } catch (error) {
       let errorMessage = '';
@@ -145,8 +127,17 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
         default:
           errorMessage = 'Check your internet connection.';
       }
-      dispatch(RegisterFailure(errorMessage));
+      dispatch(UserRequestFailure(errorMessage));
     }
+  };
+};
+
+export const RegisterSuccess = () => {
+  return {
+    payload: {
+      message: 'Please check your inbox for verification.',
+    },
+    type: userActionTypes.REGISTER_SUCCESS,
   };
 };
 
@@ -174,7 +165,7 @@ export const passwordResetRequest = (email) => {
         default:
           errorMessage = 'Check your internet connection.';
       }
-      dispatch(passwordResetFailure(errorMessage));
+      dispatch(UserRequestFailure(errorMessage));
     }
   };
 };
@@ -207,43 +198,17 @@ export const ChangePasswordRequest = ({password, newPassword}) => {
         default:
           errorMessage = 'Check your internet connection.';
       }
-      dispatch(passwordResetFailure(errorMessage));
+      dispatch(UserRequestFailure(errorMessage));
     }
-  };
-};
-
-export const passwordResetFailure = (errorMessage) => {
-  return {
-    payload: {
-      message: errorMessage,
-    },
-    type: userActionTypes.PASSWORD_RESET_FAILURE,
   };
 };
 
 export const passwordResetSuccess = (message) => {
   return {
+    type: userActionTypes.PASSWORD_RESET_SUCCESS,
     payload: {
       message,
     },
-    type: userActionTypes.PASSWORD_RESET_SUCCESS,
-  };
-};
-
-export const RegisterFailure = (errorMessage) => {
-  return {
-    payload: {
-      message: errorMessage,
-    },
-    type: userActionTypes.REGISTER_FAILURE,
-  };
-};
-export const RegisterSuccess = () => {
-  return {
-    payload: {
-      message: 'Please check your inbox for verification.',
-    },
-    type: userActionTypes.REGISTER_SUCCESS,
   };
 };
 
@@ -302,23 +267,8 @@ export const FetchExtraInfoRequest = () => {
       dispatch(FetchExtraInfoSuccess(payload));
     } catch (e) {
       console.warn(e);
-      dispatch(FetchExtraInfoFailure());
+      dispatch(UserRequestFailure("Can't get information."));
     }
-  };
-};
-
-export const ToggleLoading = () => {
-  return {
-    type: userActionTypes.TOGGLE_LOADING,
-  };
-};
-
-export const FetchExtraInfoFailure = () => {
-  return {
-    type: userActionTypes.FETCH_EXTRA_INFO_FAILURE,
-    payload: {
-      message: `Can't get information`,
-    },
   };
 };
 
@@ -326,13 +276,6 @@ export const FetchExtraInfoSuccess = (extraInfo) => {
   return {
     type: userActionTypes.FETCH_EXTRA_INFO_SUCCESS,
     payload: extraInfo,
-  };
-};
-
-export const UpdateExtraInfoRequest = (payload) => {
-  return {
-    type: userActionTypes.UPDATE_EXTRA_INFO_SUCCESS,
-    payload: payload,
   };
 };
 
@@ -362,24 +305,8 @@ export const UpdateUserInfoRequest = ({avatar, bio, name}) => {
       dispatch(UpdateUserInfoSuccess(userInfo));
     } catch (e) {
       console.warn(e);
-      dispatch(UpdateUserInfoFailure());
+      dispatch(UserRequestFailure(`Can't update now, try again!`));
     }
-  };
-};
-
-export const UpdateUserInfoFailure = () => {
-  return {
-    type: userActionTypes.UPDATE_USER_INFO_FAILURE,
-    payload: {
-      message: `Can't update now, try again!`,
-    },
-  };
-};
-
-export const UpdateSharedPostRequest = (payload) => {
-  return {
-    type: userActionTypes.UPDATE_SHARED_POST_SUCCESS,
-    payload: payload,
   };
 };
 
@@ -387,34 +314,6 @@ export const UpdateUserInfoSuccess = (user) => {
   return {
     type: userActionTypes.UPDATE_USER_INFO_SUCCESS,
     payload: user,
-  };
-};
-
-export const UpdateNotificationSettingsRequest = (setting) => {
-  return async (dispatch) => {
-    try {
-      let currentUser = {...store.getState().user.userInfo};
-      await firestore().collection('user').doc(currentUser.uid).update({});
-      dispatch(UpdateNotificationSettingSuccess(setting));
-    } catch (e) {
-      dispatch(UpdateNotificationSettingFailure());
-    }
-  };
-};
-
-export const UpdateNotificationSettingSuccess = (payload) => {
-  return {
-    type: userActionTypes.UPDATE_NOTIFICATION_SETTING_SUCCESS,
-    payload,
-  };
-};
-
-export const UpdateNotificationSettingFailure = () => {
-  return {
-    type: userActionTypes.UPDATE_NOTIFICATION_SETTING_FAILURE,
-    payload: {
-      message: `Error! Can't update setting`,
-    },
   };
 };
 
@@ -436,25 +335,17 @@ export const followRequest = (uid) => {
           userIds: [uid],
           from: currentUser.uid,
           created_at: Date.now(),
-          seen: seenTypes.NOTSEEN,
           type: notificationTypes.FOLLOWED_ME,
         }),
       );
       dispatch(followSuccess(uid));
     } catch (e) {
       console.warn(e);
-      dispatch(followFailure());
+      dispatch(UserRequestFailure(`Can't follow this user!`));
     }
   };
 };
-export const followFailure = () => {
-  return {
-    type: userActionTypes.FOLLOW_FAILURE,
-    payload: {
-      message: `Can't follow this people!`,
-    },
-  };
-};
+
 export const followSuccess = (user) => {
   return {
     type: userActionTypes.FOLLOW_SUCCESS,
@@ -484,18 +375,11 @@ export const UnfollowRequest = (uid) => {
       dispatch(UnfollowSuccess(uid));
     } catch (e) {
       console.warn(e);
-      dispatch(UnfollowFailure());
+      dispatch(UserRequestFailure(`Can't unfollow this user!`));
     }
   };
 };
-export const UnfollowFailure = () => {
-  return {
-    type: userActionTypes.UNFOLLOW_FAILURE,
-    payload: {
-      message: `Can't unfollow this people!`,
-    },
-  };
-};
+
 export const UnfollowSuccess = (user) => {
   return {
     type: userActionTypes.UNFOLLOW_SUCCESS,
@@ -519,5 +403,25 @@ export const IncreaseLikedPostCountRequest = () => {
 export const DecreaseLikedPostCountRequest = () => {
   return {
     type: userActionTypes.DECREASE_LIKED_POST_COUNT,
+  };
+};
+
+export const UpdateExtraInfoRequest = (payload) => {
+  return {
+    type: userActionTypes.UPDATE_EXTRA_INFO_SUCCESS,
+    payload: payload,
+  };
+};
+
+export const UpdateSharedPostRequest = (payload) => {
+  return {
+    type: userActionTypes.UPDATE_SHARED_POST_SUCCESS,
+    payload: payload,
+  };
+};
+
+export const ToggleLoading = () => {
+  return {
+    type: userActionTypes.TOGGLE_LOADING,
   };
 };

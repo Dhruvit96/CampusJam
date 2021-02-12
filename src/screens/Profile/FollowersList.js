@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, FlatList} from 'react-native';
+import {Alert, View, FlatList} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import FollowListItem from '../../components/FollowListItem';
 import EmptyList from '../../components/EmptyList';
@@ -44,34 +44,39 @@ const FollowersList = ({route}) => {
 
 function getEventHandlers(setRefreshing, setFollowersData, userId) {
   const _onRefresh = async (uid) => {
-    setRefreshing(true);
-    let followers = await firestore()
-      .collection('users')
-      .where('followings', 'array-contains', uid)
-      .get();
-    let followersData = [];
-    let index = -1;
-    await Promise.all(
-      followers.docs.map(async (doc, i) => {
-        let followerData = doc.data();
-        if (doc.id === userId) index = i;
-        return followersData.push({
-          avatar: followerData.avatar,
-          id: followerData.id,
-          initials: followerData.initials,
-          name: followerData.name,
-          uid: doc.id,
-        });
-      }),
-    );
-    if (index > -1)
-      followersData = [
-        followersData[index],
-        ...followersData.slice(0, index),
-        ...followersData.slice(index + 1),
-      ];
-    setFollowersData(followersData);
-    setRefreshing(false);
+    try {
+      setRefreshing(true);
+      let followers = await firestore()
+        .collection('users')
+        .where('followings', 'array-contains', uid)
+        .get();
+      let followersData = [];
+      let index = -1;
+      await Promise.all(
+        followers.docs.map(async (doc, i) => {
+          let followerData = doc.data();
+          if (doc.id === userId) index = i;
+          return followersData.push({
+            avatar: followerData.avatar,
+            id: followerData.id,
+            initials: followerData.initials,
+            name: followerData.name,
+            uid: doc.id,
+          });
+        }),
+      );
+      if (index > -1)
+        followersData = [
+          followersData[index],
+          ...followersData.slice(0, index),
+          ...followersData.slice(index + 1),
+        ];
+      setFollowersData(followersData);
+      setRefreshing(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not load followers list');
+    }
   };
   const _renderEmpty = () => <EmptyList message="No followers to show." />;
   return {

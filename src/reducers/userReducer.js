@@ -12,13 +12,6 @@ const defaultState = {
     isStudent: false,
     name: '',
     uid: '',
-    notificationSettings: {
-      posts: true,
-      comments: true,
-      likes: true,
-      followed: true,
-      pauseAll: false,
-    },
   },
   extraInfo: {
     followers: [],
@@ -31,14 +24,43 @@ const defaultState = {
 const reducer = (state = defaultState, action) => {
   let index = 0;
   switch (action.type) {
-    case userActionTypes.LOGOUT_SUCCESS:
-      state = {...defaultState};
-      return state;
-    case userActionTypes.LOGIN_SUCCESS:
+    case userActionTypes.DECREASE_LIKED_POST_COUNT:
       state = {
         ...state,
-        ...action.payload,
-        userInfo: {...action.payload.userInfo},
+        extraInfo: {
+          ...state.extraInfo,
+          likedPosts: state.extraInfo.likedPosts + 1,
+        },
+      };
+      return state;
+    case userActionTypes.DELETE_POST_SUCCESS:
+      let index = findWithAttr(state.extraInfo.posts, 'postId', action.payload);
+      if (index >= 0)
+        state = {
+          ...state,
+          extraInfo: {
+            ...state.extraInfo,
+            posts: [
+              ...state.extraInfo.posts.splice(0, index),
+              ...state.extraInfo.posts.splice(index + 1),
+            ],
+          },
+        };
+      return state;
+    case userActionTypes.FETCH_EXTRA_INFO_SUCCESS:
+      state = {
+        ...state,
+        userInfo: {...state.userInfo, ...action.payload.userInfo},
+        extraInfo: {...state.extraInfo, ...action.payload.extraInfo},
+      };
+      return state;
+    case userActionTypes.FOLLOW_SUCCESS:
+      state = {
+        ...state,
+        userInfo: {
+          ...state.userInfo,
+          followings: [action.payload, ...state.userInfo.followings],
+        },
       };
       return state;
     case userActionTypes.INCREASE_LIKED_POST_COUNT:
@@ -50,53 +72,36 @@ const reducer = (state = defaultState, action) => {
         },
       };
       return state;
-    case userActionTypes.DECREASE_LIKED_POST_COUNT:
+    case userActionTypes.LOGIN_SUCCESS:
       state = {
         ...state,
-        extraInfo: {
-          ...state.extraInfo,
-          likedPosts: state.extraInfo.likedPosts + 1,
-        },
+        ...action.payload,
+        userInfo: {...action.payload.userInfo},
       };
       return state;
-    case userActionTypes.LOGIN_FAILURE:
-    case userActionTypes.FOLLOW_FAILURE:
-    case userActionTypes.REGISTER_FAILURE:
-    case userActionTypes.FETCH_EXTRA_INFO_FAILURE:
-    case userActionTypes.UPDATE_USER_INFO_FAILURE:
-    case userActionTypes.UPDATE_NOTIFICATION_SETTING_FAILURE:
-    case userActionTypes.UNFOLLOW_FAILURE:
-    case userActionTypes.LOGOUT_FAILURE:
-    case userActionTypes.PASSWORD_RESET_FAILURE:
-      Alert.alert('Error', action.payload.message);
-      return state;
-    case userActionTypes.REGISTER_SUCCESS:
-      Alert.alert('Verify Email', action.payload.message);
+    case userActionTypes.LOGOUT_SUCCESS:
+      state = {...defaultState};
       return state;
     case userActionTypes.PASSWORD_RESET_SUCCESS:
       Alert.alert('Password reset', action.payload.message);
       return state;
-    case userActionTypes.FETCH_EXTRA_INFO_SUCCESS:
+    case userActionTypes.REGISTER_SUCCESS:
+      Alert.alert('Verify Email', action.payload.message);
+      return state;
+    case userActionTypes.TOGGLE_LOADING:
       state = {
         ...state,
-        userInfo: {...state.userInfo, ...action.payload.userInfo},
-        extraInfo: {...state.extraInfo, ...action.payload.extraInfo},
+        loading: !state.loading,
       };
       return state;
-    case userActionTypes.UPDATE_USER_INFO_SUCCESS:
+    case userActionTypes.UNFOLLOW_SUCCESS:
       state = {
         ...state,
         userInfo: {
           ...state.userInfo,
-          ...action.payload,
-        },
-        extraInfo: {
-          ...state.extraInfo,
-          posts: state.extraInfo.posts.map((x) => ({
-            ...x,
-            avatar: action.payload.avatar,
-            name: action.payload.name,
-          })),
+          followings: state.userInfo.followings.filter(
+            (x) => x !== action.payload,
+          ),
         },
       };
       return state;
@@ -106,18 +111,6 @@ const reducer = (state = defaultState, action) => {
         extraInfo: {
           ...state.extraInfo,
           posts: [action.payload, ...state.extraInfo.posts],
-        },
-      };
-      return state;
-    case userActionTypes.UPDATE_NOTIFICATION_SETTING_SUCCESS:
-      state = {
-        ...state,
-        userInfo: {
-          ...state.userInfo,
-          notificationSettings: {
-            ...state.userInfo?.notificationSettings,
-            ...action.payload,
-          },
         },
       };
       return state;
@@ -142,44 +135,25 @@ const reducer = (state = defaultState, action) => {
         },
       };
       return state;
-    case userActionTypes.DELETE_POST_SUCCESS:
-      let index = findWithAttr(state.extraInfo.posts, 'postId', action.payload);
-      if (index >= 0)
-        state = {
-          ...state,
-          extraInfo: {
-            ...state.extraInfo,
-            posts: [
-              ...state.extraInfo.posts.splice(0, index),
-              ...state.extraInfo.posts.splice(index + 1),
-            ],
-          },
-        };
-      return state;
-    case userActionTypes.TOGGLE_LOADING:
-      state = {
-        ...state,
-        loading: !state.loading,
-      };
-    case userActionTypes.UNFOLLOW_SUCCESS:
+    case userActionTypes.UPDATE_USER_INFO_SUCCESS:
       state = {
         ...state,
         userInfo: {
           ...state.userInfo,
-          followings: state.userInfo.followings.filter(
-            (x) => x !== action.payload,
-          ),
+          ...action.payload,
+        },
+        extraInfo: {
+          ...state.extraInfo,
+          posts: state.extraInfo.posts.map((x) => ({
+            ...x,
+            avatar: action.payload.avatar,
+            name: action.payload.name,
+          })),
         },
       };
       return state;
-    case userActionTypes.FOLLOW_SUCCESS:
-      state = {
-        ...state,
-        userInfo: {
-          ...state.userInfo,
-          followings: [action.payload, ...state.userInfo.followings],
-        },
-      };
+    case userActionTypes.USER_REQUEST_FAILURE:
+      Alert.alert('Error', action.payload.message);
       return state;
     default:
       return state;

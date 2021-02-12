@@ -2,7 +2,6 @@ import {
   LIMIT_POSTS_PER_LOADING,
   postActionTypes,
   notificationTypes,
-  seenTypes,
   uploadPhotoAsync,
   FieldValue,
 } from '../constants';
@@ -23,6 +22,15 @@ import {
   DeleteNotificationRequest,
 } from '../actions/notificationActions';
 import * as ImageManipulator from 'expo-image-manipulator';
+
+export const PostRequestFailure = (message) => {
+  return {
+    type: postActionTypes.POST_REQUEST_FAILURE,
+    payload: {
+      message,
+    },
+  };
+};
 
 export const FetchPostListRequest = () => {
   return async (dispatch) => {
@@ -58,18 +66,9 @@ export const FetchPostListRequest = () => {
         dispatch(ToggleAllLoadedSuccess(true));
       dispatch(FetchPostListSuccess(payload));
     } catch (e) {
-      console.log(e);
-      dispatch(FetchPostListFailure());
+      console.warn(e);
+      dispatch(PostRequestFailure('Get Post List Failed!'));
     }
-  };
-};
-
-export const FetchPostListFailure = () => {
-  return {
-    type: postActionTypes.FETCH_POST_LIST_FAILURE,
-    payload: {
-      message: 'Get Post List Failed!',
-    },
   };
 };
 
@@ -117,18 +116,9 @@ export const LoadMorePostListRequest = () => {
         dispatch(ToggleAllLoadedSuccess(true));
       dispatch(LoadMorePostListSuccess(payload));
     } catch (e) {
-      console.log(e);
-      dispatch(LoadMorePostListFailure());
+      console.warn(e);
+      dispatch(PostRequestFailure('Can not load more posts!'));
     }
-  };
-};
-
-export const LoadMorePostListFailure = () => {
-  return {
-    type: postActionTypes.LOAD_MORE_POST_LIST_FAILURE,
-    payload: {
-      message: 'Can not load more posts!',
-    },
   };
 };
 
@@ -178,7 +168,6 @@ export const CreatePostRequest = ({image, text}) => {
               userIds: [...followers],
               from: currentUser.uid,
               created_at: Date.now(),
-              seen: seenTypes.NOTSEEN,
               type: notificationTypes.SOMEONE_POSTS,
             }),
           );
@@ -196,7 +185,7 @@ export const CreatePostRequest = ({image, text}) => {
         });
     } catch (e) {
       console.warn(e);
-      dispatch(CreatePostFailure());
+      dispatch(PostRequestFailure('Can not post this post!'));
     } finally {
       dispatch(ToggleLoading());
     }
@@ -207,15 +196,6 @@ export const CreatePostSuccess = (payload) => {
   return {
     type: postActionTypes.CREATE_POST_SUCCESS,
     payload: payload,
-  };
-};
-
-export const CreatePostFailure = () => {
-  return {
-    type: postActionTypes.CREATE_POST_FAILURE,
-    payload: {
-      message: 'Can not post this post!',
-    },
   };
 };
 
@@ -249,7 +229,7 @@ export const UpdatePostRequest = ({postId, image, text}) => {
       dispatch(UpdateSharedPostRequest({data, postId}));
     } catch (e) {
       console.warn(e);
-      dispatch(UpdatePostFailure());
+      dispatch(PostRequestFailure('Can not update this post!'));
     } finally {
       dispatch(ToggleLoading());
     }
@@ -260,15 +240,6 @@ export const UpdatePostSuccess = (payload) => {
   return {
     type: postActionTypes.UPDATE_POST_SUCCESS,
     payload: payload,
-  };
-};
-
-export const UpdatePostFailure = () => {
-  return {
-    type: postActionTypes.UPDATE_POST_FAILURE,
-    payload: {
-      message: 'Can not update this post!',
-    },
   };
 };
 
@@ -298,17 +269,8 @@ export const DeletePostRequest = (postId) => {
       dispatch(DeletePostSuccess(postId));
     } catch (e) {
       console.warn(e);
-      dispatch();
+      dispatch(PostRequestFailure('Can not delete post.'));
     }
-  };
-};
-
-export const DeletePostFailure = () => {
-  return {
-    type: postActionTypes.DELETE_POST_FAILURE,
-    payload: {
-      message: 'Can not delete post.',
-    },
   };
 };
 
@@ -351,25 +313,15 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
               userIds: [postUserId],
               from: uid,
               created_at: Date.now(),
-              seen: seenTypes.NOTSEEN,
               type: notificationTypes.LIKE_MY_POST,
             }),
           );
         }
       }
     } catch (e) {
-      console.log(e);
-      dispatch(ToggleLikePostFailure());
+      console.warn(e);
+      dispatch(PostRequestFailure('Can not like this posts!'));
     }
-  };
-};
-
-export const ToggleLikePostFailure = () => {
-  return {
-    type: postActionTypes.TOGGLE_LIKE_POST_FAILURE,
-    payload: {
-      message: 'Can not like this posts!',
-    },
   };
 };
 
@@ -379,18 +331,9 @@ export const ToggleFollowUserRequest = (uid, isFollowed) => {
       if (isFollowed) dispatch(UnfollowRequest(uid));
       else dispatch(followRequest(uid));
     } catch (e) {
-      console.log(e);
-      dispatch(ToggleFollowUserFailure());
+      console.warn(e);
+      dispatch(PostRequestFailure('Something went wrong try later'));
     }
-  };
-};
-
-export const ToggleFollowUserFailure = () => {
-  return {
-    type: postActionTypes.TOGGLE_FOLLOW_USER_FAILURE,
-    payload: {
-      message: 'Can not follow this user!',
-    },
   };
 };
 

@@ -137,7 +137,7 @@ const Profile = () => {
               onPress={_onPressAddPost}
             />
             <PostButton
-              title="Shared Posts"
+              title="My Posts"
               iconName="bookmark-outline"
               size={fontscale(22)}
               onPress={_onPressSharedPosts}

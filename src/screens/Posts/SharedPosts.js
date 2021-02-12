@@ -3,8 +3,7 @@ import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
 import EmptyList from '../../components/EmptyList';
-import firestore from '@react-native-firebase/firestore';
-import {fontscale, LIMIT_POSTS_PER_LOADING} from '../../constants';
+import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
 const SharedPosts = () => {
@@ -33,7 +32,7 @@ const SharedPosts = () => {
           onPress: _onPressBack,
         }}
         centerComponent={{
-          text: 'Shared Posts',
+          text: 'My Posts',
           style: {color: '#000', fontSize: fontscale(24)},
         }}
       />

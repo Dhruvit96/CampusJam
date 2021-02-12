@@ -5,25 +5,8 @@ const defaultState = {loaded: false, posts: []};
 const reducer = (state = defaultState, action) => {
   let index = 0;
   switch (action.type) {
-    case postActionTypes.FETCH_POST_LIST_SUCCESS:
-      state = {...state, posts: [...action.payload]};
-      return state;
-    case postActionTypes.LOAD_MORE_POST_LIST_SUCCESS:
-      state = {...state, posts: [...state.posts, ...action.payload]};
-      return state;
     case postActionTypes.CREATE_POST_SUCCESS:
       state = {...state, posts: [action.payload, ...state.posts]};
-      return state;
-    case postActionTypes.UPDATE_POST_SUCCESS:
-      index = findWithAttr(state.posts, 'postId', action.payload.postId);
-      state = {
-        ...state,
-        posts: [
-          ...state.posts.slice(0, index),
-          {...state.posts[index], ...action.payload.data},
-          ...state.posts.slice(index + 1),
-        ],
-      };
       return state;
     case postActionTypes.DELETE_POST_SUCCESS:
       index = findWithAttr(state.posts, 'postId', action.payload);
@@ -36,17 +19,28 @@ const reducer = (state = defaultState, action) => {
           ],
         };
       return state;
+    case postActionTypes.FETCH_POST_LIST_SUCCESS:
+      state = {...state, posts: [...action.payload]};
+      return state;
+    case postActionTypes.LOAD_MORE_POST_LIST_SUCCESS:
+      state = {...state, posts: [...state.posts, ...action.payload]};
+      return state;
+    case postActionTypes.POST_REQUEST_FAILURE:
+      Alert.alert('Error', action.payload.message);
+      return state;
     case postActionTypes.TOGGLE_ALL_LOADED_SUCCESS:
       state = {...state, loaded: action.payload};
       return state;
-    case postActionTypes.FETCH_POST_LIST_FAILURE:
-    case postActionTypes.LOAD_MORE_POST_LIST_FAILURE:
-    case postActionTypes.TOGGLE_LIKE_POST_FAILURE:
-    case postActionTypes.TOGGLE_FOLLOW_USER_FAILURE:
-    case postActionTypes.DELETE_POST_FAILURE:
-    case postActionTypes.CREATE_POST_FAILURE:
-    case postActionTypes.UPDATE_POST_FAILURE:
-      Alert.alert('Error', action.payload.message);
+    case postActionTypes.UPDATE_POST_SUCCESS:
+      index = findWithAttr(state.posts, 'postId', action.payload.postId);
+      state = {
+        ...state,
+        posts: [
+          ...state.posts.slice(0, index),
+          {...state.posts[index], ...action.payload.data},
+          ...state.posts.slice(index + 1),
+        ],
+      };
       return state;
     default:
       return state;

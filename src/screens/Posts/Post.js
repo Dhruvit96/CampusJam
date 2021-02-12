@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StatusBar, View} from 'react-native';
+import {Alert, FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
 import EmptyList from '../../components/EmptyList';
@@ -66,29 +66,34 @@ function getEventHandlers(setPostData, setRefreshing, pid, user) {
   );
   const _renderEmpty = () => <EmptyList message="Post is deleted" />;
   const _onRefresh = async () => {
-    setRefreshing(true);
-    let postData = await firestore().collection('posts').doc(pid).get();
-    if (postData.exists) {
-      postData = postData.data();
-      let userData = await firestore()
-        .collection('users')
-        .doc(postData.uid)
-        .get();
-      userData = userData.data();
-      setPostData([
-        {
-          ...postData,
-          avatar: userData.avatar,
-          postId: pid,
-          initials: userData.initials,
-          name: userData.name,
-          isFollowed: user.followings.indexOf(postData.uid) >= 0,
-          isSelf: user.uid == postData.uid,
-          isLiked: postData.likedBy.indexOf(user.uid) >= 0,
-        },
-      ]);
+    try {
+      setRefreshing(true);
+      let postData = await firestore().collection('posts').doc(pid).get();
+      if (postData.exists) {
+        postData = postData.data();
+        let userData = await firestore()
+          .collection('users')
+          .doc(postData.uid)
+          .get();
+        userData = userData.data();
+        setPostData([
+          {
+            ...postData,
+            avatar: userData.avatar,
+            postId: pid,
+            initials: userData.initials,
+            name: userData.name,
+            isFollowed: user.followings.indexOf(postData.uid) >= 0,
+            isSelf: user.uid == postData.uid,
+            isLiked: postData.likedBy.indexOf(user.uid) >= 0,
+          },
+        ]);
+      }
+      setRefreshing(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not get post.');
     }
-    setRefreshing(false);
   };
   return {
     _onPressBack,

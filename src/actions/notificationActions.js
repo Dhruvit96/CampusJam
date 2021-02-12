@@ -8,7 +8,11 @@ export const CreateNotificationRequest = (notification) => {
       await firestore().collection('notifications').add(notification);
     } catch (e) {
       console.warn(e);
-      dispatch(CreateNotificationFailure());
+      dispatch(
+        NotificationRequestFailure(
+          'Something went wrong with notification try later.',
+        ),
+      );
     }
   };
 };
@@ -43,26 +47,12 @@ export const DeleteNotificationRequest = ({userIds, uid, type, postId}) => {
       );
     } catch (e) {
       console.warn(e);
-      dispatch(DeleteNotificationFailure());
+      dispatch(
+        NotificationRequestFailure(
+          'Something went wrong with deleting notification try later.',
+        ),
+      );
     }
-  };
-};
-
-export const DeleteNotificationFailure = () => {
-  return {
-    type: notificationActionTypes.DELETE_NOTIFICATION_FAILURE,
-    payload: {
-      message: 'Notifications Failed!',
-    },
-  };
-};
-
-export const CreateNotificationFailure = () => {
-  return {
-    type: notificationActionTypes.CREATE_NOTIFICATION_FAILURE,
-    payload: {
-      message: 'Notifications Failed!',
-    },
   };
 };
 
@@ -100,17 +90,8 @@ export const FetchNotificationListRequest = () => {
       dispatch(FetchNotificationListSuccess(notifications));
     } catch (e) {
       console.warn(e);
-      dispatch(FetchNotificationListFailure());
+      dispatch(NotificationRequestFailure('Get Notifications Failed!'));
     }
-  };
-};
-
-export const FetchNotificationListFailure = () => {
-  return {
-    type: notificationActionTypes.FETCH_NOTIFICATIONS_FAILURE,
-    payload: {
-      message: 'Get Notifications Failed!',
-    },
   };
 };
 
@@ -118,5 +99,14 @@ export const FetchNotificationListSuccess = (notifications) => {
   return {
     type: notificationActionTypes.FETCH_NOTIFICATIONS_SUCCESS,
     payload: notifications,
+  };
+};
+
+export const NotificationRequestFailure = (message) => {
+  return {
+    type: notificationActionTypes.NOTIFICATION_REQUEST_FAILURE,
+    payload: {
+      message,
+    },
   };
 };
