@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {Alert, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Text} from 'react-native-elements';
 import {
   fontscale,
@@ -9,12 +9,21 @@ import {
 import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
 
-const CommentItem = ({item, style, onPressReply}) => {
+const CommentItem = ({item, style, onDeleteComment, onPressReply}) => {
   const uid = useSelector((state) => state.user.userInfo.uid);
   const isSelf = uid === item.uid;
-  const {_onPressAvatar} = getEventHandlers(item.uid, isSelf);
+  const {_onLongPress, _onPressAvatar} = getEventHandlers(
+    item.commentId,
+    isSelf,
+    onDeleteComment,
+    item.replyId,
+    item.uid,
+  );
   return (
-    <View style={[styles.container, style]}>
+    <TouchableOpacity
+      style={[styles.container, style]}
+      disabled={!isSelf}
+      onLongPress={_onLongPress}>
       <View style={styles.row}>
         <View>
           <Avatar
@@ -28,7 +37,9 @@ const CommentItem = ({item, style, onPressReply}) => {
           />
         </View>
         <View style={{marginStart: widthPercentageToDP(3)}}>
-          <Text style={styles.name}>{item.name}</Text>
+          <TouchableOpacity onPress={_onPressAvatar}>
+            <Text style={styles.name}>{item.name}</Text>
+          </TouchableOpacity>
           <Text
             style={[
               styles.text,
@@ -50,18 +61,34 @@ const CommentItem = ({item, style, onPressReply}) => {
           />
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
-function getEventHandlers(uid, isSelf) {
+function getEventHandlers(commentId, isSelf, onDeleteComment, replyId, uid) {
   const _onPressAvatar = () => {
     !isSelf
       ? navigation.push('ProfileX', {uid: uid})
       : navigation.push('Profile');
     navigation.goBack();
   };
+  const _onLongPress = () => {
+    Alert.alert('Delete comment', 'Comment will be permanently deleted', [
+      {
+        text: 'Cancel',
+        onPress: null,
+        style: 'cancel',
+      },
+      {
+        text: 'OK',
+        onPress: () => {
+          onDeleteComment && onDeleteComment(commentId, replyId);
+        },
+      },
+    ]);
+  };
   return {
+    _onLongPress,
     _onPressAvatar,
   };
 }

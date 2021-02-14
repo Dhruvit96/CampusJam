@@ -21,7 +21,10 @@ import EmptyList from '../../components/EmptyList';
 import {navigation} from '../../navigations/RootNavigation';
 import {useSelector} from '../../store.js';
 import {useDispatch} from 'react-redux';
-import {CreateNotificationRequest} from '../../actions/notificationActions.js';
+import {
+  CreateNotificationRequest,
+  DeleteNotificationRequest,
+} from '../../actions/notificationActions.js';
 import {PostRequestFailure} from '../../actions/postActions.js';
 
 const AddComment = ({route}) => {
@@ -286,7 +289,8 @@ function getEventHandlers(
                 avatar: user.avatar,
                 initials: user.initials,
                 name: user.name,
-                commentId: doc.id,
+                replyId: doc.id,
+                commentId: replyId.commentId,
               },
             ];
             setCommentData([
@@ -329,10 +333,74 @@ function getEventHandlers(
       item={item}
       style={styles.reply}
       onPressReply={() => _onPressReply(item)}
+      onDeleteComment={_onDeleteComment}
     />
   );
+  const _onDeleteComment = async (commentId, rId) => {
+    try {
+      if (typeof rId === 'undefined') {
+        await firestore().collection('comments').doc(commentId).delete();
+        setCommentData([
+          ...commentsData.filter((x) => x.title.commentId !== commentId),
+        ]);
+        if (userId != uid)
+          dispatch(
+            DeleteNotificationRequest({
+              postId: postId,
+              uid: uid,
+              type: notificationTypes.COMMENT_MY_POST,
+            }),
+          );
+      } else {
+        await firestore()
+          .collection('comments')
+          .doc(`${commentId}`)
+          .collection('replies')
+          .doc(rId)
+          .delete();
+        await firestore()
+          .collection('comments')
+          .doc(`${commentId}`)
+          .update({replies: FieldValue.arrayRemove(uid)});
+        let index = 0;
+        let data = commentsData.filter((ref, i) => {
+          if (ref.title.commentId == commentId) {
+            index = i;
+            return true;
+          } else return false;
+        })[0];
+        data.data = [...data.data.filter((x) => x.replyId !== rId)];
+        setCommentData([
+          ...commentsData.slice(0, index),
+          data,
+          ...commentsData.slice(index + 1),
+        ]);
+        dispatch(
+          DeleteNotificationRequest({
+            postId: postId,
+            uid: uid,
+            type: notificationTypes.COMMENT_MY_POST,
+          }),
+        );
+        dispatch(
+          DeleteNotificationRequest({
+            postId: postId,
+            uid: uid,
+            type: notificationTypes.REPLIED_COMMENT,
+          }),
+        );
+      }
+    } catch (e) {
+      console.warn(e);
+      dispatch(PostRequestFailure('Can not remove comment'));
+    }
+  };
   const _renderSectionHeader = ({section: {title}}) => (
-    <CommentItem item={title} onPressReply={() => _onPressReply(title)} />
+    <CommentItem
+      item={title}
+      onPressReply={() => _onPressReply(title)}
+      onDeleteComment={_onDeleteComment}
+    />
   );
   const _onPressReply = (item) => {
     setReplyTo(item.name);

@@ -57,6 +57,7 @@ const HomeTab = () => {
           return <FontAwesome name={iconName} size={size} color={color} />;
         },
       })}
+      backBehavior="firstRoute"
       tabBarOptions={{
         activeTintColor: '#61c0ff',
         inactiveTintColor: 'grey',

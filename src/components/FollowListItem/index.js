@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Text} from 'react-native-elements';
 import {useDispatch} from 'react-redux';
 import {ToggleFollowUserRequest} from '../../actions/postActions';
@@ -42,7 +42,9 @@ const FollowListItem = ({item}) => {
             />
           </View>
           <View style={{marginStart: widthPercentageToDP(3)}}>
-            <Text style={styles.name}>{item.name}</Text>
+            <TouchableOpacity onPress={_onPressAvatar}>
+              <Text style={styles.name}>{item.name}</Text>
+            </TouchableOpacity>
             {item.id ? <Text style={styles.text}>{item.id}</Text> : null}
           </View>
           {!isSelf && item.id ? (

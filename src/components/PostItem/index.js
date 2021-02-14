@@ -76,17 +76,15 @@ class PostItem extends PureComponent {
                 this.props.item.avatar ? {uri: this.props.item.avatar} : null
               }
               title={!this.props.item.avatar ? this.props.item.initials : null}
-              onPress={
-                typeof this.props.profileX === 'undefined'
-                  ? _onPressAvatar
-                  : null
-              }
+              onPress={this.props.profileX ? null : _onPressAvatar}
               titleStyle={{fontSize: fontscale(17)}}
               containerStyle={{backgroundColor: '#523'}}
             />
           </View>
           <View style={{marginStart: widthPercentageToDP(3)}}>
-            <TouchableOpacity onPress={_onPressAvatar}>
+            <TouchableOpacity
+              disabled={this.props.profileX}
+              onPress={this.props.profileX ? null : _onPressAvatar}>
               <Text style={styles.name}>{this.props.item.name}</Text>
             </TouchableOpacity>
             <Text style={styles.text}>
