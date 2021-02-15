@@ -29,7 +29,6 @@ const Posts = () => {
     _renderFooter,
   } = getEventHandlers(dispatch, setRefreshing, refreshing, postData.loaded);
   useEffect(() => {
-    _onRefresh();
     async function fetchData() {
       await _onRefresh();
       setFirst(false);

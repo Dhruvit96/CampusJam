@@ -42,7 +42,11 @@ const Settings = () => {
           <Icon name="arrow-forward" />
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
+          navigation.push('AboutUs');
+        }}>
         <Icon name="info-outline" />
         <Text style={styles.buttonText}>About Us</Text>
         <View style={styles.leftIcon}>

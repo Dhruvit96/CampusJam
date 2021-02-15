@@ -11,6 +11,7 @@ const Post = ({route}) => {
   const user = useSelector((state) => state.user.userInfo);
   const pid = route.params.pid;
   const [refreshing, setRefreshing] = useState(false);
+  const [first, setFirst] = useState(true);
   const [postData, setPostData] = useState([]);
   const {
     _onPressBack,
@@ -19,7 +20,11 @@ const Post = ({route}) => {
     _renderEmpty,
   } = getEventHandlers(setPostData, setRefreshing, pid, user);
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setFirst(false);
+    }
+    fetchData();
   }, []);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -41,7 +46,7 @@ const Post = ({route}) => {
       <FlatList
         data={postData}
         extraData={refreshing}
-        ListEmptyComponent={_renderEmpty}
+        ListEmptyComponent={first ? null : _renderEmpty}
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}

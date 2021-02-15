@@ -13,11 +13,16 @@ import {
   Profile,
   ProfileX,
 } from '../screens/Profile';
-import StudentData from '../screens/StudentData/StudentData';
+import {
+  Magazine,
+  PDFViewer,
+  Placement,
+  StudentCenter,
+} from '../screens/StudentCenter';
 import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
-import {ChangePassword, Settings} from '../screens/Settings';
+import {AboutUs, ChangePassword, Events, Settings} from '../screens/Settings';
 import Search from '../screens/Search';
 import AddComment from '../screens/AddComment';
 import AddPost from '../screens/AddPost';
@@ -28,6 +33,7 @@ const ProfileStack = createStackNavigator();
 const FollowListTab = createMaterialTopTabNavigator();
 const PostStack = createStackNavigator();
 const NotificationStack = createStackNavigator();
+const StudentCenterStack = createStackNavigator();
 
 const tabBarListeners = ({navigation, route}) => ({
   tabPress: () => {
@@ -51,7 +57,7 @@ const HomeTab = () => {
         tabBarIcon: ({color, size}) => {
           let iconName = '';
           if (route.name === 'Home') iconName = 'home';
-          else if (route.name === 'StudentData') iconName = 'graduation-cap';
+          else if (route.name === 'StudentCenter') iconName = 'graduation-cap';
           else if (route.name === 'Notification') iconName = 'bell';
           else if (route.name === 'Profile') iconName = 'user';
           return <FontAwesome name={iconName} size={size} color={color} />;
@@ -70,8 +76,8 @@ const HomeTab = () => {
         listeners={tabBarListeners}
       />
       <Tab.Screen
-        name="StudentData"
-        component={StudentData}
+        name="StudentCenter"
+        component={StudentCenterModule}
         listeners={tabBarListeners}
       />
       <Tab.Screen
@@ -99,6 +105,8 @@ export const HomeModule = () => {
       <HomeStack.Screen name="AddComment" component={AddComment} />
       <HomeStack.Screen name="AddPost" component={AddPost} />
       <HomeStack.Screen name="ChangePassword" component={ChangePassword} />
+      <HomeStack.Screen name="AboutUs" component={AboutUs} />
+      <HomeStack.Screen name="PDFViewer" component={PDFViewer} />
     </HomeStack.Navigator>
   );
 };
@@ -133,6 +141,20 @@ const NotificationModule = () => {
         component={FollowListModule}
       />
     </NotificationStack.Navigator>
+  );
+};
+
+const StudentCenterModule = () => {
+  return (
+    <StudentCenterStack.Navigator screenOptions={screenOptions}>
+      <StudentCenterStack.Screen
+        name="StudentCenter"
+        component={StudentCenter}
+      />
+      <StudentCenterStack.Screen name="Placement" component={Placement} />
+      <StudentCenterStack.Screen name="Magazine" component={Magazine} />
+      <StudentCenterStack.Screen name="Events" component={Events} />
+    </StudentCenterStack.Navigator>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, StatusBar, StyleSheet, Image} from 'react-native';
+import {widthPercentageToDP} from '../../constants';
 
 const Splash = () => {
   return (
@@ -23,8 +24,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   image: {
-    height: 350,
-    width: 350,
+    height: widthPercentageToDP(80),
+    width: widthPercentageToDP(80),
     resizeMode: 'contain',
   },
 });
