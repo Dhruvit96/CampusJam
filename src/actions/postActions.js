@@ -6,6 +6,7 @@ import {
   FieldValue,
 } from '../constants';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import {store} from '../store';
 import {
   DecreaseLikedPostCountRequest,
@@ -205,8 +206,9 @@ export const UpdatePostRequest = ({postId, image, text}) => {
       await dispatch(ToggleLoading());
       let post = store.getState().user.extraInfo.posts;
       post = post.filter((x) => x.postId === postId)[0];
-      let scale = post.scale,
-        uploadedImageUri = post.image;
+      let scale = post.scale;
+      let uploadedImageUri = post.image;
+      let time = post.created_at;
       if (image !== post.image) {
         let imageUri = await ImageManipulator.manipulateAsync(
           image,
@@ -247,6 +249,11 @@ export const DeletePostRequest = (postId) => {
   return async (dispatch) => {
     try {
       let uid = store.getState().user.userInfo.uid;
+      let postData = store.getState().user.extraInfo.posts;
+      postData = postData.filter((x) => x.postId === postId)[0];
+      if (typeof postData.image == 'string' && postData.image.length > 0) {
+        await storage().ref(`photos/${uid}/${postData.created_at}`).delete();
+      }
       await firestore().collection('posts').doc(postId).delete();
       let data = await firestore()
         .collection('comments')
@@ -255,6 +262,11 @@ export const DeletePostRequest = (postId) => {
       await Promise.all(
         data.docs.map(async (doc) => {
           await firestore().collection('comments').doc(`${doc.id}`).delete();
+          await Promise.all(
+            doc.data().replies.map(async (id) => {
+              await firestore().collection('comments').doc(`${id}`).delete();
+            }),
+          );
           return 0;
         }),
       );

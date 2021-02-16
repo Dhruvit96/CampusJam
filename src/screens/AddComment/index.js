@@ -174,8 +174,7 @@ function getEventHandlers(
         let data = doc.data();
         let replies = await firestore()
           .collection('comments')
-          .doc(`${doc.id}`)
-          .collection('replies')
+          .where('commentId', '==', doc.id)
           .orderBy('create_at', 'asc')
           .get();
         let repliesData = [];
@@ -190,7 +189,6 @@ function getEventHandlers(
             return repliesData.push({
               ...replyData,
               avatar: userData.avatar,
-              commentId: doc.id,
               initials: userData.initials,
               name: userData.name,
               replyId: ref.id,
@@ -261,18 +259,17 @@ function getEventHandlers(
       } else {
         await firestore()
           .collection('comments')
-          .doc(`${replyId.commentId}`)
-          .collection('replies')
           .add({
             uid: uid,
             text: comment,
             create_at: Date.now(),
+            commentId: replyId.commentId,
           })
           .then(async (doc) => {
             await firestore()
               .collection('comments')
               .doc(`${replyId.commentId}`)
-              .update({replies: FieldValue.arrayUnion(uid)});
+              .update({replies: FieldValue.arrayUnion(doc.id)});
             let index = 0;
             let data = commentsData.filter((ref, i) => {
               if (ref.title.commentId == replyId.commentId) {
@@ -339,6 +336,16 @@ function getEventHandlers(
   const _onDeleteComment = async (commentId, rId) => {
     try {
       if (typeof rId === 'undefined') {
+        let data = await firestore()
+          .collection('comments')
+          .doc(commentId)
+          .get();
+        data = data.data();
+        await Promise.all(
+          data.replies.map(async (id) => {
+            await firestore().collection('comments').doc(id).delete();
+          }),
+        );
         await firestore().collection('comments').doc(commentId).delete();
         setCommentData([
           ...commentsData.filter((x) => x.title.commentId !== commentId),
@@ -352,16 +359,11 @@ function getEventHandlers(
             }),
           );
       } else {
+        await firestore().collection('comments').doc(rId).delete();
         await firestore()
           .collection('comments')
           .doc(`${commentId}`)
-          .collection('replies')
-          .doc(rId)
-          .delete();
-        await firestore()
-          .collection('comments')
-          .doc(`${commentId}`)
-          .update({replies: FieldValue.arrayRemove(uid)});
+          .update({replies: FieldValue.arrayRemove(rId)});
         let index = 0;
         let data = commentsData.filter((ref, i) => {
           if (ref.title.commentId == commentId) {

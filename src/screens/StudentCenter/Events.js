@@ -96,7 +96,6 @@ function getEventHandlers(setEvents, setRefreshing) {
     setRefreshing(false);
   };
   const _renderEmpty = () => <EmptyList message={'No Events'} />;
-
   const _renderItem = ({item}) => (
     <View style={styles.itemContainer}>
       <Text style={styles.time}>{item.time}</Text>
