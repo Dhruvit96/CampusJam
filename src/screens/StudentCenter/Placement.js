@@ -29,7 +29,7 @@ const Placement = () => {
         }}
         centerComponent={{
           text: 'Placement',
-          style: {color: '#71c2ff', fontSize: fontscale(24)},
+          style: {color: '#000', fontSize: fontscale(24)},
         }}
       />
       <FlatList

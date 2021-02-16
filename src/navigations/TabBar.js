@@ -15,6 +15,7 @@ import {
 } from '../screens/Profile';
 import {
   Magazine,
+  Events,
   PDFViewer,
   Placement,
   StudentCenter,
@@ -22,7 +23,7 @@ import {
 import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
-import {AboutUs, ChangePassword, Events, Settings} from '../screens/Settings';
+import {AboutUs, ChangePassword, Settings} from '../screens/Settings';
 import Search from '../screens/Search';
 import AddComment from '../screens/AddComment';
 import AddPost from '../screens/AddPost';

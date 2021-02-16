@@ -1,21 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {
-  SectionList,
-  StyleSheet,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {SectionList, StyleSheet, StatusBar, Text, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import firestore from '@react-native-firebase/firestore';
 import EmptyList from '../../components/EmptyList';
-import {
-  findWithAttr,
-  fontscale,
-  heightPercentageToDP,
-  widthPercentageToDP,
-} from '../../constants';
+import {findWithAttr, fontscale, widthPercentageToDP} from '../../constants';
 import moment from 'moment';
 import {navigation} from '../../navigations/RootNavigation';
 
@@ -51,7 +39,7 @@ const Events = () => {
         }}
         centerComponent={{
           text: 'Events',
-          style: {color: '#71c2ff', fontSize: fontscale(24)},
+          style: {color: '#000', fontSize: fontscale(24)},
         }}
       />
       <SectionList
