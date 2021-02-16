@@ -21,7 +21,7 @@ const PlacementItem = ({item}) => {
       </View>
       <View
         style={{
-          flex: 13,
+          flex: 15,
           justifyContent: 'center',
           marginStart: widthPercentageToDP(2),
         }}>
