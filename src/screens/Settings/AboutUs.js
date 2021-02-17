@@ -49,7 +49,7 @@ const AboutUs = () => {
         Our Mission is to provide what's happening near you, share your ideas,
         browse and search, for the type of events you like to attend.
       </Text>
-      <Text style={{marginTop: heightPercentageToDP(3)}}>
+      <Text style={{marginTop: heightPercentageToDP(2)}}>
         Devloped By Dhruvit Maniya.
       </Text>
       <TouchableOpacity
@@ -71,6 +71,7 @@ const AboutUs = () => {
         style={{
           flexDirection: 'row',
           marginTop: heightPercentageToDP(1),
+          marginBottom: heightPercentageToDP(1),
           alignItems: 'center',
         }}
         onPress={_onPressLinkedin}>
@@ -90,7 +91,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: StatusBar.currentHeight,
+    padding: widthPercentageToDP(2),
+    paddingTop: StatusBar.currentHeight,
   },
   heading: {
     fontSize: fontscale(19),

@@ -71,7 +71,7 @@ const AddPost = ({route}) => {
           }}
           centerComponent={{
             text: route.params ? 'Edit Post' : 'Create Post',
-            style: {color: '#61c0ff', fontSize: fontscale(24)},
+            style: {color: '#000', fontSize: fontscale(24)},
           }}
         />
         <ScrollView>
@@ -186,7 +186,7 @@ function getEventHandlers(
     }
   };
   const _onPressImage = async () => {
-    const {status} = await ImagePicker.requestCameraPermissionsAsync();
+    const {status} = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
       alert('Sorry, we need storage permissions to make this work!');
     } else {
@@ -214,7 +214,7 @@ function getEventHandlers(
     navigation.goBack();
   };
   const _onPressRemove = () => {
-    setImage(null);
+    setImage();
   };
   return {
     _onChangeText,

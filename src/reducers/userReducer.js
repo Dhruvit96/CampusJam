@@ -34,18 +34,15 @@ const reducer = (state = defaultState, action) => {
       };
       return state;
     case userActionTypes.DELETE_POST_SUCCESS:
-      let index = findWithAttr(state.extraInfo.posts, 'postId', action.payload);
-      if (index >= 0)
-        state = {
-          ...state,
-          extraInfo: {
-            ...state.extraInfo,
-            posts: [
-              ...state.extraInfo.posts.splice(0, index),
-              ...state.extraInfo.posts.splice(index + 1),
-            ],
-          },
-        };
+      state = {
+        ...state,
+        extraInfo: {
+          ...state.extraInfo,
+          posts: [
+            ...state.extraInfo.posts.filter((x) => x.postId !== action.payload),
+          ],
+        },
+      };
       return state;
     case userActionTypes.FETCH_EXTRA_INFO_SUCCESS:
       state = {

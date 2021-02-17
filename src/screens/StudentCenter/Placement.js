@@ -3,14 +3,35 @@ import {Alert, FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import PlacementItem from '../../components/PlacementItem';
 import firestore from '@react-native-firebase/firestore';
-import {fontscale} from '../../constants';
+import {
+  fontscale,
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from '../../constants';
+import LottieView from 'lottie-react-native';
 import {navigation} from '../../navigations/RootNavigation';
 const Placement = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [placementData, setPlacementData] = useState([]);
-  const {_onPressBack, _onRefresh, _renderItem} = getEventHandlers(
+  const [last, setLast] = useState();
+  const LIMIT = 12;
+  const [loaded, setLoaded] = useState(false);
+  const {
+    _loadMore,
+    _onPressBack,
+    _onRefresh,
+    _renderFooter,
+    _renderItem,
+  } = getEventHandlers(
+    placementData,
+    last,
+    LIMIT,
+    loaded,
+    refreshing,
     setPlacementData,
     setRefreshing,
+    setLast,
+    setLoaded,
   );
   useEffect(() => {
     _onRefresh();
@@ -38,12 +59,25 @@ const Placement = () => {
         keyExtractor={(item) => item.id}
         refreshing={refreshing}
         renderItem={_renderItem}
-        onRefresh={_onRefresh}
+        onEndReachedThreshold={0.5}
+        onRefresh={() => {}}
+        onEndReached={loaded ? null : _loadMore}
+        ListFooterComponent={_renderFooter}
       />
     </View>
   );
 };
-function getEventHandlers(setPlacementData, setRefreshing) {
+function getEventHandlers(
+  data,
+  last,
+  LIMIT,
+  loaded,
+  refreshing,
+  setPlacementData,
+  setRefreshing,
+  setLast,
+  setLoaded,
+) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -55,13 +89,16 @@ function getEventHandlers(setPlacementData, setRefreshing) {
         .collection('placement')
         .orderBy('year', 'desc')
         .orderBy('package', 'asc')
+        .limit(LIMIT)
         .get();
+      setLast(documents.docs[documents.size - 1]);
       let placementData = [];
       await Promise.all(
         documents.docs.map((doc) => {
           return placementData.push({...doc.data()});
         }),
       );
+      if (documents.size < LIMIT) setLoaded(true);
       setPlacementData(placementData);
       setRefreshing(false);
     } catch (e) {
@@ -69,11 +106,50 @@ function getEventHandlers(setPlacementData, setRefreshing) {
       Alert.alert('Error', 'Can not get data.');
     }
   };
-  return {
-    _onPressBack,
-    _onRefresh,
-    _renderItem,
+  const _loadMore = async () => {
+    try {
+      setRefreshing(true);
+      let documents = await firestore()
+        .collection('placement')
+        .orderBy('year', 'desc')
+        .orderBy('package', 'asc')
+        .startAfter(last)
+        .limit(LIMIT)
+        .get();
+      setLast(documents.docs[documents.size - 1]);
+      let placementData = data;
+      await Promise.all(
+        documents.docs.map((doc) => {
+          return placementData.push({...doc.data()});
+        }),
+      );
+      if (documents.size < LIMIT) setLoaded(true);
+      setPlacementData(placementData);
+      setRefreshing(false);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert('Error', 'Can not get data.');
+    }
   };
+  const _renderFooter = () => {
+    return (
+      !loaded &&
+      !refreshing && (
+        <LottieView
+          source={require('../../assets/animations/loading.json')}
+          style={{
+            height: widthPercentageToDP(8),
+            marginTop: heightPercentageToDP(1),
+            marginBottom: heightPercentageToDP(1),
+            alignSelf: 'center',
+          }}
+          autoPlay
+          loop
+        />
+      )
+    );
+  };
+  return {_loadMore, _onPressBack, _onRefresh, _renderFooter, _renderItem};
 }
 
 export default Placement;

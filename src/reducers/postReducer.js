@@ -13,10 +13,7 @@ const reducer = (state = defaultState, action) => {
       if (index >= 0)
         state = {
           ...state,
-          posts: [
-            ...state.posts.splice(0, index),
-            ...state.posts.splice(index + 1),
-          ],
+          posts: [...state.posts.filter((x) => x.postId !== action.payload)],
         };
       return state;
     case postActionTypes.FETCH_POST_LIST_SUCCESS:
@@ -33,14 +30,15 @@ const reducer = (state = defaultState, action) => {
       return state;
     case postActionTypes.UPDATE_POST_SUCCESS:
       index = findWithAttr(state.posts, 'postId', action.payload.postId);
-      state = {
-        ...state,
-        posts: [
-          ...state.posts.slice(0, index),
-          {...state.posts[index], ...action.payload.data},
-          ...state.posts.slice(index + 1),
-        ],
-      };
+      if (index > -1)
+        state = {
+          ...state,
+          posts: [
+            ...state.posts.slice(0, index),
+            {...state.posts[index], ...action.payload.data},
+            ...state.posts.slice(index + 1),
+          ],
+        };
       return state;
     default:
       return state;

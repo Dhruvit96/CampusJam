@@ -91,7 +91,6 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
   return async (dispatch) => {
     try {
       const ref = await auth().createUserWithEmailAndPassword(email, password);
-      ref.user?.sendEmailVerification();
       let domain = email.substring(email.lastIndexOf('@') + 1);
       let id =
         domain.toLowerCase() === 'charusat.edu.in'
@@ -99,6 +98,10 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
           : null;
       let name = firstName + ' ' + lastName;
       let initials = firstName[0].toUpperCase() + lastName[0].toUpperCase();
+      await ref.user?.updateProfile({
+        displayName: name,
+      });
+      await ref.user?.sendEmailVerification();
       await firestore().collection('users').doc(ref.user.uid).set({
         avatar: null,
         bio: null,

@@ -143,7 +143,7 @@ export const CreatePostRequest = ({image, text}) => {
         let imageUri = await ImageManipulator.manipulateAsync(
           image,
           [{resize: {width: 580}}],
-          {format: 'jpeg'},
+          {format: ImageManipulator.SaveFormat.PNG},
         );
         scale = imageUri.height / imageUri.width;
         uploadedImageUri = await uploadPhotoAsync(
@@ -209,17 +209,20 @@ export const UpdatePostRequest = ({postId, image, text}) => {
       let scale = post.scale;
       let uploadedImageUri = post.image;
       let time = post.created_at;
-      if (image !== post.image) {
+      if (image !== post.image && typeof image == 'string') {
         let imageUri = await ImageManipulator.manipulateAsync(
           image,
           [{resize: {width: 580}}],
-          {format: 'jpeg'},
+          {format: ImageManipulator.SaveFormat.PNG},
         );
         scale = imageUri.height / imageUri.width;
         uploadedImageUri = await uploadPhotoAsync(
           imageUri.uri,
-          `photos/${currentUser.uid}/${time}`,
+          `photos/${post.uid}/${time}`,
         );
+      } else if (image !== post.image && typeof image == 'undefined') {
+        await storage().ref(`photos/${post.uid}/${post.created_at}`).delete();
+        uploadedImageUri = undefined;
       }
       let data = {
         image: uploadedImageUri,
