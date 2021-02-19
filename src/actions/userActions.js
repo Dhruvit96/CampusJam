@@ -11,6 +11,7 @@ import {
   CreateNotificationRequest,
   DeleteNotificationRequest,
 } from '../actions/notificationActions';
+import {followXSuccess, unfollowXSuccess} from './profileXActions';
 
 export const UserRequestFailure = (errorMessage) => {
   return {
@@ -229,7 +230,26 @@ export const FetchExtraInfoRequest = () => {
         .collection('posts')
         .where('likedBy', 'array-contains', currentUser.uid)
         .get();
-      let likedPosts = posts.size;
+      let likedPosts = [];
+      await Promise.all(
+        posts.docs.map(async (doc) => {
+          let postData = doc.data();
+          let userData = await firestore()
+            .collection('users')
+            .doc(postData.uid)
+            .get();
+          userData = userData.data();
+          return likedPosts.push({
+            ...postData,
+            avatar: userData.avatar,
+            postId: doc.id,
+            initials: userData.initials,
+            name: userData.name,
+            isSelf: postData.uid === currentUser.uid,
+            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
+          });
+        }),
+      );
       posts = [];
       await Promise.all(
         postsData.docs.map(async (doc) => {
@@ -331,6 +351,7 @@ export const followRequest = (uid) => {
           .update({
             followings: FieldValue.arrayUnion(uid),
           });
+        dispatch();
       }
       dispatch(
         CreateNotificationRequest({
@@ -342,6 +363,7 @@ export const followRequest = (uid) => {
         }),
       );
       dispatch(followSuccess(uid));
+      dispatch(followXSuccess(uid));
     } catch (e) {
       console.warn(e);
       dispatch(UserRequestFailure(`Can't follow this user!`));
@@ -376,6 +398,7 @@ export const UnfollowRequest = (uid) => {
         );
       }
       dispatch(UnfollowSuccess(uid));
+      dispatch(unfollowXSuccess(uid));
     } catch (e) {
       console.warn(e);
       dispatch(UserRequestFailure(`Can't unfollow this user!`));
@@ -397,15 +420,19 @@ export const DeleteSharedPostSuccess = (postId) => {
   };
 };
 
-export const IncreaseLikedPostCountRequest = () => {
+export const IncreaseLikedPostCountRequest = (data) => {
   return {
     type: userActionTypes.INCREASE_LIKED_POST_COUNT,
+    payload: data,
   };
 };
 
-export const DecreaseLikedPostCountRequest = () => {
+export const DecreaseLikedPostCountRequest = (postId) => {
   return {
     type: userActionTypes.DECREASE_LIKED_POST_COUNT,
+    payload: {
+      postId,
+    },
   };
 };
 

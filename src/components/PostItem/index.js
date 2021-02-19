@@ -15,6 +15,7 @@ import {
 } from '../../constants';
 import {connect} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
+import Autolink from 'react-native-autolink';
 
 class PostItem extends PureComponent {
   constructor() {
@@ -142,7 +143,10 @@ class PostItem extends PureComponent {
               }}
               onTextLayout={_onTextLayout}
               numberOfLines={this.state.textShown ? this.state.lines : 4}>
-              {this.props.item.text}
+              <Autolink
+                text={this.props.item.text}
+                linkStyle={{color: 'blue'}}
+              />
             </Text>
             {this.state.lines > 4 && !this.state.textShown ? (
               <Text

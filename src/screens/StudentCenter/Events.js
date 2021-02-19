@@ -19,6 +19,7 @@ import {
 import LottieView from 'lottie-react-native';
 import moment from 'moment';
 import {navigation} from '../../navigations/RootNavigation';
+import EventItem from '../../components/EventItem';
 
 const Events = () => {
   const [refreshing, setRefreshing] = useState(false);
@@ -145,13 +146,7 @@ function getEventHandlers(
     }
   };
   const _renderEmpty = () => <EmptyList message={'No Events'} />;
-  const _renderItem = ({item}) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.time}>{item.time}</Text>
-      <Text style={styles.text}>{item.name}</Text>
-      {item.details && <Text style={styles.details}>{item.details}</Text>}
-    </View>
-  );
+  const _renderItem = ({item}) => <EventItem item={item} />;
   const _loadMore = async () => {
     try {
       let events = await firestore()
@@ -231,37 +226,5 @@ function getEventHandlers(
     _renderSectionHeader,
   };
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: 'white',
-  },
-  itemContainer: {
-    margin: widthPercentageToDP(3),
-    marginBottom: widthPercentageToDP(1),
-    padding: widthPercentageToDP(4),
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-    borderRadius: widthPercentageToDP(2),
-    backgroundColor: 'white',
-  },
-  details: {
-    fontSize: fontscale(13.5),
-  },
-  text: {
-    fontSize: fontscale(14),
-    marginTop: widthPercentageToDP(1),
-    marginBottom: widthPercentageToDP(1),
-  },
-  time: {
-    fontSize: fontscale(13),
-  },
-});
 
 export default Events;

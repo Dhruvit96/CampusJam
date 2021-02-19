@@ -3,12 +3,22 @@ import {useSelector as useReduxSelector} from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import thunk from 'redux-thunk';
 import {persistStore, persistReducer} from 'redux-persist';
-import {userReducer, notificationReducer, postReducer} from './reducers';
+import {
+  userReducer,
+  notificationReducer,
+  postReducer,
+  userXReducer,
+  commentReducer,
+  followListReducer,
+} from './reducers';
 
 const rootReducer = combineReducers({
   user: userReducer,
   notification: notificationReducer,
   post: postReducer,
+  profile: userXReducer,
+  comment: commentReducer,
+  followList: followListReducer,
 });
 
 const persistConfig = {

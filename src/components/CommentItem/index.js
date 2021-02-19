@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
-    fontSize: fontscale(13),
+    fontSize: fontscale(14.5),
     color: '#6a6a6a',
   },
 });

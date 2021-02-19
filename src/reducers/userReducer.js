@@ -16,7 +16,7 @@ const defaultState = {
   extraInfo: {
     followers: [],
     posts: [],
-    likedPosts: 0,
+    likedPosts: [],
   },
   loading: false,
 };
@@ -29,7 +29,11 @@ const reducer = (state = defaultState, action) => {
         ...state,
         extraInfo: {
           ...state.extraInfo,
-          likedPosts: state.extraInfo.likedPosts + 1,
+          likedPosts: [
+            ...state.extraInfo.likedPosts.filter(
+              (x) => x.postId !== action.payload.postId,
+            ),
+          ],
         },
       };
       return state;
@@ -65,7 +69,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         extraInfo: {
           ...state.extraInfo,
-          likedPosts: state.extraInfo.likedPosts + 1,
+          likedPosts: [action.payload, ...state.extraInfo.likedPosts],
         },
       };
       return state;

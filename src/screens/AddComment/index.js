@@ -26,6 +26,11 @@ import {
   DeleteNotificationRequest,
 } from '../../actions/notificationActions.js';
 import {PostRequestFailure} from '../../actions/postActions.js';
+import {
+  AddCommentRequest,
+  DeleteCommentRequest,
+  FetchCommentListRequest,
+} from '../../actions/commentActions.js';
 
 const AddComment = ({route}) => {
   const postId = route.params.postId;
@@ -37,7 +42,9 @@ const AddComment = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [first, setFirst] = useState(true);
-  const [commentsData, setCommentData] = useState([]);
+  const commentsData = useSelector(
+    (state) => state.comment[route.params.postId],
+  );
   const [comment, setComment] = useState('');
   const {
     _addComment,
@@ -48,19 +55,15 @@ const AddComment = ({route}) => {
     _renderSectionHeader,
   } = getEventHandlers(
     comment,
-    commentsData,
     dispatch,
     postId,
     replyId,
     replyTo,
     setComment,
-    setCommentData,
     setLoading,
     setRefreshing,
     setReplyTo,
     setReplyId,
-    user.uid,
-    user,
     userId,
   );
   useEffect(() => {
@@ -143,19 +146,15 @@ const AddComment = ({route}) => {
 
 function getEventHandlers(
   comment,
-  commentsData,
   dispatch,
   postId,
   replyId,
   replyTo,
   setComment,
-  setCommentData,
   setLoading,
   setRefreshing,
   setReplyTo,
   setReplyId,
-  uid,
-  user,
   userId,
 ) {
   const _onPressBack = () => {
@@ -163,167 +162,19 @@ function getEventHandlers(
   };
   const _onRefresh = async () => {
     setRefreshing(true);
-    let comments = await firestore()
-      .collection('comments')
-      .where('postId', '==', postId)
-      .orderBy('create_at', 'desc')
-      .get();
-    let commentData = [];
-    await Promise.all(
-      comments.docs.map(async (doc) => {
-        let data = doc.data();
-        let replies = await firestore()
-          .collection('comments')
-          .where('commentId', '==', doc.id)
-          .orderBy('create_at', 'asc')
-          .get();
-        let repliesData = [];
-        await Promise.all(
-          replies.docs.map(async (ref) => {
-            let replyData = ref.data();
-            let userData = await firestore()
-              .collection('users')
-              .doc(replyData.uid)
-              .get();
-            userData = userData.data();
-            return repliesData.push({
-              ...replyData,
-              avatar: userData.avatar,
-              initials: userData.initials,
-              name: userData.name,
-              replyId: ref.id,
-            });
-          }),
-        );
-        let userData = await firestore()
-          .collection('users')
-          .doc(data.uid)
-          .get();
-        userData = userData.data();
-        return commentData.push({
-          title: {
-            ...data,
-            avatar: userData.avatar,
-            initials: userData.initials,
-            name: userData.name,
-            commentId: doc.id,
-          },
-          data: repliesData,
-        });
-      }),
-    );
-    setCommentData(commentData);
+    await dispatch(FetchCommentListRequest(postId));
     setRefreshing(false);
   };
   const _renderEmpty = () => <EmptyList message={'No comments'} />;
 
   const _addComment = async () => {
-    try {
-      setLoading(true);
-      if (replyTo.length == 0) {
-        await firestore()
-          .collection('comments')
-          .add({
-            uid: uid,
-            text: comment,
-            postId: postId,
-            create_at: Date.now(),
-            replies: [],
-          })
-          .then((doc) => {
-            let data = {
-              title: {
-                uid: uid,
-                text: comment,
-                postId: postId,
-                create_at: Date.now(),
-                avatar: user.avatar,
-                initials: user.initials,
-                name: user.name,
-                commentId: doc.id,
-              },
-              data: [],
-            };
-            setCommentData([data, ...commentsData]);
-          });
-        if (userId != uid)
-          dispatch(
-            CreateNotificationRequest({
-              postId: postId,
-              userIds: [userId],
-              from: uid,
-              created_at: Date.now(),
-              type: notificationTypes.COMMENT_MY_POST,
-            }),
-          );
-      } else {
-        await firestore()
-          .collection('comments')
-          .add({
-            uid: uid,
-            text: comment,
-            create_at: Date.now(),
-            commentId: replyId.commentId,
-          })
-          .then(async (doc) => {
-            await firestore()
-              .collection('comments')
-              .doc(`${replyId.commentId}`)
-              .update({replies: FieldValue.arrayUnion(doc.id)});
-            let index = 0;
-            let data = commentsData.filter((ref, i) => {
-              if (ref.title.commentId == replyId.commentId) {
-                index = i;
-                return true;
-              } else return false;
-            })[0];
-            data.data = [
-              ...data.data,
-              {
-                uid: uid,
-                text: comment,
-                create_at: Date.now(),
-                avatar: user.avatar,
-                initials: user.initials,
-                name: user.name,
-                replyId: doc.id,
-                commentId: replyId.commentId,
-              },
-            ];
-            setCommentData([
-              ...commentsData.slice(0, index),
-              data,
-              ...commentsData.slice(index + 1),
-            ]);
-          });
-        if (userId != uid && userId != replyId.uid)
-          dispatch(
-            CreateNotificationRequest({
-              postId: postId,
-              userIds: [userId],
-              from: uid,
-              created_at: Date.now(),
-              type: notificationTypes.COMMENT_MY_POST,
-            }),
-          );
-        if (replyId.uid != uid)
-          dispatch(
-            CreateNotificationRequest({
-              postId: postId,
-              userIds: [replyId.uid],
-              from: uid,
-              created_at: Date.now(),
-              type: notificationTypes.REPLIED_COMMENT,
-            }),
-          );
-      }
-      setComment('');
-      setReplyTo('');
-      setLoading(false);
-    } catch (e) {
-      console.warn(e);
-      dispatch(PostRequestFailure('Can not add comment'));
-    }
+    setLoading(true);
+    await dispatch(
+      AddCommentRequest(comment, postId, replyId, replyTo, userId),
+    );
+    setComment('');
+    setReplyTo('');
+    setLoading(false);
   };
   const _renderItem = ({item}) => (
     <CommentItem
@@ -333,69 +184,8 @@ function getEventHandlers(
       onDeleteComment={_onDeleteComment}
     />
   );
-  const _onDeleteComment = async (commentId, rId) => {
-    try {
-      if (typeof rId === 'undefined') {
-        let data = await firestore()
-          .collection('comments')
-          .doc(commentId)
-          .get();
-        data = data.data();
-        await Promise.all(
-          data.replies.map(async (id) => {
-            await firestore().collection('comments').doc(id).delete();
-          }),
-        );
-        await firestore().collection('comments').doc(commentId).delete();
-        setCommentData([
-          ...commentsData.filter((x) => x.title.commentId !== commentId),
-        ]);
-        if (userId != uid)
-          dispatch(
-            DeleteNotificationRequest({
-              postId: postId,
-              uid: uid,
-              type: notificationTypes.COMMENT_MY_POST,
-            }),
-          );
-      } else {
-        await firestore().collection('comments').doc(rId).delete();
-        await firestore()
-          .collection('comments')
-          .doc(`${commentId}`)
-          .update({replies: FieldValue.arrayRemove(rId)});
-        let index = 0;
-        let data = commentsData.filter((ref, i) => {
-          if (ref.title.commentId == commentId) {
-            index = i;
-            return true;
-          } else return false;
-        })[0];
-        data.data = [...data.data.filter((x) => x.replyId !== rId)];
-        setCommentData([
-          ...commentsData.slice(0, index),
-          data,
-          ...commentsData.slice(index + 1),
-        ]);
-        dispatch(
-          DeleteNotificationRequest({
-            postId: postId,
-            uid: uid,
-            type: notificationTypes.COMMENT_MY_POST,
-          }),
-        );
-        dispatch(
-          DeleteNotificationRequest({
-            postId: postId,
-            uid: uid,
-            type: notificationTypes.REPLIED_COMMENT,
-          }),
-        );
-      }
-    } catch (e) {
-      console.warn(e);
-      dispatch(PostRequestFailure('Can not remove comment'));
-    }
+  const _onDeleteComment = async (commentId, replyId) => {
+    await dispatch(DeleteCommentRequest(postId, commentId, replyId, userId));
   };
   const _renderSectionHeader = ({section: {title}}) => (
     <CommentItem

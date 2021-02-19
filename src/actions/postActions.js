@@ -299,13 +299,14 @@ export const DeletePostSuccess = (postId) => {
 export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
   return async (dispatch) => {
     try {
-      let uid = store.getState().user.userInfo.uid;
+      const uid = store.getState().user.userInfo.uid;
+      let postData = store.getState().posts.filter((x) => x.postId === postId);
       if (isLiked) {
         await firestore()
           .collection('posts')
           .doc(postId)
           .update({likedBy: FieldValue.arrayRemove(uid)});
-        dispatch(DecreaseLikedPostCountRequest());
+        dispatch(DecreaseLikedPostCountRequest(postId));
         dispatch(
           DeleteNotificationRequest({
             userIds: [postUserId],
@@ -320,7 +321,7 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           .update({
             likedBy: FieldValue.arrayUnion(uid),
           });
-        dispatch(IncreaseLikedPostCountRequest());
+        dispatch(IncreaseLikedPostCountRequest(postData));
         if (postUserId != uid) {
           dispatch(
             CreateNotificationRequest({

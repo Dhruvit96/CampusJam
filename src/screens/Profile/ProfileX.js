@@ -10,31 +10,17 @@ import {
   widthPercentageToDP,
 } from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
-import firestore from '@react-native-firebase/firestore';
 import PostItem from '../../components/PostItem';
 import Loading from '../../components/Loading';
 import {ToggleFollowUserRequest} from '../../actions/postActions';
+import {FetchProfileXRequest} from '../../actions/profileXActions';
 
 const ProfileX = ({route}) => {
   const dispatch = useDispatch();
   const uid = route.params.uid;
-  const currentUser = useSelector((state) => state.user.userInfo);
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [isFollowed, setIsFollowed] = useState(true);
-  const [userState, setUserState] = useState({
-    avatar: null,
-    bio: '',
-    email: '',
-    followings: [],
-    followers: [],
-    id: null,
-    initials: '',
-    isStudent: false,
-    posts: [],
-    name: '',
-    uid: '',
-  });
+  const userState = useSelector((state) => state.profile[route.params.uid]);
   const {
     _headerComponent,
     _onPressBack,
@@ -42,19 +28,13 @@ const ProfileX = ({route}) => {
     _onPressLikedPosts,
     _onRefresh,
     _renderItem,
-  } = getEventHandlers(
-    currentUser,
-    dispatch,
-    isFollowed,
-    setIsFollowed,
-    setLoading,
-    setRefreshing,
-    setUserState,
-    uid,
-    userState,
-  );
+  } = getEventHandlers(dispatch, setLoading, setRefreshing, uid, userState);
   useEffect(() => {
-    _onRefresh();
+    async function fetchData() {
+      await _onRefresh();
+      setLoading(false);
+    }
+    fetchData();
   }, []);
   if (loading) return <Loading isVisible={loading} />;
   return (
@@ -133,7 +113,7 @@ const ProfileX = ({route}) => {
               style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
               <TabComponent
                 name="Liked Posts"
-                count={userState.likedPosts}
+                count={userState.likedPosts.length}
                 onPress={_onPressLikedPosts}
               />
               <TabComponent
@@ -150,71 +130,14 @@ const ProfileX = ({route}) => {
   );
 };
 
-function getEventHandlers(
-  currentUser,
-  dispatch,
-  isFollowed,
-  setIsFollowed,
-  setLoading,
-  setRefreshing,
-  setUserState,
-  uid,
-  userState,
-) {
+function getEventHandlers(dispatch, setLoading, setRefreshing, uid, userState) {
   const _onPressBack = () => {
     navigation.goBack();
   };
   const _onRefresh = async () => {
     setRefreshing(true);
-    let user = await firestore().collection('users').doc(uid).get();
-    user = user.data();
-    let postsData;
-    let posts = [];
-    let likedPosts = 0;
-    let followers = [];
-    if (typeof user.id === 'undefined') {
-      let posts = await firestore()
-        .collection('posts')
-        .where('likedBy', 'array-contains', uid)
-        .get();
-      likedPosts = posts.size;
-    } else {
-      postsData = await firestore()
-        .collection('posts')
-        .where('uid', '==', uid)
-        .orderBy('created_at', 'desc')
-        .get();
-
-      await Promise.all(
-        postsData.docs.map(async (doc) => {
-          let postData = doc.data();
-          return posts.push({
-            ...postData,
-            avatar: user.avatar,
-            postId: doc.id,
-            initials: user.initials,
-            name: user.name,
-            isSelf: currentUser.uid == postData.uid,
-            isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
-          });
-        }),
-      );
-      let followersData = await firestore()
-        .collection('users')
-        .where('followings', 'array-contains', uid)
-        .get();
-      followersData.forEach((ref) => followers.push(ref.id));
-    }
-    setUserState({
-      ...user,
-      isStudent: typeof user.id === 'string',
-      posts: posts,
-      likedPosts: likedPosts,
-      followers: followers,
-    });
-    setIsFollowed(currentUser.followings.indexOf(uid) > -1);
+    await dispatch(FetchProfileXRequest(uid));
     setRefreshing(false);
-    setLoading(false);
   };
   const _onPressFollowers = () => {
     navigation.push('FollowList', {
@@ -239,9 +162,6 @@ function getEventHandlers(
   };
   const _onPressLikedPosts = () => {
     navigation.push('LikedPosts', {
-      avatar: userState.avatar,
-      initials: userState.initials,
-      name: userState.name,
       uid: uid,
     });
   };
@@ -282,24 +202,18 @@ function getEventHandlers(
             <Button
               type="clear"
               onPress={async () => {
-                await dispatch(ToggleFollowUserRequest(uid, isFollowed));
-                if (!isFollowed) userState.followers.push(currentUser.uid);
-                else {
-                  userState.followers.splice(
-                    userState.followers.indexOf(currentUser.uid),
-                    userState.followers.indexOf(currentUser.uid) + 1,
-                  );
-                }
-                setIsFollowed(!isFollowed);
+                await dispatch(
+                  ToggleFollowUserRequest(uid, userState.isFollowed),
+                );
               }}
-              title={isFollowed ? 'Following' : 'Follow'}
+              title={userState.isFollowed ? 'Following' : 'Follow'}
               containerStyle={{
                 width: widthPercentageToDP(24),
                 marginTop: !userState.bio ? heightPercentageToDP(2) : 0,
-                backgroundColor: isFollowed ? '#f3f3f3' : '#61c0ff',
+                backgroundColor: userState.isFollowed ? '#f3f3f3' : '#61c0ff',
               }}
               titleStyle={{
-                color: isFollowed ? '#61c0ff' : '#f3f3f3',
+                color: userState.isFollowed ? '#61c0ff' : '#f3f3f3',
                 fontSize: fontscale(15),
               }}
               buttonStyle={{
