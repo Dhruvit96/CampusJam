@@ -9,7 +9,6 @@ import {
   postReducer,
   userXReducer,
   commentReducer,
-  followListReducer,
 } from './reducers';
 
 const rootReducer = combineReducers({
@@ -18,7 +17,6 @@ const rootReducer = combineReducers({
   post: postReducer,
   profile: userXReducer,
   comment: commentReducer,
-  followList: followListReducer,
 });
 
 const persistConfig = {

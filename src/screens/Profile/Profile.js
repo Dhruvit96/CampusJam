@@ -269,11 +269,12 @@ function getEventHandlers(
       screen: 'Following',
       params: {
         title: name,
+        uid: uid,
       },
     });
   };
   const _onPressFollowingX = () => {
-    navigation.push('FollowingX');
+    navigation.push('FollowingX', {uid: uid});
   };
   const _onPressLikedPosts = () => {
     navigation.push('LikedPosts');
