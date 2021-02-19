@@ -300,7 +300,9 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
   return async (dispatch) => {
     try {
       const uid = store.getState().user.userInfo.uid;
-      let postData = store.getState().posts.filter((x) => x.postId === postId);
+      let postData = store
+        .getState()
+        .post.posts.filter((x) => x.postId === postId)[0];
       if (isLiked) {
         await firestore()
           .collection('posts')

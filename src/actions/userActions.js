@@ -41,6 +41,7 @@ export const LoginRequest = ({email, password}) => {
             uid: ref.user.uid,
           },
         };
+        dispatch(FetchExtraInfoRequest());
         dispatch(LoginSuccess(result));
       } else dispatch(LoginFailure('Please verify your email.'));
     } catch (error) {
@@ -229,6 +230,7 @@ export const FetchExtraInfoRequest = () => {
       let posts = await firestore()
         .collection('posts')
         .where('likedBy', 'array-contains', currentUser.uid)
+        .orderBy('created_at', 'desc')
         .get();
       let likedPosts = [];
       await Promise.all(

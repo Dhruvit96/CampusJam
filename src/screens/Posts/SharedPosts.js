@@ -38,12 +38,11 @@ const SharedPosts = () => {
       />
       <FlatList
         data={first ? [] : postsData}
-        extraData={refreshing}
         keyExtractor={(item) => item.postId}
         refreshing={refreshing}
         renderItem={_renderItem}
         ListEmptyComponent={first ? null : _renderEmpty}
-        onRefresh={_onRefresh}
+        onRefresh={() => {}}
       />
     </View>
   );
