@@ -2,7 +2,7 @@
 
 The 1st project what I did with React Native.
 
-- React Native (v0.62)
+- React Native (v0.63.4)
 - Firebase
 - JavaScript
 - React-native-navigation v5
