@@ -15,7 +15,7 @@ Use the package manager [YARN] to install [CampusJam].
 git clone https://github.com/Dhruvit96/CampusJam.git
 cd CampusJam
 yarn
-cd android && ././gradlew clean
+cd android && ./gradlew clean
 ```
 
 
