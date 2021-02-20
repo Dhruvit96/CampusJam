@@ -9,7 +9,7 @@ The 1st project what I did with React Native.
 - Redux / Redux-thunk
 ## Installation
 
-Use the package manager [YARN] to install [CampusJam].\
+Use the package manager [YARN] to install [CampusJam].
 
 ```bash
 git clone https://github.com/Dhruvit96/CampusJam.git
