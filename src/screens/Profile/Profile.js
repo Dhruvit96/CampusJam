@@ -213,7 +213,7 @@ const Profile = () => {
               style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
               <TabComponent
                 name="Liked Posts"
-                count={extraInfoState.likedPosts}
+                count={extraInfoState.likedPosts.length}
                 onPress={_onPressLikedPosts}
               />
               <TabComponent

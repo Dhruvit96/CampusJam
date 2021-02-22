@@ -41,9 +41,11 @@ export const LoginRequest = ({email, password}) => {
             uid: ref.user.uid,
           },
         };
-        dispatch(FetchExtraInfoRequest());
         dispatch(LoginSuccess(result));
-      } else dispatch(LoginFailure('Please verify your email.'));
+      } else {
+        await ref.user.sendEmailVerification();
+        dispatch(UserRequestFailure('Please verify your email.'));
+      }
     } catch (error) {
       let errorMessage = '';
       switch (error.code) {
@@ -60,7 +62,7 @@ export const LoginRequest = ({email, password}) => {
         default:
           errorMessage = 'Check your internet connection.';
       }
-      dispatch(LoginFailure(errorMessage));
+      dispatch(UserRequestFailure(errorMessage));
     }
   };
 };
@@ -107,7 +109,6 @@ export const RegisterRequest = ({firstName, lastName, email, password}) => {
       await firestore().collection('users').doc(ref.user.uid).set({
         avatar: null,
         bio: null,
-        email: email,
         followings: [],
         id: id,
         initials: initials,
@@ -452,8 +453,9 @@ export const UpdateSharedPostRequest = (payload) => {
   };
 };
 
-export const ToggleLoading = () => {
+export const ToggleLoading = (value) => {
   return {
     type: userActionTypes.TOGGLE_LOADING,
+    payload: value,
   };
 };

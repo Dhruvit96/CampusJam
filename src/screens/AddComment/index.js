@@ -10,22 +10,14 @@ import {
 import {Avatar, Button, Header, Icon, Text} from 'react-native-elements';
 import CommentItem from '../../components/CommentItem/index.js';
 import {
-  FieldValue,
   fontscale,
   heightPercentageToDP,
-  notificationTypes,
   widthPercentageToDP,
 } from '../../constants';
-import firestore from '@react-native-firebase/firestore';
 import EmptyList from '../../components/EmptyList';
 import {navigation} from '../../navigations/RootNavigation';
 import {useSelector} from '../../store.js';
 import {useDispatch} from 'react-redux';
-import {
-  CreateNotificationRequest,
-  DeleteNotificationRequest,
-} from '../../actions/notificationActions.js';
-import {PostRequestFailure} from '../../actions/postActions.js';
 import {
   AddCommentRequest,
   DeleteCommentRequest,
@@ -184,8 +176,10 @@ function getEventHandlers(
       onDeleteComment={_onDeleteComment}
     />
   );
-  const _onDeleteComment = async (commentId, replyId) => {
-    await dispatch(DeleteCommentRequest(postId, commentId, replyId, userId));
+  const _onDeleteComment = async (commentId, replyId, created_at) => {
+    await dispatch(
+      DeleteCommentRequest(postId, commentId, replyId, created_at),
+    );
   };
   const _renderSectionHeader = ({section: {title}}) => (
     <CommentItem

@@ -17,7 +17,13 @@ export const CreateNotificationRequest = (notification) => {
   };
 };
 
-export const DeleteNotificationRequest = ({userIds, uid, type, postId}) => {
+export const DeleteNotificationRequest = ({
+  userIds,
+  uid,
+  type,
+  postId,
+  created_at,
+}) => {
   return async (dispatch) => {
     try {
       let time = Date.now() - 60 * 1000 * 10;
@@ -27,7 +33,7 @@ export const DeleteNotificationRequest = ({userIds, uid, type, postId}) => {
             .where('from', '==', uid)
             .where('type', '==', type)
             .where('postId', '==', postId)
-            .where('created_at', '>=', time)
+            .where('created_at', '==', created_at)
             .get()
         : await firestore()
             .collection('notifications')

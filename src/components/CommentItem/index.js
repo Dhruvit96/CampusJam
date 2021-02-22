@@ -18,6 +18,7 @@ const CommentItem = ({item, style, onDeleteComment, onPressReply}) => {
     onDeleteComment,
     item.replyId,
     item.uid,
+    item.created_at,
   );
   return (
     <TouchableOpacity
@@ -47,6 +48,7 @@ const CommentItem = ({item, style, onDeleteComment, onPressReply}) => {
                 width: style
                   ? widthPercentageToDP(43)
                   : widthPercentageToDP(58),
+                marginTop: heightPercentageToDP(0.2),
               },
             ]}>
             {item.text}
@@ -65,7 +67,14 @@ const CommentItem = ({item, style, onDeleteComment, onPressReply}) => {
   );
 };
 
-function getEventHandlers(commentId, isSelf, onDeleteComment, replyId, uid) {
+function getEventHandlers(
+  commentId,
+  isSelf,
+  onDeleteComment,
+  replyId,
+  uid,
+  created_at,
+) {
   const _onPressAvatar = () => {
     !isSelf
       ? navigation.push('ProfileX', {uid: uid})
@@ -82,7 +91,7 @@ function getEventHandlers(commentId, isSelf, onDeleteComment, replyId, uid) {
       {
         text: 'OK',
         onPress: () => {
-          onDeleteComment && onDeleteComment(commentId, replyId);
+          onDeleteComment && onDeleteComment(commentId, replyId, created_at);
         },
       },
     ]);

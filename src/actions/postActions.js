@@ -168,7 +168,7 @@ export const CreatePostRequest = ({image, text}) => {
               postId: ref.id,
               userIds: [...followers],
               from: currentUser.uid,
-              created_at: Date.now(),
+              created_at: time,
               type: notificationTypes.SOMEONE_POSTS,
             }),
           );
@@ -257,27 +257,33 @@ export const DeletePostRequest = (postId) => {
       if (typeof postData.image == 'string' && postData.image.length > 0) {
         await storage().ref(`photos/${uid}/${postData.created_at}`).delete();
       }
-      await firestore().collection('posts').doc(postId).delete();
       let data = await firestore()
         .collection('comments')
         .where('postId', '==', postId)
         .get();
       await Promise.all(
         data.docs.map(async (doc) => {
-          await firestore().collection('comments').doc(`${doc.id}`).delete();
+          let replies = await firestore()
+            .collection('comments')
+            .where('commentId', '==', doc.id)
+            .get();
           await Promise.all(
-            doc.data().replies.map(async (id) => {
+            replies.docs.map(async (id) => {
               await firestore().collection('comments').doc(`${id}`).delete();
+              return 0;
             }),
           );
+          await firestore().collection('comments').doc(`${doc.id}`).delete();
           return 0;
         }),
       );
+      await firestore().collection('posts').doc(postId).delete();
       dispatch(
         DeleteNotificationRequest({
           postId: postId,
           uid: uid,
           type: notificationTypes.SOMEONE_POSTS,
+          created_at: postData.created_at,
         }),
       );
       dispatch(DeleteSharedPostSuccess(postId));
