@@ -1,15 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {Alert, FlatList, StatusBar, View} from 'react-native';
+import {FlatList, StatusBar, View} from 'react-native';
 import {Header} from 'react-native-elements';
 import MagazineItem from '../../components/MagazineItem';
-import firestore from '@react-native-firebase/firestore';
 import {fontscale} from '../../constants';
 import {navigation} from '../../navigations/RootNavigation';
+import {FetchMagazineListRequest} from '../../actions/studentDataActions';
+import {useDispatch} from 'react-redux';
+import {useSelector} from '../../store';
 const Magazine = () => {
   const [refreshing, setRefreshing] = useState(false);
-  const [magazineData, setMagazineData] = useState([]);
+  const magazineData = useSelector((state) => state.studentData.magazineData);
+  const dispatch = useDispatch();
   const {_onPressBack, _onRefresh, _renderItem} = getEventHandlers(
-    setMagazineData,
+    dispatch,
     setRefreshing,
   );
   useEffect(() => {
@@ -43,30 +46,15 @@ const Magazine = () => {
     </View>
   );
 };
-function getEventHandlers(setMagazineData, setRefreshing) {
+function getEventHandlers(dispatch, setRefreshing) {
   const _onPressBack = () => {
     navigation.goBack();
   };
   const _renderItem = ({item}) => <MagazineItem item={item} />;
   const _onRefresh = async () => {
-    try {
-      setRefreshing(true);
-      let documents = await firestore()
-        .collection('magazine')
-        .orderBy('date', 'desc')
-        .get();
-      let magazineData = [];
-      await Promise.all(
-        documents.docs.map((doc) => {
-          return magazineData.push({id: doc.id, ...doc.data()});
-        }),
-      );
-      setMagazineData(magazineData);
-      setRefreshing(false);
-    } catch (e) {
-      console.warn(e);
-      Alert.alert('Error', 'Can not get data.');
-    }
+    setRefreshing(true);
+    await dispatch(FetchMagazineListRequest());
+    setRefreshing(false);
   };
   return {
     _onPressBack,

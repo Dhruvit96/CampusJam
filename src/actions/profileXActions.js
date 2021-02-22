@@ -26,7 +26,7 @@ export const FetchProfileXRequest = (uid) => {
               postId: doc.id,
               initials: user.initials,
               name: user.name,
-              isSelf: true,
+              isSelf: postData.uid === currentUser.uid,
               isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
             });
           }),
@@ -47,7 +47,7 @@ export const FetchProfileXRequest = (uid) => {
               postId: doc.id,
               initials: user.initials,
               name: user.name,
-              isSelf: true,
+              isSelf: postData.uid === currentUser.uid,
               isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
             });
           }),
@@ -97,16 +97,16 @@ export const FetchProfileXFailure = (message) => {
   };
 };
 
-export const followXSuccess = (uid) => {
+export const followXSuccess = (uid, currentUid) => {
   return {
     type: profileXActionTypes.FOLLOW_SUCCESS,
-    payload: {uid},
+    payload: {uid, currentUid},
   };
 };
 
-export const unfollowXSuccess = (uid) => {
+export const unfollowXSuccess = (uid, currentUid) => {
   return {
     type: profileXActionTypes.UNFOLLOW_SUCCESS,
-    payload: {uid},
+    payload: {uid, currentUid},
   };
 };

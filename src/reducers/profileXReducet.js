@@ -12,18 +12,29 @@ const reducer = (state = defaultState, action) => {
       Alert.alert('Error', action.payload.message);
       return state;
     case profileXActionTypes.FOLLOW_SUCCESS:
-      if (typeof state[action.payload.uid] !== undefined)
+      if (typeof state[action.payload.uid] !== 'undefined') {
         state[action.payload.uid] = {
           ...state[action.payload.uid],
+          followers: [
+            action.payload.currentUid,
+            ...state[action.payload.uid].followers,
+          ],
           isFollowed: true,
         };
+      }
       return state;
     case profileXActionTypes.UNFOLLOW_SUCCESS:
-      if (typeof state[action.payload.uid] !== undefined)
+      if (typeof state[action.payload.uid] !== 'undefined') {
         state[action.payload.uid] = {
           ...state[action.payload.uid],
+          followers: [
+            ...state[action.payload.uid].followers.filter(
+              (x) => x !== action.payload.currentUid,
+            ),
+          ],
           isFollowed: false,
         };
+      }
       return state;
     default:
       return state;

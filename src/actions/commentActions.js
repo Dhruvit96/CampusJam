@@ -242,10 +242,6 @@ export const DeleteCommentRequest = (
         dispatch(DeleteCommentSuccess(postId, commentId));
       } else {
         await firestore().collection('comments').doc(replyId).delete();
-        await firestore()
-          .collection('comments')
-          .doc(`${commentId}`)
-          .update({replies: FieldValue.arrayRemove(replyId)});
         dispatch(
           DeleteNotificationRequest({
             postId,

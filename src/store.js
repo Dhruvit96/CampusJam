@@ -9,6 +9,7 @@ import {
   postReducer,
   userXReducer,
   commentReducer,
+  studentDataReducer,
 } from './reducers';
 
 const rootReducer = combineReducers({
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   post: postReducer,
   profile: userXReducer,
   comment: commentReducer,
+  studentData: studentDataReducer,
 });
 
 const persistConfig = {

@@ -350,7 +350,7 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
 };
 
 export const ToggleFollowUserRequest = (uid, isFollowed) => {
-  return async (dispatch) => {
+  return (dispatch) => {
     try {
       if (isFollowed) dispatch(UnfollowRequest(uid));
       else dispatch(followRequest(uid));

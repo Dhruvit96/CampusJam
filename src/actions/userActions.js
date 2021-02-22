@@ -354,7 +354,6 @@ export const followRequest = (uid) => {
           .update({
             followings: FieldValue.arrayUnion(uid),
           });
-        dispatch();
       }
       dispatch(
         CreateNotificationRequest({
@@ -366,7 +365,7 @@ export const followRequest = (uid) => {
         }),
       );
       dispatch(followSuccess(uid));
-      dispatch(followXSuccess(uid));
+      dispatch(followXSuccess(uid, currentUser.uid));
     } catch (e) {
       console.warn(e);
       dispatch(UserRequestFailure(`Can't follow this user!`));
@@ -401,7 +400,7 @@ export const UnfollowRequest = (uid) => {
         );
       }
       dispatch(UnfollowSuccess(uid));
-      dispatch(unfollowXSuccess(uid));
+      dispatch(unfollowXSuccess(uid, currentUser.uid));
     } catch (e) {
       console.warn(e);
       dispatch(UserRequestFailure(`Can't unfollow this user!`));

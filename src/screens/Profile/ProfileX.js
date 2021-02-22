@@ -28,7 +28,7 @@ const ProfileX = ({route}) => {
     _onPressLikedPosts,
     _onRefresh,
     _renderItem,
-  } = getEventHandlers(dispatch, setLoading, setRefreshing, uid, userState);
+  } = getEventHandlers(dispatch, setRefreshing, uid, userState);
   useEffect(() => {
     async function fetchData() {
       await _onRefresh();
@@ -130,7 +130,7 @@ const ProfileX = ({route}) => {
   );
 };
 
-function getEventHandlers(dispatch, setLoading, setRefreshing, uid, userState) {
+function getEventHandlers(dispatch, setRefreshing, uid, userState) {
   const _onPressBack = () => {
     navigation.goBack();
   };

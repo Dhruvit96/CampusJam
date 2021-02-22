@@ -1,32 +1,27 @@
 import React, {useEffect, useState} from 'react';
-import {
-  Alert,
-  SectionList,
-  StyleSheet,
-  StatusBar,
-  Text,
-  View,
-} from 'react-native';
+import {SectionList, StatusBar, Text, View} from 'react-native';
 import {Header} from 'react-native-elements';
-import firestore from '@react-native-firebase/firestore';
 import EmptyList from '../../components/EmptyList';
 import {
-  findWithAttr,
   fontscale,
   heightPercentageToDP,
   widthPercentageToDP,
 } from '../../constants';
 import LottieView from 'lottie-react-native';
-import moment from 'moment';
-import {navigation} from '../../navigations/RootNavigation';
+import {dispatch, navigation} from '../../navigations/RootNavigation';
 import EventItem from '../../components/EventItem';
+import {useSelector} from '../../store';
+import {useDispatch} from 'react-redux';
+import {
+  FetchEventsRequest,
+  LoadMoreEventsRequest,
+} from '../../actions/studentDataActions';
 
 const Events = () => {
   const [refreshing, setRefreshing] = useState(false);
-  const [eventsData, setEventsData] = useState([]);
-  const [last, setLast] = useState();
-  const LIMIT = 20;
-  const [loaded, setLoaded] = useState(false);
+  const dispatch = useDispatch();
+  const eventsData = useSelector((state) => state.studentData.events);
+  const loaded = useSelector((state) => state.studentData.loadedEvents);
   const [first, setFirst] = useState(true);
   const {
     _loadMore,
@@ -36,17 +31,7 @@ const Events = () => {
     _renderFooter,
     _renderItem,
     _renderSectionHeader,
-  } = getEventHandlers(
-    eventsData,
-    last,
-    LIMIT,
-    loaded,
-    refreshing,
-    setEventsData,
-    setRefreshing,
-    setLast,
-    setLoaded,
-  );
+  } = getEventHandlers(dispatch, loaded, refreshing, setRefreshing);
   useEffect(() => {
     async function fetchData() {
       await _onRefresh();
@@ -87,106 +72,19 @@ const Events = () => {
   );
 };
 
-function getEventHandlers(
-  data,
-  last,
-  LIMIT,
-  loaded,
-  refreshing,
-  setEvents,
-  setRefreshing,
-  setLast,
-  setLoaded,
-) {
+function getEventHandlers(dispatch, loaded, refreshing, setRefreshing) {
   const _onPressBack = () => {
     navigation.goBack();
   };
   const _onRefresh = async () => {
-    try {
-      setRefreshing(true);
-      let today = (Date.now() / 100000) * 100000;
-      let events = await firestore()
-        .collection('events')
-        .where('date', '>=', today)
-        .orderBy('date', 'asc')
-        .orderBy('order', 'asc')
-        .limit(LIMIT)
-        .get();
-      setLast(events.docs[events.size - 1]);
-      let eventsData = [];
-      await Promise.all(
-        events.docs.map((doc) => {
-          let data = doc.data();
-          let eventDate = moment(data.date).format('Do MMMM YYYY');
-          let index = findWithAttr(eventsData, 'title', eventDate);
-          if (index >= 0) {
-            eventsData = [
-              ...eventsData.slice(0, index),
-              {
-                ...eventsData[index],
-                data: [...eventsData[index].data, {...data, id: doc.id}],
-              },
-              ...eventsData.slice(index + 1),
-            ];
-            return;
-          } else {
-            return eventsData.push({
-              title: eventDate,
-              data: [{...data, id: doc.id}],
-            });
-          }
-        }),
-      );
-      if (events.size < LIMIT) setLoaded(true);
-      setEvents(eventsData);
-      setRefreshing(false);
-    } catch (e) {
-      console.warn(e);
-      Alert.alert('Error', 'Can not get data.');
-    }
+    setRefreshing(true);
+    await dispatch(FetchEventsRequest());
+    setRefreshing(false);
   };
   const _renderEmpty = () => <EmptyList message={'No Events'} />;
   const _renderItem = ({item}) => <EventItem item={item} />;
-  const _loadMore = async () => {
-    try {
-      let events = await firestore()
-        .collection('events')
-        .orderBy('date', 'asc')
-        .orderBy('order', 'asc')
-        .startAfter(last)
-        .limit(LIMIT)
-        .get();
-      setLast(events.docs[events.size - 1]);
-      let eventsData = data;
-      await Promise.all(
-        events.docs.map((doc) => {
-          let data = doc.data();
-          let eventDate = moment(data.date).format('Do MMMM YYYY');
-          let index = findWithAttr(eventsData, 'title', eventDate);
-          if (index >= 0) {
-            eventsData = [
-              ...eventsData.slice(0, index),
-              {
-                ...eventsData[index],
-                data: [...eventsData[index].data, {...data, id: doc.id}],
-              },
-              ...eventsData.slice(index + 1),
-            ];
-            return;
-          } else {
-            return eventsData.push({
-              title: eventDate,
-              data: [{...data, id: doc.id}],
-            });
-          }
-        }),
-      );
-      if (events.size < LIMIT) setLoaded(true);
-      setEvents(eventsData);
-    } catch (e) {
-      console.warn(e);
-      Alert.alert('Error', 'Can not get data.');
-    }
+  const _loadMore = () => {
+    dispatch(LoadMoreEventsRequest());
   };
   const _renderSectionHeader = ({section: {title}}) => (
     <Text
