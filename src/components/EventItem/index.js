@@ -22,6 +22,9 @@ class EventItem extends PureComponent {
       <View style={styles.container}>
         <Text style={styles.time}>{this.props.item.time}</Text>
         <Text style={styles.text}>{this.props.item.name}</Text>
+        {this.props.item.department && (
+          <Text style={styles.text}>{this.props.item.department}</Text>
+        )}
         {this.props.item.details && (
           <>
             <Text

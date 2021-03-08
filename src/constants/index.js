@@ -1,6 +1,6 @@
 import {Dimensions, PixelRatio} from 'react-native';
 import firebase from '@react-native-firebase/app';
-import firestore from '@react-native-firebase/firestore';
+require('@react-native-firebase/firestore');
 import storage from '@react-native-firebase/storage';
 
 export const userActionTypes = {

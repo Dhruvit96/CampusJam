@@ -30,30 +30,15 @@ const Profile = () => {
     _onPressLikedPosts,
     _onPressSharedPosts,
     _onPressSettings,
-  } = getEventHandlers(
-    userState.avatar,
-    dispatch,
-    userState.initials,
-    setRefreshing,
-    userState.name,
-    userState.uid,
-  );
+  } = getEventHandlers(dispatch, setRefreshing, userState.name, userState.uid);
   useEffect(() => {
     _onRefresh();
   }, []);
   return (
-    <ScrollView
-      contentContainerStyle={{flex: 1, backgroundColor: 'white'}}
-      refreshControl={
-        <RefreshControl
-          refreshing={refreshing}
-          onRefresh={_onRefresh}
-          progressViewOffset={heightPercentageToDP(10)}
-        />
-      }>
-      <StatusBar barStyle="dark-content" />
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="white" />
       <Header
-        backgroundColor="transparent"
+        backgroundColor="white"
         placement="center"
         leftComponent={{
           icon: 'arrow-back',
@@ -72,172 +57,187 @@ const Profile = () => {
           size: fontscale(24),
         }}
       />
-      {userState.id ? (
-        <>
-          <View style={styles.profileContainer}>
-            <Avatar
-              rounded
-              size="xlarge"
-              source={userState.avatar ? {uri: userState.avatar} : null}
-              title={!userState.avatar ? userState.initials : null}
-              titleStyle={{fontSize: fontscale(50)}}
-              containerStyle={{
-                backgroundColor: '#523',
-                margin: widthPercentageToDP(6),
-              }}
-            />
-            <Text h4 h4Style={{fontWeight: '300'}}>
-              {userState.name + '-' + userState.id}
-            </Text>
-            <Text h4 h4Style={styles.text}>
-              {userState.bio}
-            </Text>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'center',
-                marginTop: heightPercentageToDP(3),
-              }}>
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  flexDirection: 'row',
-                }}>
-                <TabComponent
-                  name="Posts"
-                  count={extraInfoState.posts.length}
-                  onPress={_onPressSharedPosts}
+      <ScrollView
+        contentContainerStyle={{flexGrow: 1, backgroundColor: 'white'}}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={_onRefresh} />
+        }>
+        <View style={{flex: 1}}>
+          {userState.id ? (
+            <>
+              <View style={styles.profileContainer}>
+                <Avatar
+                  rounded
+                  size={widthPercentageToDP(44)}
+                  source={userState.avatar ? {uri: userState.avatar} : null}
+                  title={!userState.avatar ? userState.initials : null}
+                  titleStyle={{fontSize: fontscale(50)}}
+                  containerStyle={{
+                    backgroundColor: '#523',
+                    margin: widthPercentageToDP(6),
+                  }}
                 />
-                <TabComponent
-                  name="Followers"
-                  count={extraInfoState.followers.length}
-                  onPress={_onPressFollowers}
-                />
-                <TabComponent
-                  name="Following"
-                  count={userState.followings.length}
-                  onPress={_onPressFollowing}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.postContainer}>
-            <PostButton
-              title="Edit Profile"
-              iconName="edit"
-              type="feather"
-              size={fontscale(20)}
-              onPress={_onPressEditProfile}
-            />
-            <PostButton
-              title="Add Post"
-              iconName="add"
-              size={fontscale(22)}
-              onPress={_onPressAddPost}
-            />
-            <PostButton
-              title="My Posts"
-              iconName="bookmark-outline"
-              size={fontscale(22)}
-              onPress={_onPressSharedPosts}
-            />
-            <PostButton
-              title="Liked Posts"
-              iconName="favorite-outline"
-              size={fontscale(22)}
-              onPress={_onPressLikedPosts}
-            />
-          </View>
-        </>
-      ) : (
-        <>
-          <View
-            style={{
-              flex: 9,
-              flexDirection: 'row',
-            }}>
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Avatar
-                rounded
-                size={widthPercentageToDP(28)}
-                source={userState.avatar ? {uri: userState.avatar} : null}
-                title={!userState.avatar ? userState.initials : null}
-                titleStyle={{fontSize: fontscale(50)}}
-                containerStyle={{
-                  backgroundColor: '#523',
-                  margin: widthPercentageToDP(6),
-                }}
-              />
-            </View>
-            <View
-              style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-              <Text style={{fontSize: fontscale(18)}}>{userState.name}</Text>
-              {userState.bio ? (
-                <Text
-                  h4
-                  h4Style={[
-                    styles.text,
-                    {
-                      marginTop: heightPercentageToDP(1),
-                      marginBottom: heightPercentageToDP(1),
-                    },
-                  ]}>
+                <Text h4 h4Style={{fontSize: fontscale(20), fontWeight: '300'}}>
+                  {userState.name + '-' + userState.id}
+                </Text>
+                <Text h4 h4Style={styles.text}>
                   {userState.bio}
                 </Text>
-              ) : null}
-              <Button
-                type="clear"
-                onPress={_onPressEditProfile}
-                title="Edit Profile"
-                containerStyle={{
-                  width: widthPercentageToDP(30),
-                  marginTop: !userState.bio ? heightPercentageToDP(2) : 0,
-                  backgroundColor: '#61c0ff',
-                }}
-                titleStyle={{
-                  color: 'white',
-                  fontSize: fontscale(15),
-                }}
-              />
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              marginTop: heightPercentageToDP(3),
-            }}>
-            <View
-              style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
-              <TabComponent
-                name="Liked Posts"
-                count={extraInfoState.likedPosts.length}
-                onPress={_onPressLikedPosts}
-              />
-              <TabComponent
-                name="Following"
-                count={userState.followings.length}
-                onPress={_onPressFollowingX}
-              />
-            </View>
-          </View>
-          <View style={{flex: 20}} />
-        </>
-      )}
-    </ScrollView>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    marginTop: heightPercentageToDP(3),
+                  }}>
+                  <View
+                    style={{
+                      flex: 1,
+                      justifyContent: 'center',
+                      flexDirection: 'row',
+                    }}>
+                    <TabComponent
+                      name="Posts"
+                      count={extraInfoState.posts.length}
+                      onPress={_onPressSharedPosts}
+                    />
+                    <TabComponent
+                      name="Followers"
+                      count={extraInfoState.followers.length}
+                      onPress={_onPressFollowers}
+                    />
+                    <TabComponent
+                      name="Following"
+                      count={userState.followings.length}
+                      onPress={_onPressFollowing}
+                    />
+                  </View>
+                </View>
+              </View>
+              <View style={styles.postContainer}>
+                <PostButton
+                  title="Edit Profile"
+                  iconName="edit"
+                  type="feather"
+                  size={fontscale(20)}
+                  onPress={_onPressEditProfile}
+                />
+                <PostButton
+                  title="Add Post"
+                  iconName="add"
+                  size={fontscale(22)}
+                  onPress={_onPressAddPost}
+                />
+                <PostButton
+                  title="My Posts"
+                  iconName="bookmark-outline"
+                  size={fontscale(22)}
+                  onPress={_onPressSharedPosts}
+                />
+                <PostButton
+                  title="Liked Posts"
+                  iconName="favorite-outline"
+                  size={fontscale(22)}
+                  onPress={_onPressLikedPosts}
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <View
+                style={{
+                  flex: 9,
+                  flexDirection: 'row',
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Avatar
+                    rounded
+                    size={widthPercentageToDP(28)}
+                    source={userState.avatar ? {uri: userState.avatar} : null}
+                    title={!userState.avatar ? userState.initials : null}
+                    titleStyle={{fontSize: fontscale(50)}}
+                    containerStyle={{
+                      backgroundColor: '#523',
+                      margin: widthPercentageToDP(6),
+                    }}
+                  />
+                </View>
+                <View
+                  style={{
+                    flex: 1,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}>
+                  <Text style={{fontSize: fontscale(18)}}>
+                    {userState.name}
+                  </Text>
+                  {userState.bio ? (
+                    <Text
+                      h4
+                      h4Style={[
+                        styles.text,
+                        {
+                          marginTop: heightPercentageToDP(1),
+                          marginBottom: heightPercentageToDP(1),
+                        },
+                      ]}>
+                      {userState.bio}
+                    </Text>
+                  ) : null}
+                  <Button
+                    type="clear"
+                    onPress={_onPressEditProfile}
+                    title="Edit Profile"
+                    containerStyle={{
+                      width: widthPercentageToDP(30),
+                      marginTop: !userState.bio ? heightPercentageToDP(2) : 0,
+                      backgroundColor: '#61c0ff',
+                    }}
+                    titleStyle={{
+                      color: 'white',
+                      fontSize: fontscale(15),
+                    }}
+                  />
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  marginTop: heightPercentageToDP(3),
+                }}>
+                <View
+                  style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    flexDirection: 'row',
+                  }}>
+                  <TabComponent
+                    name="Liked Posts"
+                    count={extraInfoState.likedPosts.length}
+                    onPress={_onPressLikedPosts}
+                  />
+                  <TabComponent
+                    name="Following"
+                    count={userState.followings.length}
+                    onPress={_onPressFollowingX}
+                  />
+                </View>
+              </View>
+              <View style={{flex: 20}} />
+            </>
+          )}
+        </View>
+      </ScrollView>
+    </>
   );
 };
 
-function getEventHandlers(
-  avatar,
-  dispatch,
-  initials,
-  setRefreshing,
-  name,
-  uid,
-) {
+function getEventHandlers(dispatch, setRefreshing, name, uid) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -303,12 +303,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   postContainer: {
-    flex: 8,
-    justifyContent: 'space-evenly',
     alignItems: 'center',
   },
   profileContainer: {
-    flex: 9,
     justifyContent: 'center',
     alignItems: 'center',
   },

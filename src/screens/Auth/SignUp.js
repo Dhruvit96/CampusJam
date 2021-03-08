@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
     height: heightPercentageToDP(6.5),
     marginEnd: widthPercentageToDP(2),
     marginTop: heightPercentageToDP(1),
+    marginBottom: heightPercentageToDP(1),
   },
   text: {
     fontWeight: '300',

@@ -4,7 +4,7 @@ import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
 import EmptyList from '../../components/EmptyList';
 import {fontscale} from '../../constants';
-import {useSelector} from '../../store';
+import {useSelector, store} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
 const LikedPosts = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -12,7 +12,7 @@ const LikedPosts = ({route}) => {
   const postsData =
     typeof route.params?.uid == 'string'
       ? useSelector((state) => state.profile[route.params?.uid].likedPosts)
-      : useSelector((state) => state.user.extraInfo.likedPosts);
+      : store.getState().user.extraInfo.likedPosts;
   const {
     _onPressBack,
     _onRefresh,

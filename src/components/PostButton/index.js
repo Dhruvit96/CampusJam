@@ -19,6 +19,8 @@ const PostButton = ({size, onPress, title, type, iconName}) => {
         paddingTop: heightPercentageToDP(0.6),
         paddingBottom: heightPercentageToDP(0.8),
         paddingStart: widthPercentageToDP(11),
+        marginTop: heightPercentageToDP(2),
+        marginBottom: heightPercentageToDP(1),
       }}>
       <Icon
         name={iconName}

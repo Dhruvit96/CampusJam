@@ -1,9 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Alert, Linking, StyleSheet, TouchableOpacity, View} from 'react-native';
 import {Text} from 'react-native-elements';
 import {fontscale, widthPercentageToDP} from '../../constants';
 
 const PlacementItem = ({item}) => {
+  const [line, setLine] = useState(0);
   const handleClick = () => {
     Linking.canOpenURL(item.url).then((supported) => {
       if (supported) {
@@ -13,10 +14,22 @@ const PlacementItem = ({item}) => {
       }
     });
   };
+  const _onTextLayout = (ref) => {
+    setLine(ref.nativeEvent.lines.length);
+  };
   return (
     <View style={styles.container}>
       <View style={{flex: 10, alignItems: 'center', justifyContent: 'center'}}>
-        <Text style={styles.text}>{item.name}</Text>
+        {line > 1 ? (
+          <>
+            <Text style={styles.text}>{item.firstName}</Text>
+            <Text style={styles.text}>{item.lastName}</Text>
+          </>
+        ) : (
+          <Text style={styles.text} onTextLayout={_onTextLayout}>
+            {item.firstName + ' ' + item.lastName}
+          </Text>
+        )}
         <Text style={styles.text}>{item.id}</Text>
       </View>
       <View
@@ -27,10 +40,14 @@ const PlacementItem = ({item}) => {
         }}>
         <Text style={styles.text}>{'Passing year: ' + item.year}</Text>
         <Text style={styles.text}>{'Department: ' + item.department}</Text>
-        <TouchableOpacity onPress={handleClick}>
+        <TouchableOpacity
+          onPress={item.url ? handleClick : null}
+          disabled={!item.url}>
           <Text style={styles.text}>{'Company: ' + item.company}</Text>
         </TouchableOpacity>
-        <Text style={styles.text}>{'Package: ' + item.package + ' LPA'}</Text>
+        {item.package && (
+          <Text style={styles.text}>{'Package: ' + item.package + ' LPA'}</Text>
+        )}
       </View>
     </View>
   );
@@ -54,7 +71,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   text: {
-    fontSize: fontscale(17),
+    fontSize: fontscale(15),
   },
 });
 

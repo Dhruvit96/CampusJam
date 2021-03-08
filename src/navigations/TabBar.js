@@ -23,7 +23,7 @@ import {
 import {ButtonGroup, Header} from 'react-native-elements';
 import {StatusBar, View} from 'react-native';
 import {fontscale} from '../constants';
-import {AboutUs, ChangePassword, Settings} from '../screens/Settings';
+import {AboutUs, ChangePassword, Settings, FeedBack} from '../screens/Settings';
 import Search from '../screens/Search';
 import AddComment from '../screens/AddComment';
 import AddPost from '../screens/AddPost';
@@ -107,6 +107,7 @@ export const HomeModule = () => {
       <HomeStack.Screen name="AddPost" component={AddPost} />
       <HomeStack.Screen name="ChangePassword" component={ChangePassword} />
       <HomeStack.Screen name="AboutUs" component={AboutUs} />
+      <HomeStack.Screen name="FeedBack" component={FeedBack} />
       <HomeStack.Screen name="PDFViewer" component={PDFViewer} />
     </HomeStack.Navigator>
   );

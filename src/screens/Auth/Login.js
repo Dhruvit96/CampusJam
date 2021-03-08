@@ -131,7 +131,10 @@ const Login = () => {
                   alignItems: 'center',
                 }}>
                 <TouchableOpacity
-                  style={{marginTop: heightPercentageToDP(2)}}
+                  style={{
+                    marginTop: heightPercentageToDP(2),
+                    marginBottom: heightPercentageToDP(1),
+                  }}
                   onPress={_onPressRegister}>
                   <Text style={styles.buttonText}>
                     Don't have account? Sign Up

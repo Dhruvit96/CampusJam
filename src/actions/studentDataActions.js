@@ -151,7 +151,7 @@ export const FetchPlacementListRequest = () => {
       let placements = await firestore()
         .collection('placement')
         .orderBy('year', 'desc')
-        .orderBy('package', 'asc')
+        .orderBy('id', 'asc')
         .limit(LIMIT_PLACEMENT_DATA_PER_LOADING)
         .get();
       let last = placements.docs[placements.size - 1];
@@ -185,7 +185,7 @@ export const LoadMorePlacementRequest = () => {
       let placements = await firestore()
         .collection('placement')
         .orderBy('year', 'desc')
-        .orderBy('package', 'asc')
+        .orderBy('id', 'asc')
         .startAfter(last)
         .limit(LIMIT_PLACEMENT_DATA_PER_LOADING)
         .get();

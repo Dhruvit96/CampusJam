@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {
   fontscale,
@@ -38,52 +39,60 @@ const AboutUs = () => {
     );
   };
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
-      <Image
-        source={require('../../assets/aboutus.png')}
-        style={styles.image}
-      />
-      <Text style={styles.heading}>There's a lot happening around you!</Text>
-      <Text>
-        Our Mission is to provide what's happening near you, share your ideas,
-        browse and search, for the type of events you like to attend.
-      </Text>
-      <Text style={{marginTop: heightPercentageToDP(2)}}>
-        Devloped By Dhruvit Maniya.
-      </Text>
-      <TouchableOpacity
-        style={{
-          flexDirection: 'row',
-          marginTop: heightPercentageToDP(1),
-          alignItems: 'center',
-        }}
-        onPress={_onPressGitHub}>
-        <FontAwesome name="github" size={fontscale(25)} />
-        <Text
-          style={{
-            marginStart: widthPercentageToDP(3),
-          }}>
-          github.com/Dhruvit96
+    <ScrollView contentContainerStyle={{flex: 1, backgroundColor: 'white'}}>
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <Image
+          source={require('../../assets/aboutus.png')}
+          style={styles.image}
+        />
+        <Text style={styles.heading}>There's a lot happening around you!</Text>
+        <Text style={styles.text}>
+          Our Mission is to provide what's happening near you, share your ideas,
+          browse and search, for the type of events you like to attend.
         </Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={{
-          flexDirection: 'row',
-          marginTop: heightPercentageToDP(1),
-          marginBottom: heightPercentageToDP(1),
-          alignItems: 'center',
-        }}
-        onPress={_onPressLinkedin}>
-        <FontAwesome name="linkedin-square" size={fontscale(25)} />
-        <Text
-          style={{
-            marginStart: widthPercentageToDP(3),
-          }}>
-          linkedin.com/in/dhruvit-maniya
+        <Text style={[styles.text, {marginTop: heightPercentageToDP(2)}]}>
+          Devloped By Dhruvit Maniya.
         </Text>
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            marginTop: heightPercentageToDP(1),
+            alignItems: 'center',
+          }}
+          onPress={_onPressGitHub}>
+          <FontAwesome name="github" size={fontscale(26)} />
+          <Text
+            style={[
+              styles.text,
+              {
+                marginStart: widthPercentageToDP(3),
+              },
+            ]}>
+            github.com/Dhruvit96
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            flexDirection: 'row',
+            marginTop: heightPercentageToDP(1),
+            marginBottom: heightPercentageToDP(1),
+            alignItems: 'center',
+          }}
+          onPress={_onPressLinkedin}>
+          <FontAwesome name="linkedin-square" size={fontscale(26)} />
+          <Text
+            style={[
+              styles.text,
+              {
+                marginStart: widthPercentageToDP(3),
+              },
+            ]}>
+            linkedin.com/in/dhruvit-maniya
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -95,7 +104,7 @@ const styles = StyleSheet.create({
     paddingTop: StatusBar.currentHeight,
   },
   heading: {
-    fontSize: fontscale(19),
+    fontSize: fontscale(20),
     marginTop: heightPercentageToDP(5),
     marginBottom: heightPercentageToDP(4),
   },
@@ -103,6 +112,9 @@ const styles = StyleSheet.create({
     width: widthPercentageToDP(100),
     height: heightPercentageToDP(60),
     alignSelf: 'center',
+  },
+  text: {
+    fontSize: fontscale(13),
   },
 });
 

@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {FlatList, StatusBar, View} from 'react-native';
+import {FlatList, StatusBar, View, Text} from 'react-native';
 import {Header} from 'react-native-elements';
 import PlacementItem from '../../components/PlacementItem';
 import {
@@ -15,6 +15,7 @@ import {
 } from '../../actions/studentDataActions';
 import {useSelector} from '../../store';
 import {useDispatch} from 'react-redux';
+//import firestore from '@react-native-firebase/firestore';
 const Placement = () => {
   const [refreshing, setRefreshing] = useState(false);
   const placementData = useSelector((state) => state.studentData.placementData);
@@ -47,6 +48,22 @@ const Placement = () => {
           style: {color: '#000', fontSize: fontscale(24)},
         }}
       />
+      {/*ListHeaderComponent={() => (
+          <Text
+            style={{
+              fontSize: fontscale(18),
+              paddingStart: widthPercentageToDP(5),
+            }}
+            //onPress={() => {
+            //  for (let i = 0; i < DATA1.length; i++) {
+            //    firestore().collection('placement').add(DATA1[i]);
+            //  }
+            //}}
+          >
+            This data is not 100% acurate.
+          </Text>
+          )}
+        */}
       <FlatList
         data={placementData}
         extraData={refreshing}
@@ -57,6 +74,21 @@ const Placement = () => {
         onRefresh={() => {}}
         onEndReached={loaded ? null : _loadMore}
         ListFooterComponent={_renderFooter}
+        ListHeaderComponent={() => (
+          <Text
+            style={{
+              fontSize: fontscale(18),
+              paddingStart: widthPercentageToDP(5),
+            }}
+            //onPress={() => {
+            //  for (let i = 0; i < DATA1.length; i++) {
+            //    firestore().collection('placement').add(DATA1[i]);
+            //  }
+            //}}
+          >
+            This data is not 100% acurate.
+          </Text>
+        )}
       />
     </View>
   );

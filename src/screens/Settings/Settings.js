@@ -56,6 +56,17 @@ const Settings = () => {
       <TouchableOpacity
         style={styles.button}
         onPress={() => {
+          navigation.push('FeedBack');
+        }}>
+        <Icon name="comment" />
+        <Text style={styles.buttonText}>Feedback</Text>
+        <View style={styles.leftIcon}>
+          <Icon name="arrow-forward" />
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => {
           dispatch(LogoutRequest());
         }}>
         <Icon name="logout" />

@@ -103,7 +103,13 @@ const AddComment = ({route}) => {
           </TouchableOpacity>
         </View>
       ) : null}
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          height: fontscale(60),
+          justifyContent: 'center',
+        }}>
         <Avatar
           rounded
           size={fontscale(45)}
@@ -113,6 +119,7 @@ const AddComment = ({route}) => {
           containerStyle={{
             backgroundColor: '#523',
             marginStart: widthPercentageToDP(2),
+            marginEnd: widthPercentageToDP(3),
           }}
         />
         <View style={styles.inputContainer}>
@@ -209,10 +216,8 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     flex: 1,
-    height: heightPercentageToDP(5.5),
-    margin: widthPercentageToDP(5),
-    marginStart: widthPercentageToDP(3),
-    marginBottom: heightPercentageToDP(2),
+    height: fontscale(40),
+    marginEnd: widthPercentageToDP(3),
     borderRadius: widthPercentageToDP(12),
     borderWidth: widthPercentageToDP(0.2),
     paddingStart: widthPercentageToDP(4.5),
