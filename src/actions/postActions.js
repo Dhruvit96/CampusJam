@@ -342,10 +342,18 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           );
         }
       }
+      dispatch(ToggleLikePostSuccess(postId, uid));
     } catch (e) {
       console.warn(e);
       dispatch(PostRequestFailure('Can not like this posts!'));
     }
+  };
+};
+
+export const ToggleLikePostSuccess = (postId, uid) => {
+  return {
+    type: postActionTypes.TOGGLE_LIKE_SUCCESS,
+    payload: {postId, uid},
   };
 };
 

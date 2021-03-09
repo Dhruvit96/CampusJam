@@ -1,4 +1,4 @@
-import {commnetActionTypes, notificationTypes, FieldValue} from '../constants';
+import {commentActionTypes, notificationTypes} from '../constants';
 import firestore from '@react-native-firebase/firestore';
 import {store} from '../store';
 import {
@@ -8,7 +8,7 @@ import {
 
 export const CommentRequestFailure = (message) => {
   return {
-    type: commnetActionTypes.COMMENT_REQUEST_FAILURE,
+    type: commentActionTypes.COMMENT_REQUEST_FAILURE,
     payload: {
       message,
     },
@@ -36,16 +36,16 @@ export const FetchCommentListRequest = (postId) => {
           await Promise.all(
             replies.docs.map(async (ref) => {
               let replyData = ref.data();
-              let userData = await firestore()
+              let usersData = await firestore()
                 .collection('users')
                 .doc(replyData.uid)
                 .get();
-              userData = userData.data();
+              usersData = usersData.data();
               return repliesData.push({
                 ...replyData,
-                avatar: userData.avatar,
-                initials: userData.initials,
-                name: userData.name,
+                avatar: usersData.avatar,
+                initials: usersData.initials,
+                name: usersData.name,
                 replyId: ref.id,
               });
             }),
@@ -77,7 +77,7 @@ export const FetchCommentListRequest = (postId) => {
 
 export const FetchCommentListSuccess = (postId, data) => {
   return {
-    type: commnetActionTypes.FETCH_COMMENT_LIST_SUCCESS,
+    type: commentActionTypes.FETCH_COMMENT_LIST_SUCCESS,
     payload: {postId, data},
   };
 };
@@ -181,14 +181,14 @@ export const AddCommentRequest = (
 
 export const AddCommentSuccess = (postId, data) => {
   return {
-    type: commnetActionTypes.ADD_COMMENT_SUCCESS,
+    type: commentActionTypes.ADD_COMMENT_SUCCESS,
     payload: {postId, data},
   };
 };
 
 export const ReplyCommentSuccess = (postId, commentId, data) => {
   return {
-    type: commnetActionTypes.ADD_REPLY_SUCCESS,
+    type: commentActionTypes.ADD_REPLY_SUCCESS,
     payload: {postId, commentId, data},
   };
 };
@@ -269,14 +269,14 @@ export const DeleteCommentRequest = (
 
 export const DeleteCommentSuccess = (postId, commentId) => {
   return {
-    type: commnetActionTypes.DELETE_COMMENT_SUCCESS,
+    type: commentActionTypes.DELETE_COMMENT_SUCCESS,
     payload: {postId, commentId},
   };
 };
 
 export const DeleteReplySuccess = (postId, commentId, replyId) => {
   return {
-    type: commnetActionTypes.DELETE_REPLY_SUCCESS,
+    type: commentActionTypes.DELETE_REPLY_SUCCESS,
     payload: {postId, commentId, replyId},
   };
 };

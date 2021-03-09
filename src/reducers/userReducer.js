@@ -25,17 +25,31 @@ const reducer = (state = defaultState, action) => {
   let index = 0;
   switch (action.type) {
     case userActionTypes.DECREASE_LIKED_POST_COUNT:
-      state = {
-        ...state,
-        extraInfo: {
-          ...state.extraInfo,
-          likedPosts: [
-            ...state.extraInfo.likedPosts.filter(
-              (x) => x.postId !== action.payload.postId,
-            ),
-          ],
-        },
-      };
+      index = findWithAttr(
+        state.extraInfo.likedPosts,
+        'postId',
+        action.payload.postId,
+      );
+      if (index > -1)
+        state = {
+          ...state,
+          extraInfo: {
+            ...state.extraInfo,
+            likedPosts: [
+              ...state.extraInfo.likedPosts.slice(0, index),
+              {
+                ...state.extraInfo.likedPosts[index],
+                isLiked: false,
+                likedBy: [
+                  ...state.extraInfo.likedPosts[index].likedBy.filter(
+                    (x) => x !== state.userInfo.uid,
+                  ),
+                ],
+              },
+              ...state.extraInfo.likedPosts.slice(index + 1),
+            ],
+          },
+        };
       return state;
     case userActionTypes.DELETE_POST_SUCCESS:
       state = {
@@ -65,13 +79,45 @@ const reducer = (state = defaultState, action) => {
       };
       return state;
     case userActionTypes.INCREASE_LIKED_POST_COUNT:
-      state = {
-        ...state,
-        extraInfo: {
-          ...state.extraInfo,
-          likedPosts: [action.payload, ...state.extraInfo.likedPosts],
-        },
-      };
+      index = findWithAttr(
+        state.extraInfo.likedPosts,
+        'postId',
+        action.payload.postId,
+      );
+      if (index > -1)
+        state = {
+          ...state,
+          extraInfo: {
+            ...state.extraInfo,
+            likedPosts: [
+              ...state.extraInfo.likedPosts.slice(0, index),
+              {
+                ...state.extraInfo.likedPosts[index],
+                isLiked: true,
+                likedBy: [
+                  ...state.extraInfo.likedPosts[index].likedBy,
+                  state.userInfo.uid,
+                ],
+              },
+              ...state.extraInfo.likedPosts.slice(index + 1),
+            ],
+          },
+        };
+      else
+        state = {
+          ...state,
+          extraInfo: {
+            ...state.extraInfo,
+            likedPosts: [
+              {
+                ...action.payload,
+                isLiked: true,
+                likedBy: [...action.payload.likedBy, state.userInfo.uid],
+              },
+              ...state.extraInfo.likedPosts,
+            ],
+          },
+        };
       return state;
     case userActionTypes.LOGIN_SUCCESS:
       state = {
@@ -112,6 +158,15 @@ const reducer = (state = defaultState, action) => {
         extraInfo: {
           ...state.extraInfo,
           posts: [action.payload, ...state.extraInfo.posts],
+        },
+      };
+      return state;
+    case userActionTypes.UPDATE_LIKED_POSTS:
+      state = {
+        ...state,
+        extraInfo: {
+          ...state.extraInfo,
+          likedPosts: [...state.extraInfo.likedPosts.filter((x) => x.isLiked)],
         },
       };
       return state;

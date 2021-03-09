@@ -12,20 +12,24 @@ export const FetchProfileXRequest = (uid) => {
       let posts = [];
       let likedPosts = [];
       let followers = [];
-      if (typeof user.id === 'undefined') {
-        let posts = await firestore()
+      if (typeof user.id === 'object') {
+        postsData = await firestore()
           .collection('posts')
           .where('likedBy', 'array-contains', uid)
           .get();
         await Promise.all(
-          posts.docs.map(async (doc) => {
+          postsData.docs.map(async (doc) => {
             let postData = doc.data();
+            let userData = await firestore()
+              .collection('users')
+              .doc(postData.uid)
+              .get();
             return likedPosts.push({
               ...postData,
-              avatar: user.avatar,
+              avatar: userData.data().avatar,
               postId: doc.id,
-              initials: user.initials,
-              name: user.name,
+              initials: userData.data().initials,
+              name: userData.data().name,
               isSelf: postData.uid === currentUser.uid,
               isLiked: postData.likedBy.indexOf(currentUser.uid) >= 0,
             });

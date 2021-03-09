@@ -28,6 +28,42 @@ const reducer = (state = defaultState, action) => {
     case postActionTypes.TOGGLE_ALL_LOADED_SUCCESS:
       state = {...state, loaded: action.payload};
       return state;
+    case postActionTypes.TOGGLE_LIKE_SUCCESS:
+      index = findWithAttr(state.posts, 'postId', action.payload.postId);
+      if (index > -1) {
+        if (state.posts[index].isLiked) {
+          state = {
+            ...state,
+            posts: [
+              ...state.posts.slice(0, index),
+              {
+                ...state.posts[index],
+                isLiked: !state.posts[index].isLiked,
+                likedBy: [
+                  ...state.posts[index].likedBy.filter(
+                    (x) => x !== action.payload.uid,
+                  ),
+                ],
+              },
+              ...state.posts.slice(index + 1),
+            ],
+          };
+        } else {
+          state = {
+            ...state,
+            posts: [
+              ...state.posts.slice(0, index),
+              {
+                ...state.posts[index],
+                isLiked: !state.posts[index].isLiked,
+                likedBy: [action.payload.uid, ...state.posts[index].likedBy],
+              },
+              ...state.posts.slice(index + 1),
+            ],
+          };
+        }
+      }
+      return state;
     case postActionTypes.UPDATE_POST_SUCCESS:
       index = findWithAttr(state.posts, 'postId', action.payload.postId);
       if (index > -1)

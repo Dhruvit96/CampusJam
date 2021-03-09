@@ -1,4 +1,4 @@
-import React, {PureComponent} from 'react';
+import React, {Component} from 'react';
 import {Alert, StyleSheet, View, TouchableOpacity} from 'react-native';
 import {Avatar, Button, Image, Overlay, Text} from 'react-native-elements';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -17,11 +17,10 @@ import {connect} from 'react-redux';
 import {navigation} from '../../navigations/RootNavigation';
 import Autolink from 'react-native-autolink';
 
-class PostItem extends PureComponent {
+class PostItem extends Component {
   constructor() {
     super();
     this.state = {
-      count: 0,
       isLiked: false,
       visible: false,
       lines: 0,
@@ -31,7 +30,6 @@ class PostItem extends PureComponent {
 
   componentDidMount() {
     this.setState({
-      count: this.props.item.likedBy.length,
       isLiked: this.props.item.isLiked,
       visible: false,
       lines: 0,
@@ -39,6 +37,26 @@ class PostItem extends PureComponent {
     });
     if (this.props.item.isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    let islinesUpdated = this.state.lines !== nextState.lines;
+    let isVisibleUpdated = this.state.visible !== nextState.visible;
+    let isTextShownUpdated = this.state.textShown !== nextState.textShown;
+    let stateUpdated = islinesUpdated || isVisibleUpdated || isTextShownUpdated;
+    let itemUpdated = this.props.item !== nextProps.item;
+    return stateUpdated || itemUpdated;
+  }
+
+  componentDidUpdate() {
+    if (this.state.isLiked !== this.props.item.isLiked) {
+      if (this.state.isLiked) {
+        this.animation.play(0, 17);
+      } else {
+        this.animation.play(25, 60);
+      }
+      this.setState({...this.state, isLiked: this.props.item.isLiked});
+    }
   }
 
   render() {
@@ -51,7 +69,7 @@ class PostItem extends PureComponent {
     } = getEventHandlers(
       this.props.dispatch,
       this.props.index,
-      this.state.isLiked,
+      this.props.item.isLiked,
       this.props.item.isSelf,
       this.props.onDeletePost,
       this.props.item.postId,
@@ -176,25 +194,7 @@ class PostItem extends PureComponent {
           />
         ) : null}
         <View style={styles.row}>
-          <TouchableOpacity
-            onPress={() => {
-              _onPressLike();
-              if (this.state.isLiked) {
-                this.animation.play(0, 17);
-                this.setState({
-                  ...this.state,
-                  count: this.state.count - 1,
-                  isLiked: !this.state.isLiked,
-                });
-              } else {
-                this.animation.play(25, 60);
-                this.setState({
-                  ...this.state,
-                  count: this.state.count + 1,
-                  isLiked: !this.state.isLiked,
-                });
-              }
-            }}>
+          <TouchableOpacity onPress={_onPressLike}>
             <LottieView
               source={require('../../assets/animations/like-animation.json')}
               style={styles.heart}
@@ -206,7 +206,7 @@ class PostItem extends PureComponent {
             />
           </TouchableOpacity>
           <Text style={{...styles.text, marginStart: widthPercentageToDP(2)}}>
-            {this.state.count}
+            {this.props.item.likedBy.length}
           </Text>
           <View
             style={{

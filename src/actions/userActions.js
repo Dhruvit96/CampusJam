@@ -273,7 +273,7 @@ export const FetchExtraInfoRequest = () => {
         .where('followings', 'array-contains', currentUser.uid)
         .get();
 
-      let userData = (
+      let usersData = (
         await firestore().collection('users').doc(currentUser.uid).get()
       ).data();
       let followers = [];
@@ -282,7 +282,7 @@ export const FetchExtraInfoRequest = () => {
 
       const payload = {
         userInfo: {
-          followings: userData.followings,
+          followings: usersData.followings,
         },
         extraInfo: {
           posts: posts,
@@ -456,5 +456,11 @@ export const ToggleLoading = (value) => {
   return {
     type: userActionTypes.TOGGLE_LOADING,
     payload: value,
+  };
+};
+
+export const UpdateLikedPost = () => {
+  return {
+    type: userActionTypes.UPDATE_LIKED_POSTS,
   };
 };

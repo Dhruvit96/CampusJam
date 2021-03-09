@@ -4,24 +4,29 @@ import {Header} from 'react-native-elements';
 import PostItem from '../../components/PostItem';
 import EmptyList from '../../components/EmptyList';
 import {fontscale} from '../../constants';
-import {useSelector, store} from '../../store';
+import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
+import {UpdateLikedPost} from '../../actions/userActions';
+import {useDispatch} from 'react-redux';
+import {useIsFocused} from '@react-navigation/core';
 const LikedPosts = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [first, setFirst] = useState(true);
-  const postsData =
-    typeof route.params?.uid == 'string'
-      ? useSelector((state) => state.profile[route.params?.uid].likedPosts)
-      : store.getState().user.extraInfo.likedPosts;
+  const isUserX = typeof route.params?.uid == 'string';
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
+  const postsData = isUserX
+    ? useSelector((state) => state.profile[route.params?.uid].likedPosts)
+    : useSelector((state) => state.user.extraInfo.likedPosts);
   const {
     _onPressBack,
     _onRefresh,
     _renderEmpty,
     _renderItem,
-  } = getEventHandlers(first, setFirst, setRefreshing);
+  } = getEventHandlers(dispatch, first, isUserX, setFirst, setRefreshing);
   useEffect(() => {
     _onRefresh();
-  }, []);
+  }, [isFocused]);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
       <StatusBar barStyle="dark-content" />
@@ -45,24 +50,27 @@ const LikedPosts = ({route}) => {
         refreshing={refreshing}
         renderItem={_renderItem}
         ListEmptyComponent={first ? null : _renderEmpty}
-        onRefresh={() => {}}
+        onRefresh={_onRefresh}
       />
     </View>
   );
 };
 
-function getEventHandlers(first, setFirst, setRefreshing) {
+function getEventHandlers(dispatch, first, isUserX, setFirst, setRefreshing) {
   const _onPressBack = () => {
     navigation.goBack();
   };
-  const _onRefresh = () => {
+  const _onRefresh = async () => {
     setRefreshing(true);
     if (first)
       setTimeout(() => {
         setRefreshing(false);
         setFirst(false);
       }, 100);
-    else setRefreshing(false);
+    else if (!isUserX) {
+      await dispatch(UpdateLikedPost());
+      setRefreshing(false);
+    } else setRefreshing(false);
   };
   const _renderEmpty = () => <EmptyList message="No posts to show." />;
   const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
