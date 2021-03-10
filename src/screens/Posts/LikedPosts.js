@@ -9,6 +9,7 @@ import {navigation} from '../../navigations/RootNavigation';
 import {UpdateLikedPost} from '../../actions/userActions';
 import {useDispatch} from 'react-redux';
 import {useIsFocused} from '@react-navigation/core';
+import {UpdateLikedPostsX} from '../../actions/profileXActions';
 const LikedPosts = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [first, setFirst] = useState(true);
@@ -23,9 +24,21 @@ const LikedPosts = ({route}) => {
     _onRefresh,
     _renderEmpty,
     _renderItem,
-  } = getEventHandlers(dispatch, first, isUserX, setFirst, setRefreshing);
+  } = getEventHandlers(
+    dispatch,
+    first,
+    isFocused,
+    isUserX,
+    setFirst,
+    setRefreshing,
+  );
   useEffect(() => {
     _onRefresh();
+  }, []);
+  useEffect(() => {
+    if (isUserX) {
+      dispatch(UpdateLikedPostsX(route.params?.uid));
+    }
   }, [isFocused]);
   return (
     <View style={{flex: 1, backgroundColor: 'white'}}>
@@ -46,7 +59,7 @@ const LikedPosts = ({route}) => {
       />
       <FlatList
         data={first ? [] : postsData}
-        keyExtractor={(item) => item.postId}
+        keyExtractor={(item) => item}
         refreshing={refreshing}
         renderItem={_renderItem}
         ListEmptyComponent={first ? null : _renderEmpty}
@@ -56,7 +69,14 @@ const LikedPosts = ({route}) => {
   );
 };
 
-function getEventHandlers(dispatch, first, isUserX, setFirst, setRefreshing) {
+function getEventHandlers(
+  dispatch,
+  first,
+  isFocused,
+  isUserX,
+  setFirst,
+  setRefreshing,
+) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -73,7 +93,10 @@ function getEventHandlers(dispatch, first, isUserX, setFirst, setRefreshing) {
     } else setRefreshing(false);
   };
   const _renderEmpty = () => <EmptyList message="No posts to show." />;
-  const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
+  const _renderItem = ({item, index}) => (
+    <PostItem index={index} item={item} isFocused={isFocused} />
+  );
+
   return {
     _onPressBack,
     _onRefresh,

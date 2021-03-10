@@ -30,12 +30,12 @@ class PostItem extends Component {
 
   componentDidMount() {
     this.setState({
-      isLiked: this.props.item.isLiked,
+      isLiked: this.props.post[this.props.item].isLiked,
       visible: false,
       lines: 0,
       textShown: false,
     });
-    if (this.props.item.isLiked) this.animation.play(43, 43);
+    if (this.props.post[this.props.item].isLiked) this.animation.play(43, 43);
     else this.animation.play(11, 11);
   }
 
@@ -43,19 +43,27 @@ class PostItem extends Component {
     let islinesUpdated = this.state.lines !== nextState.lines;
     let isVisibleUpdated = this.state.visible !== nextState.visible;
     let isTextShownUpdated = this.state.textShown !== nextState.textShown;
-    let stateUpdated = islinesUpdated || isVisibleUpdated || isTextShownUpdated;
-    let itemUpdated = this.props.item !== nextProps.item;
-    return stateUpdated || itemUpdated;
+    let likeUpdated = this.state.isLiked !== nextState.isLiked;
+    let stateUpdated =
+      islinesUpdated || isVisibleUpdated || isTextShownUpdated || likeUpdated;
+    let postUpdated =
+      this.props.post[this.props.item].isLiked != this.state.isLiked;
+    let isFocusedUpdated = this.props.isFocused != nextProps.isFocused;
+    let propsUpdated = postUpdated && isFocusedUpdated;
+    return stateUpdated || propsUpdated;
   }
 
   componentDidUpdate() {
-    if (this.state.isLiked !== this.props.item.isLiked) {
+    if (this.state.isLiked !== this.props.post[this.props.item].isLiked) {
       if (this.state.isLiked) {
-        this.animation.play(0, 17);
+        this.animation.play(11, 11);
       } else {
-        this.animation.play(25, 60);
+        this.animation.play(43, 43);
       }
-      this.setState({...this.state, isLiked: this.props.item.isLiked});
+      this.setState({
+        ...this.state,
+        isLiked: this.props.post[this.props.item].isLiked,
+      });
     }
   }
 
@@ -69,11 +77,11 @@ class PostItem extends Component {
     } = getEventHandlers(
       this.props.dispatch,
       this.props.index,
-      this.props.item.isLiked,
-      this.props.item.isSelf,
+      this.props.post[this.props.item].isLiked,
+      this.props.post[this.props.item].isSelf,
       this.props.onDeletePost,
-      this.props.item.postId,
-      this.props.item.uid,
+      this.props.post[this.props.item].postId,
+      this.props.post[this.props.item].uid,
     );
     const _toggleVisible = () => {
       this.setState({...this.state, visible: !this.state.visible});
@@ -92,10 +100,19 @@ class PostItem extends Component {
               rounded
               size={fontscale(50)}
               source={
-                this.props.item.avatar ? {uri: this.props.item.avatar} : null
+                this.props.post[this.props.item].avatar
+                  ? {uri: this.props.post[this.props.item].avatar}
+                  : null
               }
-              title={!this.props.item.avatar ? this.props.item.initials : null}
-              onPress={this.props.profileX ? null : _onPressAvatar}
+              title={
+                !this.props.post[this.props.item].avatar
+                  ? this.props.post[this.props.item].initials
+                  : null
+              }
+              //onPress={this.props.profileX ? null : _onPressAvatar}
+              onPress={() =>
+                console.log(this.props.post[this.props.item].isLiked)
+              }
               titleStyle={{fontSize: fontscale(17)}}
               containerStyle={{backgroundColor: '#523'}}
             />
@@ -104,16 +121,18 @@ class PostItem extends Component {
             <TouchableOpacity
               disabled={this.props.profileX}
               onPress={this.props.profileX ? null : _onPressAvatar}>
-              <Text style={styles.name}>{this.props.item.name}</Text>
+              <Text style={styles.name}>
+                {this.props.post[this.props.item].name}
+              </Text>
             </TouchableOpacity>
             <Text style={styles.text}>
-              {moment(this.props.item.created_at).fromNow() ==
+              {moment(this.props.post[this.props.item].created_at).fromNow() ==
               'a few seconds ago'
                 ? 'Just now'
-                : moment(this.props.item.created_at).fromNow()}
+                : moment(this.props.post[this.props.item].created_at).fromNow()}
             </Text>
           </View>
-          {this.props.delete && this.props.item.isSelf ? (
+          {this.props.delete && this.props.post[this.props.item].isSelf ? (
             <>
               <Overlay
                 isVisible={this.state.visible}
@@ -151,7 +170,7 @@ class PostItem extends Component {
             </>
           ) : null}
         </View>
-        {this.props.item.text ? (
+        {this.props.post[this.props.item].text ? (
           <>
             <Text
               style={{
@@ -162,7 +181,7 @@ class PostItem extends Component {
               onTextLayout={_onTextLayout}
               numberOfLines={this.state.textShown ? this.state.lines : 4}>
               <Autolink
-                text={this.props.item.text}
+                text={this.props.post[this.props.item].text}
                 linkStyle={{color: 'blue'}}
               />
             </Text>
@@ -180,12 +199,14 @@ class PostItem extends Component {
             ) : null}
           </>
         ) : null}
-        {this.props.item.image ? (
+        {this.props.post[this.props.item].image ? (
           <Image
-            source={{uri: this.props.item.image}}
+            source={{uri: this.props.post[this.props.item].image}}
             style={{
               width: widthPercentageToDP(90),
-              height: this.props.item.scale * widthPercentageToDP(90),
+              height:
+                this.props.post[this.props.item].scale *
+                widthPercentageToDP(90),
               resizeMode: 'cover',
               marginTop: heightPercentageToDP(1),
               marginBottom: heightPercentageToDP(1),
@@ -194,7 +215,19 @@ class PostItem extends Component {
           />
         ) : null}
         <View style={styles.row}>
-          <TouchableOpacity onPress={_onPressLike}>
+          <TouchableOpacity
+            onPress={async () => {
+              await _onPressLike();
+              if (this.state.isLiked) {
+                this.animation.play(0, 17);
+              } else {
+                this.animation.play(25, 60);
+              }
+              this.setState({
+                ...this.state,
+                isLiked: this.props.post[this.props.item].isLiked,
+              });
+            }}>
             <LottieView
               source={require('../../assets/animations/like-animation.json')}
               style={styles.heart}
@@ -206,7 +239,7 @@ class PostItem extends Component {
             />
           </TouchableOpacity>
           <Text style={{...styles.text, marginStart: widthPercentageToDP(2)}}>
-            {this.props.item.likedBy.length}
+            {this.props.post[this.props.item].likedBy.length}
           </Text>
           <View
             style={{
@@ -315,4 +348,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connect()(PostItem);
+const mapStateToProps = (state) => {
+  return {
+    post: state.post,
+  };
+};
+
+export default connect(mapStateToProps)(PostItem);

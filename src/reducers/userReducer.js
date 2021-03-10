@@ -1,4 +1,4 @@
-import {findWithAttr, userActionTypes} from '../constants';
+import {userActionTypes} from '../constants';
 import {Alert} from 'react-native';
 const defaultState = {
   logined: false,
@@ -25,31 +25,9 @@ const reducer = (state = defaultState, action) => {
   let index = 0;
   switch (action.type) {
     case userActionTypes.DECREASE_LIKED_POST_COUNT:
-      index = findWithAttr(
-        state.extraInfo.likedPosts,
-        'postId',
-        action.payload.postId,
+      state.extraInfo.likedPosts = state.extraInfo.likedPosts.filter(
+        (x) => x !== action.payload.postId,
       );
-      if (index > -1)
-        state = {
-          ...state,
-          extraInfo: {
-            ...state.extraInfo,
-            likedPosts: [
-              ...state.extraInfo.likedPosts.slice(0, index),
-              {
-                ...state.extraInfo.likedPosts[index],
-                isLiked: false,
-                likedBy: [
-                  ...state.extraInfo.likedPosts[index].likedBy.filter(
-                    (x) => x !== state.userInfo.uid,
-                  ),
-                ],
-              },
-              ...state.extraInfo.likedPosts.slice(index + 1),
-            ],
-          },
-        };
       return state;
     case userActionTypes.DELETE_POST_SUCCESS:
       state = {
@@ -57,7 +35,12 @@ const reducer = (state = defaultState, action) => {
         extraInfo: {
           ...state.extraInfo,
           posts: [
-            ...state.extraInfo.posts.filter((x) => x.postId !== action.payload),
+            ...state.extraInfo.posts.filter((x) => x !== action.payload.postId),
+          ],
+          likedPosts: [
+            ...state.extraInfo.likedPosts.filter(
+              (x) => x !== action.payload.postId,
+            ),
           ],
         },
       };
@@ -79,43 +62,13 @@ const reducer = (state = defaultState, action) => {
       };
       return state;
     case userActionTypes.INCREASE_LIKED_POST_COUNT:
-      index = findWithAttr(
-        state.extraInfo.likedPosts,
-        'postId',
-        action.payload.postId,
-      );
-      if (index > -1)
+      index = state.extraInfo.likedPosts.indexOf(action.payload.postId);
+      if (index == -1)
         state = {
           ...state,
           extraInfo: {
             ...state.extraInfo,
-            likedPosts: [
-              ...state.extraInfo.likedPosts.slice(0, index),
-              {
-                ...state.extraInfo.likedPosts[index],
-                isLiked: true,
-                likedBy: [
-                  ...state.extraInfo.likedPosts[index].likedBy,
-                  state.userInfo.uid,
-                ],
-              },
-              ...state.extraInfo.likedPosts.slice(index + 1),
-            ],
-          },
-        };
-      else
-        state = {
-          ...state,
-          extraInfo: {
-            ...state.extraInfo,
-            likedPosts: [
-              {
-                ...action.payload,
-                isLiked: true,
-                likedBy: [...action.payload.likedBy, state.userInfo.uid],
-              },
-              ...state.extraInfo.likedPosts,
-            ],
+            likedPosts: [action.payload.postId, ...state.extraInfo.likedPosts],
           },
         };
       return state;
@@ -157,54 +110,7 @@ const reducer = (state = defaultState, action) => {
         ...state,
         extraInfo: {
           ...state.extraInfo,
-          posts: [action.payload, ...state.extraInfo.posts],
-        },
-      };
-      return state;
-    case userActionTypes.UPDATE_LIKED_POSTS:
-      state = {
-        ...state,
-        extraInfo: {
-          ...state.extraInfo,
-          likedPosts: [...state.extraInfo.likedPosts.filter((x) => x.isLiked)],
-        },
-      };
-      return state;
-    case userActionTypes.UPDATE_SHARED_POST_SUCCESS:
-      index = findWithAttr(
-        state.extraInfo.posts,
-        'postId',
-        action.payload.postId,
-      );
-      state = {
-        ...state,
-        extraInfo: {
-          ...state.extraInfo,
-          posts: [
-            ...state.extraInfo.posts.slice(0, index),
-            {
-              ...state.extraInfo.posts[index],
-              ...action.payload.data,
-            },
-            ...state.extraInfo.posts.slice(index + 1),
-          ],
-        },
-      };
-      return state;
-    case userActionTypes.UPDATE_USER_INFO_SUCCESS:
-      state = {
-        ...state,
-        userInfo: {
-          ...state.userInfo,
-          ...action.payload,
-        },
-        extraInfo: {
-          ...state.extraInfo,
-          posts: state.extraInfo.posts.map((x) => ({
-            ...x,
-            avatar: action.payload.avatar,
-            name: action.payload.name,
-          })),
+          posts: [action.payload.postId, ...state.extraInfo.posts],
         },
       };
       return state;

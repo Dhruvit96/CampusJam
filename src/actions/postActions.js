@@ -9,14 +9,12 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import {store} from '../store';
 import {
-  DecreaseLikedPostCountRequest,
   DeleteSharedPostSuccess,
   followRequest,
   IncreaseLikedPostCountRequest,
   ToggleLoading,
   UnfollowRequest,
   UpdateExtraInfoRequest,
-  UpdateSharedPostRequest,
 } from '../actions/userActions';
 import {
   CreateNotificationRequest,
@@ -33,6 +31,13 @@ export const PostRequestFailure = (message) => {
   };
 };
 
+export const AddPostsRequest = (posts) => {
+  return {
+    type: postActionTypes.ADD_POSTS_SUCCESS,
+    payload: {posts},
+  };
+};
+
 export const FetchPostListRequest = () => {
   return async (dispatch) => {
     try {
@@ -43,10 +48,12 @@ export const FetchPostListRequest = () => {
         .orderBy('created_at', 'desc')
         .limit(LIMIT_POSTS_PER_LOADING)
         .get();
+      const postIds = [];
       const payload = [];
       await Promise.all(
         posts.docs.map(async (doc) => {
           let postData = doc.data();
+          postIds.push(doc.id);
           let userData = await firestore()
             .collection('users')
             .doc(postData.uid)
@@ -65,7 +72,8 @@ export const FetchPostListRequest = () => {
       );
       if (payload.length < LIMIT_POSTS_PER_LOADING)
         dispatch(ToggleAllLoadedSuccess(true));
-      dispatch(FetchPostListSuccess(payload));
+      dispatch(AddPostsRequest(payload));
+      dispatch(FetchPostListSuccess(postIds));
     } catch (e) {
       console.warn(e);
       dispatch(PostRequestFailure('Get Post List Failed!'));
@@ -93,10 +101,12 @@ export const LoadMorePostListRequest = () => {
         .startAfter(starting)
         .limit(LIMIT_POSTS_PER_LOADING)
         .get();
+      const postIds = [];
       const payload = [];
       await Promise.all(
         posts.docs.map(async (doc) => {
           let postData = doc.data();
+          postIds.push(doc.id);
           let userData = await firestore()
             .collection('users')
             .doc(postData.uid)
@@ -115,7 +125,8 @@ export const LoadMorePostListRequest = () => {
       );
       if (payload.length < LIMIT_POSTS_PER_LOADING)
         dispatch(ToggleAllLoadedSuccess(true));
-      dispatch(LoadMorePostListSuccess(payload));
+      dispatch(AddPostsRequest(payload));
+      dispatch(FetchPostListSuccess(postIds));
     } catch (e) {
       console.warn(e);
       dispatch(PostRequestFailure('Can not load more posts!'));
@@ -181,8 +192,9 @@ export const CreatePostRequest = ({image, text}) => {
             isSelf: true,
             isLiked: false,
           };
-          dispatch(UpdateExtraInfoRequest(data));
-          dispatch(CreatePostSuccess(data));
+          dispatch(UpdateExtraInfoRequest(ref.id));
+          dispatch(CreatePostSuccess(ref.id));
+          dispatch(AddPostsRequest([data]));
         });
     } catch (e) {
       console.warn(e);
@@ -193,10 +205,10 @@ export const CreatePostRequest = ({image, text}) => {
   };
 };
 
-export const CreatePostSuccess = (payload) => {
+export const CreatePostSuccess = (postId) => {
   return {
     type: postActionTypes.CREATE_POST_SUCCESS,
-    payload: payload,
+    payload: postId,
   };
 };
 
@@ -231,7 +243,6 @@ export const UpdatePostRequest = ({postId, image, text}) => {
       };
       await firestore().collection('posts').doc(postId).update(data);
       dispatch(UpdatePostSuccess({data, postId}));
-      dispatch(UpdateSharedPostRequest({data, postId}));
     } catch (e) {
       console.warn(e);
       dispatch(PostRequestFailure('Can not update this post!'));
@@ -306,15 +317,11 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
   return async (dispatch) => {
     try {
       const uid = store.getState().user.userInfo.uid;
-      let postData = store
-        .getState()
-        .post.posts.filter((x) => x.postId === postId)[0];
       if (isLiked) {
         await firestore()
           .collection('posts')
           .doc(postId)
           .update({likedBy: FieldValue.arrayRemove(uid)});
-        dispatch(DecreaseLikedPostCountRequest(postId));
         dispatch(
           DeleteNotificationRequest({
             userIds: [postUserId],
@@ -329,7 +336,7 @@ export const ToggleLikePostRequest = (postUserId, postId, isLiked) => {
           .update({
             likedBy: FieldValue.arrayUnion(uid),
           });
-        dispatch(IncreaseLikedPostCountRequest(postData));
+        dispatch(IncreaseLikedPostCountRequest(postId));
         if (postUserId != uid) {
           dispatch(
             CreateNotificationRequest({

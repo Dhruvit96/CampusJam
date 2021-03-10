@@ -6,16 +6,18 @@ import EmptyList from '../../components/EmptyList';
 import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
+import {useIsFocused} from '@react-navigation/core';
 const SharedPosts = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [first, setFirst] = useState(true);
+  const isFocused = useIsFocused();
   const postsData = useSelector((state) => state.user.extraInfo.posts);
   const {
     _onPressBack,
     _onRefresh,
     _renderEmpty,
     _renderItem,
-  } = getEventHandlers(first, setFirst, setRefreshing);
+  } = getEventHandlers(first, setFirst, isFocused, setRefreshing);
   useEffect(() => {
     _onRefresh();
   }, []);
@@ -38,7 +40,7 @@ const SharedPosts = () => {
       />
       <FlatList
         data={first ? [] : postsData}
-        keyExtractor={(item) => item.postId}
+        keyExtractor={(item) => item}
         refreshing={refreshing}
         renderItem={_renderItem}
         ListEmptyComponent={first ? null : _renderEmpty}
@@ -48,7 +50,7 @@ const SharedPosts = () => {
   );
 };
 
-function getEventHandlers(first, setFirst, setRefreshing) {
+function getEventHandlers(first, setFirst, isFocused, setRefreshing) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -63,7 +65,7 @@ function getEventHandlers(first, setFirst, setRefreshing) {
   };
   const _renderEmpty = () => <EmptyList message="No posts to show." />;
   const _renderItem = ({item, index}) => (
-    <PostItem index={index} item={item} delete={true} />
+    <PostItem index={index} item={item} delete={true} isFocused={isFocused} />
   );
   return {
     _onPressBack,

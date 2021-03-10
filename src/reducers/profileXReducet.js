@@ -23,6 +23,18 @@ const reducer = (state = defaultState, action) => {
         };
       }
       return state;
+    case profileXActionTypes.DECREASE_LIKED_POST:
+      if (typeof state[action.payload.uid] !== 'undefined') {
+        state[action.payload.uid] = {
+          ...state[action.payload.uid],
+          likedPosts: [
+            ...state[action.payload.uid].likedPosts.filter(
+              (x) => x !== action.payload.postId,
+            ),
+          ],
+        };
+      }
+      return state;
     case profileXActionTypes.UNFOLLOW_SUCCESS:
       if (typeof state[action.payload.uid] !== 'undefined') {
         state[action.payload.uid] = {

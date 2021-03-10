@@ -7,18 +7,23 @@ import firestore from '@react-native-firebase/firestore';
 import {fontscale} from '../../constants';
 import {useSelector} from '../../store';
 import {navigation} from '../../navigations/RootNavigation';
+import {AddPostsRequest} from '../../actions/postActions';
+import {useDispatch} from 'react-redux';
+import {useIsFocused} from '@react-navigation/core';
 const Post = ({route}) => {
   const user = useSelector((state) => state.user.userInfo);
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
   const pid = route.params.pid;
   const [refreshing, setRefreshing] = useState(false);
   const [first, setFirst] = useState(true);
-  const [postData, setPostData] = useState([]);
+  const postData = [pid];
   const {
     _onPressBack,
     _onRefresh,
     _renderItem,
     _renderEmpty,
-  } = getEventHandlers(setPostData, setRefreshing, pid, user);
+  } = getEventHandlers(dispatch, isFocused, setRefreshing, pid, user);
   useEffect(() => {
     async function fetchData() {
       await _onRefresh();
@@ -44,10 +49,10 @@ const Post = ({route}) => {
         }}
       />
       <FlatList
-        data={postData}
+        data={first ? [] : postData}
         extraData={refreshing}
         ListEmptyComponent={first ? null : _renderEmpty}
-        keyExtractor={(item) => item.postId}
+        keyExtractor={(item) => item}
         refreshing={refreshing}
         renderItem={_renderItem}
         onRefresh={_onRefresh}
@@ -55,7 +60,7 @@ const Post = ({route}) => {
     </View>
   );
 };
-function getEventHandlers(setPostData, setRefreshing, pid, user) {
+function getEventHandlers(dispatch, isFocused, setRefreshing, pid, user) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -64,6 +69,7 @@ function getEventHandlers(setPostData, setRefreshing, pid, user) {
       index={index}
       item={item}
       delete={true}
+      isFocused={isFocused}
       onDeletePost={() => {
         navigation.goBack();
       }}
@@ -81,18 +87,20 @@ function getEventHandlers(setPostData, setRefreshing, pid, user) {
           .doc(postData.uid)
           .get();
         userData = userData.data();
-        setPostData([
-          {
-            ...postData,
-            avatar: userData.avatar,
-            postId: pid,
-            initials: userData.initials,
-            name: userData.name,
-            isFollowed: user.followings.indexOf(postData.uid) >= 0,
-            isSelf: user.uid == postData.uid,
-            isLiked: postData.likedBy.indexOf(user.uid) >= 0,
-          },
-        ]);
+        dispatch(
+          AddPostsRequest([
+            {
+              ...postData,
+              avatar: userData.avatar,
+              postId: pid,
+              initials: userData.initials,
+              name: userData.name,
+              isFollowed: user.followings.indexOf(postData.uid) >= 0,
+              isSelf: user.uid == postData.uid,
+              isLiked: postData.likedBy.indexOf(user.uid) >= 0,
+            },
+          ]),
+        );
       }
       setRefreshing(false);
     } catch (e) {

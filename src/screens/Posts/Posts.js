@@ -11,12 +11,13 @@ import EmptyList from '../../components/EmptyList';
 import LottieView from 'lottie-react-native';
 import {fontscale, widthPercentageToDP} from '../../constants';
 import {useSelector} from '../../store';
-import {useScrollToTop} from '@react-navigation/native';
+import {useIsFocused, useScrollToTop} from '@react-navigation/native';
 import {navigation} from '../../navigations/RootNavigation';
 const Posts = () => {
   const dispatch = useDispatch();
   const [refreshing, setRefreshing] = useState(false);
   const [first, setFirst] = useState(true);
+  const isFocused = useIsFocused();
   const postData = useSelector((state) => state.post);
   const ref = React.useRef(null);
   useScrollToTop(ref);
@@ -27,7 +28,13 @@ const Posts = () => {
     _renderEmpty,
     _renderItem,
     _renderFooter,
-  } = getEventHandlers(dispatch, setRefreshing, refreshing, postData.loaded);
+  } = getEventHandlers(
+    dispatch,
+    isFocused,
+    setRefreshing,
+    refreshing,
+    postData.loaded,
+  );
   useEffect(() => {
     async function fetchData() {
       await _onRefresh();
@@ -56,7 +63,7 @@ const Posts = () => {
         ref={ref}
         data={postData.posts}
         extraData={refreshing}
-        keyExtractor={(item) => item.postId}
+        keyExtractor={(item) => item}
         refreshing={refreshing}
         renderItem={_renderItem}
         ListEmptyComponent={first ? null : _renderEmpty}
@@ -69,7 +76,13 @@ const Posts = () => {
   );
 };
 
-function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
+function getEventHandlers(
+  dispatch,
+  isFocused,
+  setRefreshing,
+  refreshing,
+  loaded,
+) {
   const _onRefresh = async () => {
     setRefreshing(true);
     await dispatch(FetchPostListRequest());
@@ -84,7 +97,9 @@ function getEventHandlers(dispatch, setRefreshing, refreshing, loaded) {
     }
   };
   const _renderEmpty = () => <EmptyList message="No posts to show." />;
-  const _renderItem = ({item, index}) => <PostItem index={index} item={item} />;
+  const _renderItem = ({item, index}) => (
+    <PostItem index={index} item={item} isFocused={isFocused} />
+  );
   const _renderFooter = () => {
     return !loaded && !refreshing ? (
       <LottieView

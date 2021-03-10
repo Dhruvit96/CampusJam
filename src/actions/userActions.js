@@ -12,6 +12,7 @@ import {
   DeleteNotificationRequest,
 } from '../actions/notificationActions';
 import {followXSuccess, unfollowXSuccess} from './profileXActions';
+import {AddPostsRequest} from './postActions';
 
 export const UserRequestFailure = (errorMessage) => {
   return {
@@ -234,6 +235,7 @@ export const FetchExtraInfoRequest = () => {
         .orderBy('created_at', 'desc')
         .get();
       let likedPosts = [];
+      let likedPostIds = [];
       await Promise.all(
         posts.docs.map(async (doc) => {
           let postData = doc.data();
@@ -242,6 +244,7 @@ export const FetchExtraInfoRequest = () => {
             .doc(postData.uid)
             .get();
           userData = userData.data();
+          likedPostIds.push(doc.id);
           return likedPosts.push({
             ...postData,
             avatar: userData.avatar,
@@ -254,9 +257,11 @@ export const FetchExtraInfoRequest = () => {
         }),
       );
       posts = [];
+      let postIds = [];
       await Promise.all(
         postsData.docs.map(async (doc) => {
           let postData = doc.data();
+          postIds.push(doc.id);
           return posts.push({
             ...postData,
             avatar: currentUser.avatar,
@@ -285,11 +290,12 @@ export const FetchExtraInfoRequest = () => {
           followings: usersData.followings,
         },
         extraInfo: {
-          posts: posts,
+          posts: postIds,
           followers: followers,
-          likedPosts: likedPosts,
+          likedPosts: likedPostIds,
         },
       };
+      dispatch(AddPostsRequest([...likedPosts, ...posts]));
       dispatch(FetchExtraInfoSuccess(payload));
     } catch (e) {
       console.warn(e);
@@ -418,14 +424,14 @@ export const UnfollowSuccess = (user) => {
 export const DeleteSharedPostSuccess = (postId) => {
   return {
     type: userActionTypes.DELETE_POST_SUCCESS,
-    payload: postId,
+    payload: {postId},
   };
 };
 
-export const IncreaseLikedPostCountRequest = (data) => {
+export const IncreaseLikedPostCountRequest = (postId) => {
   return {
     type: userActionTypes.INCREASE_LIKED_POST_COUNT,
-    payload: data,
+    payload: {postId},
   };
 };
 
@@ -438,17 +444,10 @@ export const DecreaseLikedPostCountRequest = (postId) => {
   };
 };
 
-export const UpdateExtraInfoRequest = (payload) => {
+export const UpdateExtraInfoRequest = (postId) => {
   return {
     type: userActionTypes.UPDATE_EXTRA_INFO_SUCCESS,
-    payload: payload,
-  };
-};
-
-export const UpdateSharedPostRequest = (payload) => {
-  return {
-    type: userActionTypes.UPDATE_SHARED_POST_SUCCESS,
-    payload: payload,
+    payload: postId,
   };
 };
 
@@ -460,7 +459,22 @@ export const ToggleLoading = (value) => {
 };
 
 export const UpdateLikedPost = () => {
-  return {
-    type: userActionTypes.UPDATE_LIKED_POSTS,
+  return async (dispatch) => {
+    try {
+      let likedPosts = [...store.getState().user.extraInfo.likedPosts];
+      likedPosts.map((postId) => {
+        if (
+          !(
+            typeof store.getState().post[postId] != 'undefined' &&
+            store.getState().post[postId].isLiked
+          )
+        ) {
+          dispatch(DecreaseLikedPostCountRequest(postId));
+        }
+      });
+    } catch (e) {
+      console.warn(e);
+      dispatch(UserRequestFailure(`Something went wrong try again later`));
+    }
   };
 };

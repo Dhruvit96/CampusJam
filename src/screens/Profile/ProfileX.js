@@ -14,6 +14,7 @@ import PostItem from '../../components/PostItem';
 import Loading from '../../components/Loading';
 import {ToggleFollowUserRequest} from '../../actions/postActions';
 import {FetchProfileXRequest} from '../../actions/profileXActions';
+import {useIsFocused} from '@react-navigation/core';
 
 const ProfileX = ({route}) => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const ProfileX = ({route}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const userState = useSelector((state) => state.profile[route.params.uid]);
+  const isFocused = useIsFocused();
   const {
     _headerComponent,
     _onPressBack,
@@ -28,7 +30,7 @@ const ProfileX = ({route}) => {
     _onPressLikedPosts,
     _onRefresh,
     _renderItem,
-  } = getEventHandlers(dispatch, setRefreshing, uid, userState);
+  } = getEventHandlers(dispatch, isFocused, setRefreshing, uid, userState);
   useEffect(() => {
     async function fetchData() {
       await _onRefresh();
@@ -58,7 +60,7 @@ const ProfileX = ({route}) => {
       {userState.isStudent ? (
         <FlatList
           data={userState.posts}
-          keyExtractor={(item) => item.postId}
+          keyExtractor={(item) => item}
           renderItem={_renderItem}
           ListHeaderComponent={_headerComponent}
           contentContainerStyle={{backgroundColor: 'white'}}
@@ -130,7 +132,7 @@ const ProfileX = ({route}) => {
   );
 };
 
-function getEventHandlers(dispatch, setRefreshing, uid, userState) {
+function getEventHandlers(dispatch, isFocused, setRefreshing, uid, userState) {
   const _onPressBack = () => {
     navigation.goBack();
   };
@@ -247,7 +249,7 @@ function getEventHandlers(dispatch, setRefreshing, uid, userState) {
     );
   };
   const _renderItem = ({item, index}) => (
-    <PostItem index={index} item={item} profileX={uid} />
+    <PostItem index={index} item={item} profileX={uid} isFocused={isFocused} />
   );
 
   return {

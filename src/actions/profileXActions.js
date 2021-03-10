@@ -1,6 +1,7 @@
 import firestore from '@react-native-firebase/firestore';
 import {profileXActionTypes} from '../constants';
 import {store} from '../store';
+import {AddPostsRequest} from './postActions';
 
 export const FetchProfileXRequest = (uid) => {
   return async (dispatch) => {
@@ -10,7 +11,9 @@ export const FetchProfileXRequest = (uid) => {
       user = user.data();
       let postsData;
       let posts = [];
+      let postIds = [];
       let likedPosts = [];
+      let likedPostIds = [];
       let followers = [];
       if (typeof user.id === 'object') {
         postsData = await firestore()
@@ -20,6 +23,7 @@ export const FetchProfileXRequest = (uid) => {
         await Promise.all(
           postsData.docs.map(async (doc) => {
             let postData = doc.data();
+            likedPostIds.push(doc.id);
             let userData = await firestore()
               .collection('users')
               .doc(postData.uid)
@@ -45,6 +49,7 @@ export const FetchProfileXRequest = (uid) => {
         await Promise.all(
           postsData.docs.map(async (doc) => {
             let postData = doc.data();
+            postIds.push(doc.id);
             return posts.push({
               ...postData,
               avatar: user.avatar,
@@ -65,11 +70,12 @@ export const FetchProfileXRequest = (uid) => {
       let data = {
         ...user,
         isStudent: typeof user.id === 'string',
-        posts: posts,
-        likedPosts: likedPosts,
+        posts: postIds,
+        likedPosts: likedPostIds,
         followers: followers,
         isFollowed: currentUser.followings.indexOf(uid) > -1,
       };
+      dispatch(AddPostsRequest([...likedPosts, ...posts]));
       dispatch(FetchProfileXSuccess(uid, data));
     } catch (e) {
       console.warn(e);
@@ -112,5 +118,27 @@ export const unfollowXSuccess = (uid, currentUid) => {
   return {
     type: profileXActionTypes.UNFOLLOW_SUCCESS,
     payload: {uid, currentUid},
+  };
+};
+
+export const DecreaseLikedPost = (postId, uid) => {
+  return {
+    type: profileXActionTypes.DECREASE_LIKED_POST,
+    payload: {postId, uid},
+  };
+};
+
+export const UpdateLikedPostsX = (uid) => {
+  return async (dispatch) => {
+    try {
+      let likedPosts = {...store.getState().profile[uid].likedPosts};
+      likedPosts.map((postId) => {
+        if (typeof store.getState().post[postId] == 'undefined')
+          dispatch(DecreaseLikedPost(postId, uid));
+      });
+    } catch (e) {
+      console.warn(e);
+      dispatch(FetchProfileXFailure('Something went wrong.'));
+    }
   };
 };
