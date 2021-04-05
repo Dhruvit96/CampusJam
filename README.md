@@ -1,6 +1,6 @@
 # React Native Social Media Application
 
-The 1st project what I did with React Native.
+The 1st project that I did with React Native.
 
 - React Native (v0.63.4)
 - Firebase
