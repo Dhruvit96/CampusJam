@@ -25,3 +25,10 @@ cd android && ./gradlew clean
 yarn android
 
 ```
+
+## Live App on play store
+
+```bash
+https://play.google.com/store/apps/details?id=com.campusjam
+
+```
