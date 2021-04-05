@@ -29,6 +29,6 @@ yarn android
 ## Live App on play store
 
 ```bash
-https://play.google.com/store/apps/details?id=com.campusjam
+[Find app on playstore](https://play.google.com/store/apps/details?id=com.campusjam "Live App")
 
 ```
